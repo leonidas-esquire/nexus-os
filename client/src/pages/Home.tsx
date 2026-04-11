@@ -138,6 +138,7 @@ function Nav() {
           <a href="#architecture" className="hover:text-foreground transition-colors">architecture</a>
           <a href="#cli" className="hover:text-foreground transition-colors">cli</a>
           <a href="#dashboard" className="hover:text-foreground transition-colors">dashboard</a>
+          <a href="#broker" className="hover:text-foreground transition-colors">broker</a>
           <a href="#pricing" className="hover:text-foreground transition-colors">pricing</a>
         </div>
 
@@ -357,7 +358,7 @@ function Features() {
       icon: Activity,
       title: "Broker Routing Engine",
       description: "Skill → WASM → LLM routing cascade. The broker picks the cheapest handler that can solve the task with high confidence.",
-      code: "naos broker explain \"parse JSON from API response\"",
+      code: "naos broker route \"parse JSON from API response\"",
     },
   ];
 
@@ -473,6 +474,7 @@ function CliSection() {
                   { cmd: "naos deploy", desc: "Deploy with supervisor strategies" },
                   { cmd: "naos dashboard", desc: "Launch the web dashboard" },
                   { cmd: "naos cost status", desc: "View real-time cost tracking" },
+                  { cmd: "naos broker route", desc: "Route tasks through the broker" },
                   { cmd: "naos audit tail", desc: "Stream the causal audit trail" },
                 ].map((item) => (
                   <div key={item.cmd} className="flex items-center gap-3 group">
@@ -500,6 +502,7 @@ const DASHBOARD_PAGES = [
   { path: "/cost", name: "Cost", desc: "Budget tracking with progress bars and per-agent spend breakdown" },
   { path: "/audit", name: "Audit Log", desc: "Searchable, filterable log of every system event" },
   { path: "/trust", name: "AXIS Trust", desc: "Trust verification status for all registered agents" },
+  { path: "/broker", name: "Broker", desc: "Routing stats, skill calls, WASM/LLM breakdown, and cost savings" },
 ];
 
 function DashboardSection() {
@@ -568,6 +571,7 @@ function DashboardSection() {
                 <div className="text-muted-foreground">    /cost        Budget tracking</div>
                 <div className="text-muted-foreground">    /audit       Audit log</div>
                 <div className="text-muted-foreground">    /trust       AXIS Trust status</div>
+                <div className="text-muted-foreground">    /broker      Broker routing stats</div>
                 <div className="mt-2 text-muted-foreground">  Press Ctrl+C to stop</div>
               </div>
             </div>
@@ -577,19 +581,147 @@ function DashboardSection() {
         <AnimatedSection delay={0.35}>
           <div className="max-w-5xl mx-auto mt-12">
             <h3 className="font-mono text-sm text-nexus-indigo uppercase tracking-widest mb-6 text-center">JSON API Endpoints</h3>
-            <div className="grid sm:grid-cols-5 gap-3">
+            <div className="grid sm:grid-cols-3 md:grid-cols-6 gap-3">
               {[
                 { endpoint: "/api/agents", label: "Agents" },
                 { endpoint: "/api/supervisors", label: "Supervisors" },
                 { endpoint: "/api/cost", label: "Cost" },
                 { endpoint: "/api/audit", label: "Audit" },
                 { endpoint: "/api/trust", label: "Trust" },
+                { endpoint: "/api/broker", label: "Broker" },
               ].map((api) => (
                 <div key={api.endpoint} className="terminal-border rounded-md px-3 py-2.5 text-center">
                   <code className="font-mono text-xs text-nexus-green">{api.endpoint}</code>
                   <div className="text-muted-foreground text-xs mt-1">{api.label}</div>
                 </div>
               ))}
+            </div>
+          </div>
+        </AnimatedSection>
+      </div>
+    </section>
+  );
+}
+
+// ---- Broker Routing Section ----
+function BrokerSection() {
+  const routeSteps = [
+    { label: "SKILL", color: "text-nexus-green", desc: "Pattern-matched deterministic functions", cost: "~$0.00", latency: "~5ms" },
+    { label: "WASM", color: "text-nexus-cyan", desc: "Sandboxed WebAssembly modules", cost: "~$0.00", latency: "~10ms" },
+    { label: "LLM", color: "text-nexus-amber", desc: "Language model API (last resort)", cost: "~$0.01", latency: "~1s" },
+  ];
+
+  return (
+    <section id="broker" className="py-24 relative">
+      <div className="absolute inset-0 dot-grid opacity-10" />
+      <div className="container relative">
+        <AnimatedSection>
+          <div className="max-w-2xl mb-16">
+            <span className="font-mono text-xs text-nexus-indigo uppercase tracking-widest">Broker Routing</span>
+            <h2 className="text-3xl sm:text-4xl font-bold mt-3 mb-4">
+              Route tasks to the cheapest capable handler
+            </h2>
+            <p className="text-muted-foreground text-lg leading-relaxed">
+              The broker evaluates every task against registered skills, WASM modules, and LLM providers.
+              It picks the fastest, cheapest handler that meets the confidence threshold — saving up to 90% on token costs.
+            </p>
+          </div>
+        </AnimatedSection>
+
+        <AnimatedSection delay={0.15}>
+          <div className="grid lg:grid-cols-2 gap-12 items-start">
+            {/* Left: Routing cascade */}
+            <div>
+              <h3 className="font-mono text-sm text-nexus-indigo uppercase tracking-widest mb-6">Routing Cascade</h3>
+              <div className="space-y-4">
+                {routeSteps.map((step, i) => (
+                  <div key={step.label} className="terminal-border rounded-lg p-4 flex items-start gap-4">
+                    <div className="flex flex-col items-center shrink-0">
+                      <div className={`font-mono font-bold text-sm ${step.color}`}>{step.label}</div>
+                      {i < routeSteps.length - 1 && (
+                        <div className="w-px h-6 bg-border mt-2" />
+                      )}
+                    </div>
+                    <div className="min-w-0">
+                      <div className="text-sm text-foreground">{step.desc}</div>
+                      <div className="flex gap-4 mt-1.5">
+                        <span className="font-mono text-xs text-muted-foreground">Cost: <span className={step.color}>{step.cost}</span></span>
+                        <span className="font-mono text-xs text-muted-foreground">Latency: <span className={step.color}>{step.latency}</span></span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-6 terminal-border rounded-lg p-4">
+                <div className="font-mono text-xs text-muted-foreground mb-2">Confidence Thresholds</div>
+                <div className="flex gap-6">
+                  <div>
+                    <span className="font-mono text-sm text-nexus-green">90%</span>
+                    <span className="text-muted-foreground text-xs ml-2">Skill match</span>
+                  </div>
+                  <div>
+                    <span className="font-mono text-sm text-nexus-cyan">80%</span>
+                    <span className="text-muted-foreground text-xs ml-2">WASM match</span>
+                  </div>
+                  <div>
+                    <span className="font-mono text-sm text-nexus-amber">70%</span>
+                    <span className="text-muted-foreground text-xs ml-2">LLM fallback</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Right: Terminal demo */}
+            <div className="space-y-4">
+              <div className="terminal-border rounded-lg overflow-hidden">
+                <div className="flex items-center gap-2 px-4 py-2.5 border-b border-border bg-nexus-deep">
+                  <div className="w-3 h-3 rounded-full bg-red-500/60" />
+                  <div className="w-3 h-3 rounded-full bg-yellow-500/60" />
+                  <div className="w-3 h-3 rounded-full bg-green-500/60" />
+                  <span className="ml-2 font-mono text-xs text-muted-foreground">naos broker</span>
+                </div>
+                <div className="p-5 font-mono text-sm leading-loose bg-nexus-deep/80">
+                  <div><span className="text-nexus-amber">$</span> naos broker route "summarize the quarterly report"</div>
+                  <div className="mt-2 text-muted-foreground">  Routing decision:</div>
+                  <div className="text-muted-foreground">  Route:      <span className="text-nexus-green">SKILL (summarize)</span></div>
+                  <div className="text-muted-foreground">  Confidence:  <span className="text-nexus-green">93%</span></div>
+                  <div className="text-muted-foreground">  Est. cost:  <span className="text-nexus-green">$0.00</span></div>
+                  <div className="text-muted-foreground">  Est. latency: <span className="text-nexus-green">~5ms</span></div>
+
+                  <div className="mt-4 pt-4 border-t border-border">
+                    <div><span className="text-nexus-amber">$</span> naos broker route "write me a poem about cats"</div>
+                    <div className="mt-2 text-muted-foreground">  Routing decision:</div>
+                    <div className="text-muted-foreground">  Route:      <span className="text-nexus-amber">LLM (anthropic/claude-sonnet)</span></div>
+                    <div className="text-muted-foreground">  Confidence:  <span className="text-nexus-amber">70%</span></div>
+                    <div className="text-muted-foreground">  Est. cost:  <span className="text-nexus-amber">$0.01</span></div>
+                    <div className="text-muted-foreground">  Est. latency: <span className="text-nexus-amber">~1000ms</span></div>
+                  </div>
+
+                  <div className="mt-4 pt-4 border-t border-border">
+                    <div><span className="text-nexus-amber">$</span> naos broker stats</div>
+                    <div className="mt-2 text-muted-foreground">  SKILL  7 calls   $0.00   ~4ms</div>
+                    <div className="text-muted-foreground">  WASM   0 calls   $0.00   -</div>
+                    <div className="text-muted-foreground">  LLM    8 calls   $0.08   ~1,100ms</div>
+                    <div className="text-muted-foreground mt-1">  Savings: <span className="text-nexus-green">$0.07 (46%)</span></div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-3">
+                {[
+                  { cmd: "broker route", desc: "Dry-run routing" },
+                  { cmd: "broker execute", desc: "Route & run" },
+                  { cmd: "broker stats", desc: "Cost savings" },
+                  { cmd: "broker config", desc: "View config" },
+                  { cmd: "broker skills", desc: "List skills" },
+                ].map((item) => (
+                  <div key={item.cmd} className="terminal-border rounded-md px-3 py-2.5">
+                    <code className="font-mono text-xs text-nexus-green block">{item.cmd}</code>
+                    <div className="text-muted-foreground text-xs mt-1">{item.desc}</div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </AnimatedSection>
@@ -613,12 +745,12 @@ function ConfigSection() {
               </h2>
               <p className="text-muted-foreground text-lg leading-relaxed mb-6">
                 Define your entire agent system in a single <code className="font-mono text-nexus-indigo bg-nexus-indigo/10 px-1.5 py-0.5 rounded text-sm">nexus.config.yaml</code>.
-                Agents, supervisors, cost budgets, and deployment targets — all in one place.
+                Agents, supervisors, cost budgets, broker routing, skills, and deployment targets — all in one place.
               </p>
               <p className="text-muted-foreground leading-relaxed">
                 The config file supports agent templates (research, coding, data, custom),
                 supervisor strategies with restart windows, per-agent cost budgets with
-                automatic throttling, and edge deployment targets.
+                automatic throttling, broker routing with skill/WASM/LLM cascade, and edge deployment targets.
               </p>
             </div>
 
@@ -651,10 +783,19 @@ cost:
     alert_at: 80%
     action: throttle
 
-edge:
-  provider: cloudflare
-  workers:
-    - researcher`}</code>
+broker:
+  routing:
+    preferSkill: true
+    llmAsLastResort: true
+  thresholds:
+    skill: 0.9
+    wasm: 0.8
+
+skills:
+  - name: summarize
+    patterns: [summarize, summary, tldr]
+    handler: "fn:summarize_text"
+    cost: "$0.0001"`}</code>
               </pre>
             </div>
           </div>
@@ -838,6 +979,7 @@ export default function Home() {
       <Architecture />
       <CliSection />
       <DashboardSection />
+      <BrokerSection />
       <ConfigSection />
       <PricingSection />
       <GetStarted />
