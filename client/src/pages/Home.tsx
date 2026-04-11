@@ -18,7 +18,7 @@ const ARCH_IMG = "https://d2xsxph8kpxj0f.cloudfront.net/310419663030909471/NRmiW
 const TERMINAL_IMG = "https://d2xsxph8kpxj0f.cloudfront.net/310419663030909471/NRmiWdZq2JgxyAQQ5B7Zs7/nexus-terminal-4Hd335zah89fxbMfUwEoUh.webp";
 const DASHBOARD_IMG = "https://d2xsxph8kpxj0f.cloudfront.net/310419663030909471/NRmiWdZq2JgxyAQQ5B7Zs7/nexus-dashboard-fwAdGqtnxNA3pFiqWHe6iD.webp";
 
-const GITHUB_URL = "https://github.com/punkpeye/nexus-os";
+const GITHUB_URL = "https://github.com/leonidas-esquire/nexus-os";
 
 // ---- Typewriter Hook ----
 function useTypewriter(text: string, speed = 40, delay = 500) {
