@@ -19,6 +19,8 @@ import {
   History,
 } from "lucide-react";
 import { DOC_SECTIONS, getFlatPages, getPageByPath, getAdjacentPages } from "./docsData";
+import DocSearch from "./DocSearch";
+import ThemeToggle from "../../components/ThemeToggle";
 import { MarkdownRenderer, extractHeadings } from "./MarkdownRenderer";
 
 const ICON_MAP: Record<string, React.ReactNode> = {
@@ -63,6 +65,7 @@ function Sidebar({
 
   return (
     <nav className="space-y-1">
+      <DocSearch onNavigate={onNavigate} />
       {DOC_SECTIONS.map((section) => {
         const isExpanded = expandedSections.includes(section.slug);
         const isCurrent = section.slug === currentSection;
@@ -225,6 +228,7 @@ export default function DocsLayout() {
           >
             GitHub
           </a>
+          <ThemeToggle />
           <button
             className="lg:hidden p-1.5 rounded-md hover:bg-nexus-surface/50 text-muted-foreground"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}

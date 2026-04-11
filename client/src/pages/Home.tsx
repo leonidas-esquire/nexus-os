@@ -6,10 +6,11 @@
 
 import { useEffect, useRef, useState } from "react";
 import { motion, useInView } from "framer-motion";
+import ThemeToggle from "../components/ThemeToggle";
 import {
   Terminal, Shield, Cpu, GitBranch, DollarSign,
   Layers, Zap, Globe, ArrowRight, ChevronRight,
-  Activity, Box, Network, Eye, BookOpen, Github, Cloud, Star
+  Activity, Box, Network, Eye, BookOpen, Github, Cloud, Star, Copy, Check
 } from "lucide-react";
 
 // ---- Constants ----
@@ -37,6 +38,38 @@ function useGitHubStars() {
 function formatStars(n: number): string {
   if (n >= 1000) return (n / 1000).toFixed(1).replace(/\.0$/, "") + "k";
   return n.toString();
+}
+
+// ---- Copy Install Button ----
+function CopyInstallButton() {
+  const [copied, setCopied] = useState(false);
+  const handleCopy = () => {
+    navigator.clipboard.writeText("cargo install naos").then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  };
+  return (
+    <button
+      onClick={handleCopy}
+      className="group inline-flex items-center gap-2 bg-nexus-indigo text-white font-mono text-sm px-6 py-3 rounded-md hover:bg-nexus-indigo/90 transition-all glow-indigo relative"
+    >
+      <Terminal size={16} />
+      <span>cargo install naos</span>
+      <span className="ml-1 pl-2 border-l border-white/20">
+        {copied ? (
+          <Check size={14} className="text-nexus-green" />
+        ) : (
+          <Copy size={14} className="opacity-60 group-hover:opacity-100 transition-opacity" />
+        )}
+      </span>
+      {copied && (
+        <span className="absolute -top-8 left-1/2 -translate-x-1/2 text-xs bg-nexus-surface text-foreground px-2 py-1 rounded border border-border whitespace-nowrap">
+          Copied!
+        </span>
+      )}
+    </button>
+  );
 }
 
 // ---- Typewriter Hook ----
@@ -180,6 +213,7 @@ function Nav() {
               </span>
             )}
           </a>
+          <ThemeToggle />
           <a
             href="#get-started"
             className="flex items-center gap-1.5 bg-nexus-indigo text-white text-sm font-mono px-4 py-2 rounded-md hover:bg-nexus-indigo/90 transition-colors"
@@ -265,13 +299,7 @@ function Hero() {
               transition={{ duration: 0.5, delay: 0.8 }}
               className="flex flex-wrap gap-4"
             >
-              <a
-                href="#get-started"
-                className="inline-flex items-center gap-2 bg-nexus-indigo text-white font-mono text-sm px-6 py-3 rounded-md hover:bg-nexus-indigo/90 transition-colors glow-indigo"
-              >
-                <Terminal size={16} />
-                cargo install naos
-              </a>
+              <CopyInstallButton />
               <a
                 href={GITHUB_URL}
                 target="_blank"
