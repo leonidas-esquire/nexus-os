@@ -490,6 +490,18 @@ function CliSection() {
 }
 
 // ---- Dashboard Section ----
+const DASHBOARD_PAGES = [
+  { path: "/", name: "Overview", desc: "Real-time summary of agents, supervisors, cost, trust, and recent activity" },
+  { path: "/agents", name: "Agents", desc: "All agents with status, cost budget, and AXIS trust scores" },
+  { path: "/supervisors", name: "Supervisors", desc: "Supervisor trees with child agent states and restart counts" },
+  { path: "/sagas", name: "Sagas", desc: "Multi-step saga definitions with execution history and rollback status" },
+  { path: "/workflows", name: "Workflows", desc: "Sequential data pipeline steps with execution tracking" },
+  { path: "/pools", name: "Pools", desc: "Concurrent fan-out pools with member status and strategy" },
+  { path: "/cost", name: "Cost", desc: "Budget tracking with progress bars and per-agent spend breakdown" },
+  { path: "/audit", name: "Audit Log", desc: "Searchable, filterable log of every system event" },
+  { path: "/trust", name: "AXIS Trust", desc: "Trust verification status for all registered agents" },
+];
+
 function DashboardSection() {
   return (
     <section id="dashboard" className="py-24 bg-nexus-surface/30 border-y border-border">
@@ -501,19 +513,84 @@ function DashboardSection() {
               Real-time monitoring at localhost:4200
             </h2>
             <p className="text-muted-foreground text-lg">
-              A built-in web dashboard shows agent status, cost tracking, supervisor trees,
-              broker routing stats, and the full audit trail. Runs locally with zero configuration.
+              A built-in web dashboard served by the naos binary itself — no separate install needed.
+              Server-rendered HTML with auto-refresh, terminal-aesthetic styling, and 5 JSON API endpoints.
             </p>
           </div>
         </AnimatedSection>
 
-        <AnimatedSection delay={0.2}>
-          <div className="rounded-lg overflow-hidden glow-indigo border border-border max-w-5xl mx-auto">
+        <AnimatedSection delay={0.15}>
+          <div className="rounded-lg overflow-hidden glow-indigo border border-border max-w-5xl mx-auto mb-16">
             <img
               src={DASHBOARD_IMG}
               alt="Nexus OS Dashboard — Agent monitoring, cost tracking, supervisor tree, audit trail"
               className="w-full h-auto"
             />
+          </div>
+        </AnimatedSection>
+
+        <AnimatedSection delay={0.25}>
+          <div className="grid lg:grid-cols-2 gap-12 items-start max-w-5xl mx-auto">
+            {/* Left: Page list */}
+            <div>
+              <h3 className="font-mono text-sm text-nexus-indigo uppercase tracking-widest mb-6">9 Pages</h3>
+              <div className="space-y-3">
+                {DASHBOARD_PAGES.map((page) => (
+                  <div key={page.path} className="flex items-start gap-3 group">
+                    <code className="font-mono text-xs text-nexus-green shrink-0 w-24 pt-0.5">{page.path}</code>
+                    <div className="min-w-0">
+                      <span className="font-mono text-sm text-foreground font-medium">{page.name}</span>
+                      <p className="text-muted-foreground text-xs leading-relaxed mt-0.5">{page.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Right: Terminal preview */}
+            <div className="terminal-border rounded-lg overflow-hidden">
+              <div className="flex items-center gap-2 px-4 py-2.5 border-b border-border bg-nexus-deep">
+                <div className="w-3 h-3 rounded-full bg-red-500/60" />
+                <div className="w-3 h-3 rounded-full bg-yellow-500/60" />
+                <div className="w-3 h-3 rounded-full bg-green-500/60" />
+                <span className="ml-2 font-mono text-xs text-muted-foreground">naos dashboard</span>
+              </div>
+              <div className="p-5 font-mono text-sm leading-loose bg-nexus-deep/80">
+                <div><span className="text-nexus-amber">$</span> naos dashboard --open</div>
+                <div className="mt-2 text-nexus-green">  ⬡ Dashboard running at http://127.0.0.1:4200</div>
+                <div className="mt-1 text-muted-foreground">  Pages:</div>
+                <div className="text-muted-foreground">    /            Overview</div>
+                <div className="text-muted-foreground">    /agents      Agent list and status</div>
+                <div className="text-muted-foreground">    /supervisors Supervisor trees</div>
+                <div className="text-muted-foreground">    /sagas       Saga definitions</div>
+                <div className="text-muted-foreground">    /workflows   Workflow pipelines</div>
+                <div className="text-muted-foreground">    /pools       Pool status</div>
+                <div className="text-muted-foreground">    /cost        Budget tracking</div>
+                <div className="text-muted-foreground">    /audit       Audit log</div>
+                <div className="text-muted-foreground">    /trust       AXIS Trust status</div>
+                <div className="mt-2 text-muted-foreground">  Press Ctrl+C to stop</div>
+              </div>
+            </div>
+          </div>
+        </AnimatedSection>
+
+        <AnimatedSection delay={0.35}>
+          <div className="max-w-5xl mx-auto mt-12">
+            <h3 className="font-mono text-sm text-nexus-indigo uppercase tracking-widest mb-6 text-center">JSON API Endpoints</h3>
+            <div className="grid sm:grid-cols-5 gap-3">
+              {[
+                { endpoint: "/api/agents", label: "Agents" },
+                { endpoint: "/api/supervisors", label: "Supervisors" },
+                { endpoint: "/api/cost", label: "Cost" },
+                { endpoint: "/api/audit", label: "Audit" },
+                { endpoint: "/api/trust", label: "Trust" },
+              ].map((api) => (
+                <div key={api.endpoint} className="terminal-border rounded-md px-3 py-2.5 text-center">
+                  <code className="font-mono text-xs text-nexus-green">{api.endpoint}</code>
+                  <div className="text-muted-foreground text-xs mt-1">{api.label}</div>
+                </div>
+              ))}
+            </div>
           </div>
         </AnimatedSection>
       </div>
