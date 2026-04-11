@@ -9,7 +9,7 @@ import { motion, useInView } from "framer-motion";
 import {
   Terminal, Shield, Cpu, GitBranch, DollarSign,
   Layers, Zap, Globe, ArrowRight, ChevronRight,
-  Activity, Box, Network, Eye, BookOpen, Github, Cloud
+  Activity, Box, Network, Eye, BookOpen, Github, Cloud, Star
 } from "lucide-react";
 
 // ---- Constants ----
@@ -19,6 +19,25 @@ const TERMINAL_IMG = "https://d2xsxph8kpxj0f.cloudfront.net/310419663030909471/N
 const DASHBOARD_IMG = "https://d2xsxph8kpxj0f.cloudfront.net/310419663030909471/NRmiWdZq2JgxyAQQ5B7Zs7/nexus-dashboard-fwAdGqtnxNA3pFiqWHe6iD.webp";
 
 const GITHUB_URL = "https://github.com/leonidas-esquire/nexus-os";
+
+// ---- GitHub Stars Hook ----
+function useGitHubStars() {
+  const [stars, setStars] = useState<number | null>(null);
+  useEffect(() => {
+    fetch("https://api.github.com/repos/leonidas-esquire/nexus-os")
+      .then(r => r.json())
+      .then(data => {
+        if (typeof data.stargazers_count === "number") setStars(data.stargazers_count);
+      })
+      .catch(() => {});
+  }, []);
+  return stars;
+}
+
+function formatStars(n: number): string {
+  if (n >= 1000) return (n / 1000).toFixed(1).replace(/\.0$/, "") + "k";
+  return n.toString();
+}
 
 // ---- Typewriter Hook ----
 function useTypewriter(text: string, speed = 40, delay = 500) {
@@ -114,6 +133,7 @@ function StatBlock({ value, label }: { value: string; label: string }) {
 // ---- Nav ----
 function Nav() {
   const [scrolled, setScrolled] = useState(false);
+  const stars = useGitHubStars();
 
   useEffect(() => {
     const handler = () => setScrolled(window.scrollY > 20);
@@ -149,10 +169,16 @@ function Nav() {
             href={GITHUB_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="hidden sm:flex items-center gap-2 text-sm font-mono text-muted-foreground hover:text-foreground transition-colors"
+            className="hidden sm:flex items-center gap-2 text-sm font-mono text-muted-foreground hover:text-foreground transition-colors group"
           >
             <Github size={16} />
             <span>GitHub</span>
+            {stars !== null && (
+              <span className="flex items-center gap-1 bg-white/10 text-xs px-2 py-0.5 rounded-full border border-white/10 group-hover:border-nexus-indigo/40 transition-colors">
+                <Star size={10} className="text-yellow-400 fill-yellow-400" />
+                {formatStars(stars)}
+              </span>
+            )}
           </a>
           <a
             href="#get-started"

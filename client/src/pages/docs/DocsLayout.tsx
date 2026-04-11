@@ -16,6 +16,7 @@ import {
   Terminal,
   Menu,
   X,
+  History,
 } from "lucide-react";
 import { DOC_SECTIONS, getFlatPages, getPageByPath, getAdjacentPages } from "./docsData";
 import { MarkdownRenderer, extractHeadings } from "./MarkdownRenderer";
@@ -30,6 +31,7 @@ const ICON_MAP: Record<string, React.ReactNode> = {
   globe: <Globe className="w-4 h-4" />,
   layout: <LayoutDashboard className="w-4 h-4" />,
   terminal: <Terminal className="w-4 h-4" />,
+  history: <History className="w-4 h-4" />,
 };
 
 function Sidebar({

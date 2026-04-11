@@ -1957,6 +1957,110 @@ Complete list of all \`naos\` commands.
       },
     ],
   },
+  {
+    slug: "changelog",
+    title: "Changelog",
+    icon: "history",
+    pages: [
+      {
+        slug: "releases",
+        title: "All Releases",
+        content: `# Changelog
+
+All notable changes to Nexus OS are documented here. This project follows [Semantic Versioning](https://semver.org/).
+
+---
+
+## v0.1.0 — Phase 1 Release (2025-04-11)
+
+**The foundation release.** Everything you need to create, supervise, and scale AI agents from a single CLI.
+
+### Core Engine
+- Agent lifecycle management: create, start, stop, restart, destroy
+- Template system with 5 built-in templates (research, code, data, chat, custom)
+- WASM sandbox isolation for agent execution
+- SQLite-backed persistent state store
+- Project initialization with \`naos init\`
+- YAML-based configuration (\`nexus.config.yaml\`)
+
+### Orchestration Primitives
+- **Supervisors** — one-for-one, one-for-all, rest-for-one restart strategies
+- **Sagas** — distributed transactions with compensating rollbacks
+- **Workflows** — sequential and parallel step execution with retry policies
+- **Agent Pools** — round-robin, least-loaded, and random scheduling
+
+### Cost Control
+- Per-agent and global token budgets with hard/soft limits
+- Real-time spend tracking across all LLM providers
+- Budget alerts at configurable thresholds (50%, 80%, 90%)
+- Cost action policies: warn, throttle, pause, kill
+- Spending history and analytics
+
+### Trust & AXIS
+- AXIS trust verification protocol integration
+- Trust tier system: unverified, basic, standard, verified, trusted
+- Cryptographic identity verification for agents
+- Trust score caching with configurable TTL
+- Automatic trust-based access control
+
+### Broker Routing
+- Skill-based task routing with pattern matching
+- Three-tier routing cascade: Skill → WASM → LLM
+- Configurable confidence thresholds (default 0.9)
+- Routing statistics and cost savings tracking
+- 5 CLI commands: \`broker route\`, \`execute\`, \`stats\`, \`config\`, \`skills\`
+
+### Cloudflare Edge Deployment
+- Deploy agents as Cloudflare Workers
+- Durable Objects for persistent agent state
+- Global distribution across 300+ edge locations
+- Edge deployment management: deploy, list, status, logs, undeploy
+- Simulation mode for testing without live credentials
+
+### Web Dashboard
+- 11 server-rendered HTML pages (Overview, Agents, Supervisors, Sagas, Workflows, Pools, Cost, Audit, Trust, Broker, Edge)
+- 7 JSON API endpoints for programmatic access
+- Terminal/hacker aesthetic with auto-refresh
+- \`naos dashboard --port 4200 --open\`
+
+### Audit Trail
+- Append-only audit log for all agent actions
+- Timestamped entries with agent ID, action type, and detail
+- Queryable via CLI and dashboard
+
+### CLI
+- 40+ commands across 8 command groups
+- Consistent \`--json\` output flag for scripting
+- Color-coded terminal output with progress indicators
+- Global flags: \`--help\`, \`--version\`, \`--verbose\`, \`--quiet\`
+
+---
+
+## Roadmap
+
+### v0.2.0 — Planned
+- Hot-reload agent configuration without restart
+- WebSocket real-time dashboard updates
+- Multi-provider LLM support (OpenAI, Anthropic, local models)
+- Agent-to-agent messaging protocol
+- Plugin system for custom orchestration strategies
+
+### v0.3.0 — Planned
+- Distributed mode with multi-node clustering
+- Kubernetes operator for cloud-native deployment
+- Prometheus metrics exporter
+- GraphQL API for dashboard
+- Visual workflow builder
+
+### v1.0.0 — Planned
+- Stable API with backwards compatibility guarantees
+- Comprehensive test suite with >90% coverage
+- Performance benchmarks and optimization
+- Enterprise features: SSO, RBAC, team management
+- Commercial support options`,
+      },
+    ],
+  },
 ];
 
 // Flatten all pages for navigation
