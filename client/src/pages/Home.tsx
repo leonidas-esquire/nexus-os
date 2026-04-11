@@ -9,7 +9,7 @@ import { motion, useInView } from "framer-motion";
 import {
   Terminal, Shield, Cpu, GitBranch, DollarSign,
   Layers, Zap, Globe, ArrowRight, ChevronRight,
-  Activity, Box, Network, Eye, BookOpen, Github
+  Activity, Box, Network, Eye, BookOpen, Github, Cloud
 } from "lucide-react";
 
 // ---- Constants ----
@@ -139,6 +139,7 @@ function Nav() {
           <a href="#cli" className="hover:text-foreground transition-colors">cli</a>
           <a href="#dashboard" className="hover:text-foreground transition-colors">dashboard</a>
           <a href="#broker" className="hover:text-foreground transition-colors">broker</a>
+          <a href="#edge" className="hover:text-foreground transition-colors">edge</a>
           <a href="#pricing" className="hover:text-foreground transition-colors">pricing</a>
         </div>
 
@@ -475,6 +476,7 @@ function CliSection() {
                   { cmd: "naos dashboard", desc: "Launch the web dashboard" },
                   { cmd: "naos cost status", desc: "View real-time cost tracking" },
                   { cmd: "naos broker route", desc: "Route tasks through the broker" },
+                  { cmd: "naos edge deploy", desc: "Deploy agents to Cloudflare Edge" },
                   { cmd: "naos audit tail", desc: "Stream the causal audit trail" },
                 ].map((item) => (
                   <div key={item.cmd} className="flex items-center gap-3 group">
@@ -503,6 +505,7 @@ const DASHBOARD_PAGES = [
   { path: "/audit", name: "Audit Log", desc: "Searchable, filterable log of every system event" },
   { path: "/trust", name: "AXIS Trust", desc: "Trust verification status for all registered agents" },
   { path: "/broker", name: "Broker", desc: "Routing stats, skill calls, WASM/LLM breakdown, and cost savings" },
+  { path: "/edge", name: "Edge", desc: "Cloudflare Worker deployments, global latency, region distribution" },
 ];
 
 function DashboardSection() {
@@ -536,7 +539,7 @@ function DashboardSection() {
           <div className="grid lg:grid-cols-2 gap-12 items-start max-w-5xl mx-auto">
             {/* Left: Page list */}
             <div>
-              <h3 className="font-mono text-sm text-nexus-indigo uppercase tracking-widest mb-6">9 Pages</h3>
+              <h3 className="font-mono text-sm text-nexus-indigo uppercase tracking-widest mb-6">11 Pages</h3>
               <div className="space-y-3">
                 {DASHBOARD_PAGES.map((page) => (
                   <div key={page.path} className="flex items-start gap-3 group">
@@ -572,6 +575,7 @@ function DashboardSection() {
                 <div className="text-muted-foreground">    /audit       Audit log</div>
                 <div className="text-muted-foreground">    /trust       AXIS Trust status</div>
                 <div className="text-muted-foreground">    /broker      Broker routing stats</div>
+                <div className="text-muted-foreground">    /edge        Edge deployments</div>
                 <div className="mt-2 text-muted-foreground">  Press Ctrl+C to stop</div>
               </div>
             </div>
@@ -581,7 +585,7 @@ function DashboardSection() {
         <AnimatedSection delay={0.35}>
           <div className="max-w-5xl mx-auto mt-12">
             <h3 className="font-mono text-sm text-nexus-indigo uppercase tracking-widest mb-6 text-center">JSON API Endpoints</h3>
-            <div className="grid sm:grid-cols-3 md:grid-cols-6 gap-3">
+              <div className="grid sm:grid-cols-4 md:grid-cols-7 gap-3">
               {[
                 { endpoint: "/api/agents", label: "Agents" },
                 { endpoint: "/api/supervisors", label: "Supervisors" },
@@ -589,6 +593,7 @@ function DashboardSection() {
                 { endpoint: "/api/audit", label: "Audit" },
                 { endpoint: "/api/trust", label: "Trust" },
                 { endpoint: "/api/broker", label: "Broker" },
+                { endpoint: "/api/edge", label: "Edge" },
               ].map((api) => (
                 <div key={api.endpoint} className="terminal-border rounded-md px-3 py-2.5 text-center">
                   <code className="font-mono text-xs text-nexus-green">{api.endpoint}</code>
@@ -730,6 +735,130 @@ function BrokerSection() {
   );
 }
 
+// ---- Edge Deployment Section ----
+function EdgeSection() {
+  const regions = [
+    { name: "North America", pct: 45, color: "bg-nexus-indigo" },
+    { name: "Europe", pct: 32, color: "bg-nexus-cyan" },
+    { name: "Asia-Pacific", pct: 18, color: "bg-nexus-green" },
+    { name: "Other", pct: 5, color: "bg-nexus-amber" },
+  ];
+
+  return (
+    <section id="edge" className="py-24 bg-nexus-surface/30 border-y border-border">
+      <div className="container">
+        <AnimatedSection>
+          <div className="max-w-2xl mb-16">
+            <span className="font-mono text-xs text-nexus-indigo uppercase tracking-widest">Edge Deployment</span>
+            <h2 className="text-3xl sm:text-4xl font-bold mt-3 mb-4">
+              Deploy agents to 300+ Cloudflare PoPs
+            </h2>
+            <p className="text-muted-foreground text-lg leading-relaxed">
+              One command pushes your agent to Cloudflare Workers with Durable Objects for persistent state.
+              Sub-50ms latency worldwide, automatic scaling, and zero cold starts.
+            </p>
+          </div>
+        </AnimatedSection>
+
+        <AnimatedSection delay={0.15}>
+          <div className="grid lg:grid-cols-2 gap-12 items-start">
+            {/* Left: Terminal demo */}
+            <div className="terminal-border rounded-lg overflow-hidden">
+              <div className="flex items-center gap-2 px-4 py-2.5 border-b border-border bg-nexus-deep">
+                <div className="w-3 h-3 rounded-full bg-red-500/60" />
+                <div className="w-3 h-3 rounded-full bg-yellow-500/60" />
+                <div className="w-3 h-3 rounded-full bg-green-500/60" />
+                <span className="ml-2 font-mono text-xs text-muted-foreground">naos edge</span>
+              </div>
+              <div className="p-5 font-mono text-sm leading-loose bg-nexus-deep/80">
+                <div><span className="text-nexus-amber">$</span> naos edge deploy researcher</div>
+                <div className="mt-2 text-muted-foreground">  Deploying researcher to Cloudflare Edge...</div>
+                <div className="text-nexus-green">  \u2713 Compiled to WASM (48 KB)</div>
+                <div className="text-nexus-green">  \u2713 Generated Worker script</div>
+                <div className="text-nexus-green">  \u2713 Uploaded to Cloudflare</div>
+                <div className="text-nexus-green">  \u2713 Created Durable Object namespace</div>
+                <div className="text-nexus-green">  \u2713 Route configured: researcher.agents.nexus/*</div>
+                <div className="mt-2 text-muted-foreground">  Deployment complete!</div>
+                <div className="text-muted-foreground">    URL:     <span className="text-nexus-cyan">https://researcher.agents.nexus</span></div>
+                <div className="text-muted-foreground">    Regions: <span className="text-nexus-green">300+ Cloudflare PoPs</span></div>
+                <div className="text-muted-foreground">    Latency: <span className="text-nexus-green">{"<"}50ms globally</span></div>
+
+                <div className="mt-4 pt-4 border-t border-border">
+                  <div><span className="text-nexus-amber">$</span> naos edge status researcher</div>
+                  <div className="mt-2 text-muted-foreground">  Agent:     researcher</div>
+                  <div className="text-muted-foreground">  Status:    <span className="text-nexus-green">\u25cf active</span></div>
+                  <div className="text-muted-foreground">  Requests:  <span className="text-foreground">12,847</span></div>
+                  <div className="text-muted-foreground">  Avg lat:   <span className="text-nexus-green">23ms</span></div>
+                  <div className="text-muted-foreground">  p99 lat:   <span className="text-nexus-amber">89ms</span></div>
+                  <div className="text-muted-foreground">  Errors:    <span className="text-nexus-green">0.1%</span></div>
+                </div>
+              </div>
+            </div>
+
+            {/* Right: Features and region distribution */}
+            <div className="space-y-6">
+              <div>
+                <h3 className="font-mono text-sm text-nexus-indigo uppercase tracking-widest mb-4">Global Distribution</h3>
+                <div className="space-y-3">
+                  {regions.map((r) => (
+                    <div key={r.name}>
+                      <div className="flex justify-between text-sm mb-1">
+                        <span className="text-muted-foreground">{r.name}</span>
+                        <span className="font-mono text-foreground">{r.pct}%</span>
+                      </div>
+                      <div className="h-2 bg-border rounded-full overflow-hidden">
+                        <div className={`h-full ${r.color} rounded-full`} style={{ width: `${r.pct}%` }} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                {[
+                  { cmd: "edge login", desc: "Authenticate with Cloudflare" },
+                  { cmd: "edge deploy", desc: "Push agent to Workers" },
+                  { cmd: "edge list", desc: "View all deployments" },
+                  { cmd: "edge status", desc: "Metrics & region stats" },
+                  { cmd: "edge logs", desc: "Stream Worker logs" },
+                  { cmd: "edge undeploy", desc: "Remove from edge" },
+                ].map((item) => (
+                  <div key={item.cmd} className="terminal-border rounded-md px-3 py-2.5">
+                    <code className="font-mono text-xs text-nexus-green block">{item.cmd}</code>
+                    <div className="text-muted-foreground text-xs mt-1">{item.desc}</div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="terminal-border rounded-lg p-4">
+                <div className="font-mono text-xs text-muted-foreground mb-2">Architecture</div>
+                <div className="space-y-2 text-sm">
+                  <div className="flex items-center gap-2">
+                    <Cloud size={14} className="text-nexus-indigo" />
+                    <span className="text-muted-foreground">Cloudflare Workers for compute</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Box size={14} className="text-nexus-cyan" />
+                    <span className="text-muted-foreground">Durable Objects for persistent state</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Globe size={14} className="text-nexus-green" />
+                    <span className="text-muted-foreground">Custom routes per agent</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Zap size={14} className="text-nexus-amber" />
+                    <span className="text-muted-foreground">Zero cold starts, auto-scaling</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </AnimatedSection>
+      </div>
+    </section>
+  );
+}
+
 // ---- Config Example ----
 function ConfigSection() {
   return (
@@ -795,7 +924,14 @@ skills:
   - name: summarize
     patterns: [summarize, summary, tldr]
     handler: "fn:summarize_text"
-    cost: "$0.0001"`}</code>
+    cost: "$0.0001"
+
+edge:
+  cloudflare:
+    account_id: "\$\{CF_ACCOUNT_ID\}"
+    zone_id: "your-zone-id"
+  routes:
+    researcher: "researcher.agents.nexus/*"`}</code>
               </pre>
             </div>
           </div>
@@ -980,6 +1116,7 @@ export default function Home() {
       <CliSection />
       <DashboardSection />
       <BrokerSection />
+      <EdgeSection />
       <ConfigSection />
       <PricingSection />
       <GetStarted />
