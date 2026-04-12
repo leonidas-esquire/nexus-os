@@ -16,6 +16,7 @@ import {
 import { useTheme } from "@/contexts/ThemeContext";
 import {
   SKILLS, CATEGORIES, FEATURED_SKILLS, RECENTLY_ADDED,
+  TRENDING_SKILLS,
   formatNumber, formatPrice, trustBadge, timeAgo,
   type Skill,
 } from "./marketplaceData";
@@ -327,6 +328,68 @@ export default function MarketplacePage() {
           </section>
         ) : (
           <>
+            {/* Trending Skills */}
+            <section className="mb-16">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-lg font-semibold flex items-center gap-2">
+                  <TrendingUp className="w-5 h-5 text-nexus-green" />
+                  Trending This Week
+                </h2>
+                <span className="text-xs text-muted-foreground">7-day call volume growth</span>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {TRENDING_SKILLS.map((t, i) => {
+                  const skill = SKILLS.find((s) => s.name === t.name);
+                  if (!skill) return null;
+                  // Build sparkline path
+                  const max = Math.max(...t.sparkline);
+                  const min = Math.min(...t.sparkline);
+                  const range = max - min || 1;
+                  const points = t.sparkline.map((v, j) => {
+                    const x = (j / 6) * 120;
+                    const y = 32 - ((v - min) / range) * 28;
+                    return `${x},${y}`;
+                  }).join(" ");
+                  const areaPoints = points + " 120,32 0,32";
+                  return (
+                    <Link key={t.name} href={`/marketplace/${t.name}`}>
+                      <div className="group relative bg-card/60 backdrop-blur-sm border border-border/50 rounded-xl p-4 hover:border-nexus-green/40 hover:bg-card/80 transition-all duration-300 cursor-pointer">
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-lg bg-nexus-green/10 border border-nexus-green/20 flex items-center justify-center text-xs font-bold text-nexus-green">
+                              #{i + 1}
+                            </div>
+                            <div>
+                              <h3 className="font-semibold text-sm text-foreground group-hover:text-nexus-green transition-colors">{t.name}</h3>
+                              <p className="text-xs text-muted-foreground">{skill.category} · {formatPrice(skill.pricing)}</p>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <span className="text-nexus-green font-bold text-sm">+{t.growthPct.toFixed(1)}%</span>
+                            <p className="text-[10px] text-muted-foreground">{formatNumber(t.callsLast7d)} calls</p>
+                          </div>
+                        </div>
+                        <svg viewBox="0 0 120 32" className="w-full h-8 overflow-visible">
+                          <defs>
+                            <linearGradient id={`trend-grad-${i}`} x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="0%" stopColor="var(--nexus-green)" stopOpacity="0.3" />
+                              <stop offset="100%" stopColor="var(--nexus-green)" stopOpacity="0" />
+                            </linearGradient>
+                          </defs>
+                          <polygon points={areaPoints} fill={`url(#trend-grad-${i})`} />
+                          <polyline points={points} fill="none" stroke="var(--nexus-green)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                        <div className="flex justify-between text-[10px] text-muted-foreground mt-1">
+                          <span>7d ago</span>
+                          <span>Today</span>
+                        </div>
+                      </div>
+                    </Link>
+                  );
+                })}
+              </div>
+            </section>
+
             {/* Featured Skills */}
             <section className="mb-16">
               <div className="flex items-center justify-between mb-6">

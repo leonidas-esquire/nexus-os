@@ -11,6 +11,7 @@ import MarketplacePage from "./pages/marketplace/MarketplacePage";
 import SkillDetailPage from "./pages/marketplace/SkillDetailPage";
 import DeveloperPortal from "./pages/marketplace/DeveloperPortal";
 import CompareSkills from "./pages/marketplace/CompareSkills";
+import DependencyGraph from "./pages/marketplace/DependencyGraph";
 
 
 function Router() {
@@ -20,6 +21,7 @@ function Router() {
       <Route path={"/marketplace"} component={MarketplacePage} />
       <Route path={"/marketplace/compare"} component={CompareSkills} />
       <Route path={"/marketplace/developer"} component={DeveloperPortal} />
+      <Route path={"/marketplace/dependencies"} component={DependencyGraph} />
       <Route path={"/marketplace/:skillName"} component={SkillDetailPage} />
       <Route path={"/docs/manual"} component={ManualLayout} />
       <Route path={"/docs/manual/:section"} component={ManualLayout} />

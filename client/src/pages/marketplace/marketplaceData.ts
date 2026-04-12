@@ -774,3 +774,308 @@ export const COMPARE_FIELDS: CompareField[] = [
   { label: "Inputs", key: "inputs", getValue: (s) => s.inputs.join(", ") },
   { label: "Outputs", key: "outputs", getValue: (s) => s.outputs.join(", ") },
 ];
+
+
+// ─── Trending Skills (7-day growth) ─────────────────────────────────────────
+
+export interface TrendingSkill {
+  name: string;
+  callsLast7d: number;
+  callsPrev7d: number;
+  growthPct: number;
+  sparkline: number[]; // 7 daily values
+}
+
+export const TRENDING_SKILLS: TrendingSkill[] = [
+  {
+    name: "sentiment-analyzer",
+    callsLast7d: 185_000,
+    callsPrev7d: 98_000,
+    growthPct: 88.8,
+    sparkline: [12000, 14500, 18200, 22000, 28000, 35000, 42000],
+  },
+  {
+    name: "json-parser",
+    callsLast7d: 420_000,
+    callsPrev7d: 280_000,
+    growthPct: 50.0,
+    sparkline: [35000, 42000, 48000, 55000, 62000, 68000, 75000],
+  },
+  {
+    name: "image-resizer",
+    callsLast7d: 95_000,
+    callsPrev7d: 68_000,
+    growthPct: 39.7,
+    sparkline: [8000, 9200, 11000, 13500, 15000, 17000, 19500],
+  },
+  {
+    name: "regex-matcher",
+    callsLast7d: 110_000,
+    callsPrev7d: 82_000,
+    growthPct: 34.1,
+    sparkline: [12000, 13000, 14500, 15800, 16200, 17500, 19000],
+  },
+  {
+    name: "sql-builder",
+    callsLast7d: 78_000,
+    callsPrev7d: 60_000,
+    growthPct: 30.0,
+    sparkline: [8500, 9200, 10000, 10800, 11500, 12200, 13000],
+  },
+  {
+    name: "url-validator",
+    callsLast7d: 62_000,
+    callsPrev7d: 50_000,
+    growthPct: 24.0,
+    sparkline: [7000, 7500, 8200, 8800, 9200, 9800, 10500],
+  },
+];
+
+// ─── Version History / Changelog ────────────────────────────────────────────
+
+export interface VersionEntry {
+  version: string;
+  date: string;
+  type: "major" | "minor" | "patch";
+  summary: string;
+  changes: string[];
+  breaking?: boolean;
+  wasmSize: string;
+  downloads: number;
+}
+
+const VERSION_TEMPLATES: Record<string, VersionEntry[]> = {
+  "json-parser": [
+    {
+      version: "1.2.0",
+      date: "2026-03-20",
+      type: "minor",
+      summary: "Added recursive descent mode and streaming JSON support",
+      changes: [
+        "Added `--stream` flag for processing large JSON files incrementally",
+        "New recursive descent parser mode for deeply nested structures (>100 levels)",
+        "Improved error messages with line/column indicators for malformed JSON",
+        "Performance improvement: 15% faster parsing for documents >500KB",
+      ],
+      wasmSize: "124 KB",
+      downloads: 45_200,
+    },
+    {
+      version: "1.1.0",
+      date: "2026-01-08",
+      type: "minor",
+      summary: "JQ-like query syntax and array filtering",
+      changes: [
+        "Implemented JQ-compatible query syntax for field extraction",
+        "Added array filtering with `select()` and `map()` operators",
+        "New `--pretty` output flag for formatted JSON responses",
+        "Fixed edge case with Unicode escape sequences in keys",
+      ],
+      wasmSize: "118 KB",
+      downloads: 112_000,
+    },
+    {
+      version: "1.0.1",
+      date: "2025-11-02",
+      type: "patch",
+      summary: "Bug fix for empty array handling",
+      changes: [
+        "Fixed crash when parsing empty arrays in nested objects",
+        "Improved memory allocation for large documents",
+      ],
+      wasmSize: "112 KB",
+      downloads: 89_500,
+    },
+    {
+      version: "1.0.0",
+      date: "2025-08-15",
+      type: "major",
+      summary: "Initial release — high-performance JSON parsing in WASM",
+      changes: [
+        "Core JSON parsing engine built in Rust, compiled to WASM",
+        "Support for JSON Path expressions",
+        "Graceful error handling with detailed error messages",
+        "Benchmarked at 3ms average latency for 1MB documents",
+      ],
+      wasmSize: "108 KB",
+      downloads: 234_000,
+    },
+  ],
+  "email-extractor": [
+    {
+      version: "2.0.1",
+      date: "2026-03-05",
+      type: "patch",
+      summary: "Fixed false positives in disposable email detection",
+      changes: [
+        "Updated disposable email domain list (added 120 new domains)",
+        "Fixed regex edge case causing false positives with .museum TLDs",
+        "Improved confidence scoring algorithm accuracy by 8%",
+      ],
+      wasmSize: "98 KB",
+      downloads: 18_200,
+    },
+    {
+      version: "2.0.0",
+      date: "2026-01-20",
+      type: "major",
+      summary: "Major rewrite with RFC 5322 compliance and domain verification",
+      changes: [
+        "BREAKING: Output schema changed — `emails` field now returns objects instead of strings",
+        "Full RFC 5322 compliant email validation",
+        "Added real-time domain MX record verification",
+        "Disposable email detection with confidence scores",
+        "Batch processing support for multiple text inputs",
+      ],
+      breaking: true,
+      wasmSize: "95 KB",
+      downloads: 67_800,
+    },
+    {
+      version: "1.0.0",
+      date: "2025-09-10",
+      type: "major",
+      summary: "Initial release — email extraction from unstructured text",
+      changes: [
+        "Core email extraction engine with regex-based detection",
+        "Basic validation and deduplication",
+        "Support for common email formats",
+      ],
+      wasmSize: "72 KB",
+      downloads: 145_000,
+    },
+  ],
+  "csv-parser": [
+    {
+      version: "1.0.0",
+      date: "2025-12-01",
+      type: "major",
+      summary: "Initial release — CSV/TSV parsing with schema inference",
+      changes: [
+        "High-performance CSV and TSV parsing engine",
+        "Automatic schema inference with type detection",
+        "Support for custom delimiters and quote characters",
+        "Streaming mode for files up to 10MB",
+      ],
+      wasmSize: "156 KB",
+      downloads: 98_000,
+    },
+  ],
+};
+
+// Generate generic version history for skills without custom entries
+function generateVersionHistory(skill: Skill): VersionEntry[] {
+  const parts = skill.version.split(".").map(Number);
+  const entries: VersionEntry[] = [
+    {
+      version: skill.version,
+      date: skill.updatedAt,
+      type: parts[1] > 0 ? "minor" : "major",
+      summary: `Latest release with performance improvements and bug fixes`,
+      changes: [
+        "Performance optimizations reducing average latency by 10%",
+        "Updated dependency chain for improved security",
+        "Minor bug fixes and stability improvements",
+      ],
+      wasmSize: skill.wasmSize,
+      downloads: Math.round(skill.stats.totalCalls * 0.02),
+    },
+    {
+      version: `${parts[0]}.0.0`,
+      date: skill.createdAt,
+      type: "major",
+      summary: `Initial release — ${skill.description.toLowerCase()}`,
+      changes: [
+        `Core ${skill.category.toLowerCase()} engine built in Rust/WASM`,
+        "Full pattern matching support for broker integration",
+        "Comprehensive error handling and input validation",
+        "AXIS trust verification and sandbox compliance",
+      ],
+      wasmSize: `${parseInt(skill.wasmSize) - 12} KB`,
+      downloads: Math.round(skill.stats.totalCalls * 0.08),
+    },
+  ];
+  return entries;
+}
+
+export function getVersionHistory(skillName: string): VersionEntry[] {
+  if (VERSION_TEMPLATES[skillName]) return VERSION_TEMPLATES[skillName];
+  const skill = SKILLS.find((s) => s.name === skillName);
+  if (!skill) return [];
+  return generateVersionHistory(skill);
+}
+
+// ─── Dependency Graph ───────────────────────────────────────────────────────
+
+export interface SkillDependency {
+  from: string;
+  to: string;
+  type: "requires" | "optional" | "commonly-used-with";
+}
+
+export interface SkillNode {
+  name: string;
+  category: string;
+  calls: number;
+  x: number;
+  y: number;
+}
+
+export const SKILL_DEPENDENCIES: SkillDependency[] = [
+  // Hard dependencies
+  { from: "json-diff", to: "json-parser", type: "requires" },
+  { from: "json-validator", to: "json-parser", type: "requires" },
+  { from: "sql-builder", to: "json-parser", type: "optional" },
+  { from: "email-extractor", to: "regex-matcher", type: "requires" },
+  { from: "url-validator", to: "regex-matcher", type: "requires" },
+  { from: "markdown-to-html", to: "regex-matcher", type: "optional" },
+  // Commonly used together
+  { from: "json-parser", to: "csv-parser", type: "commonly-used-with" },
+  { from: "csv-parser", to: "sql-builder", type: "commonly-used-with" },
+  { from: "email-extractor", to: "sentiment-analyzer", type: "commonly-used-with" },
+  { from: "sentiment-analyzer", to: "json-parser", type: "commonly-used-with" },
+  { from: "image-resizer", to: "url-validator", type: "commonly-used-with" },
+  { from: "date-parser", to: "json-parser", type: "commonly-used-with" },
+  { from: "markdown-to-html", to: "image-resizer", type: "commonly-used-with" },
+];
+
+// Pre-computed node positions for the graph (circular layout)
+export function getGraphNodes(): SkillNode[] {
+  const skills = SKILLS;
+  const cx = 300, cy = 250, rx = 220, ry = 180;
+  return skills.map((s, i) => {
+    const angle = (i / skills.length) * 2 * Math.PI - Math.PI / 2;
+    return {
+      name: s.name,
+      category: s.category,
+      calls: s.stats.totalCalls,
+      x: cx + rx * Math.cos(angle),
+      y: cy + ry * Math.sin(angle),
+    };
+  });
+}
+
+export function getSkillDependencies(skillName: string): {
+  requires: string[];
+  optionalDeps: string[];
+  commonlyUsedWith: string[];
+  dependedOnBy: string[];
+} {
+  const requires = SKILL_DEPENDENCIES
+    .filter((d) => d.from === skillName && d.type === "requires")
+    .map((d) => d.to);
+  const optionalDeps = SKILL_DEPENDENCIES
+    .filter((d) => d.from === skillName && d.type === "optional")
+    .map((d) => d.to);
+  const commonlyUsedWith = SKILL_DEPENDENCIES
+    .filter(
+      (d) =>
+        (d.from === skillName || d.to === skillName) &&
+        d.type === "commonly-used-with"
+    )
+    .map((d) => (d.from === skillName ? d.to : d.from));
+  const dependedOnBy = SKILL_DEPENDENCIES
+    .filter((d) => d.to === skillName && (d.type === "requires" || d.type === "optional"))
+    .map((d) => d.from);
+  return { requires, optionalDeps, commonlyUsedWith, dependedOnBy };
+}

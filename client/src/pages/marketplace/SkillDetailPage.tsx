@@ -10,14 +10,15 @@ import {
   Package, Clock, Zap, Activity, ChevronRight, GitBranch,
   FileText, Terminal, Tag, Cpu, HardDrive, Timer,
   Sun, Moon, Code2, BookOpen, LayoutDashboard, Menu, X,
-  MessageSquare, ThumbsUp, User,
+  MessageSquare, ThumbsUp, User, History, AlertTriangle,
+  ArrowRight, GitCommit, Link2,
 } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 import { toast } from "sonner";
 import {
   SKILLS, formatNumber, formatPrice, formatMoney, trustBadge, timeAgo,
-  getReviewsForSkill,
-  type Skill, type Review,
+  getReviewsForSkill, getVersionHistory, getSkillDependencies,
+  type Skill, type Review, type VersionEntry,
 } from "./marketplaceData";
 
 /* ─── Stat Card ───────────────────────────────────────────────────────────── */
@@ -75,6 +76,191 @@ function StarRating({ value, onChange, readonly = false }: { value: number; onCh
           />
         </button>
       ))}
+    </div>
+  );
+}
+
+/* ─── Version History Section ──────────────────────────────────────────────── */
+function VersionHistorySection({ skillName }: { skillName: string }) {
+  const versions = useMemo(() => getVersionHistory(skillName), [skillName]);
+  const [expanded, setExpanded] = useState<string | null>(versions[0]?.version ?? null);
+
+  if (versions.length === 0) return null;
+
+  const typeColor = (type: string) => {
+    if (type === "major") return "text-nexus-amber bg-nexus-amber/10 border-nexus-amber/30";
+    if (type === "minor") return "text-nexus-cyan bg-nexus-cyan/10 border-nexus-cyan/30";
+    return "text-muted-foreground bg-muted/50 border-border/50";
+  };
+
+  return (
+    <div className="bg-card/60 border border-border/50 rounded-xl p-5">
+      <div className="flex items-center justify-between mb-5">
+        <h2 className="text-lg font-semibold flex items-center gap-2">
+          <History className="w-5 h-5 text-nexus-indigo" />
+          Version History
+        </h2>
+        <span className="text-xs text-muted-foreground">{versions.length} releases</span>
+      </div>
+
+      <div className="relative">
+        {/* Timeline line */}
+        <div className="absolute left-[11px] top-3 bottom-3 w-px bg-border/50" />
+
+        <div className="space-y-1">
+          {versions.map((v, i) => {
+            const isExpanded = expanded === v.version;
+            return (
+              <div key={v.version} className="relative">
+                {/* Timeline dot */}
+                <div className={`absolute left-0 top-4 w-[23px] h-[23px] rounded-full border-2 flex items-center justify-center z-10 ${
+                  i === 0 ? "border-nexus-indigo bg-nexus-indigo/20" : "border-border bg-background"
+                }`}>
+                  <GitCommit className={`w-3 h-3 ${i === 0 ? "text-nexus-indigo" : "text-muted-foreground"}`} />
+                </div>
+
+                <button
+                  onClick={() => setExpanded(isExpanded ? null : v.version)}
+                  className="w-full text-left pl-9 py-3 rounded-lg hover:bg-accent/30 transition-colors"
+                >
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className={`font-mono font-bold text-sm ${i === 0 ? "text-foreground" : "text-muted-foreground"}`}>
+                      v{v.version}
+                    </span>
+                    <span className={`text-[10px] px-1.5 py-0.5 rounded border font-medium uppercase ${typeColor(v.type)}`}>
+                      {v.type}
+                    </span>
+                    {v.breaking && (
+                      <span className="text-[10px] px-1.5 py-0.5 rounded border border-red-500/30 bg-red-500/10 text-red-400 font-medium flex items-center gap-1">
+                        <AlertTriangle className="w-2.5 h-2.5" /> BREAKING
+                      </span>
+                    )}
+                    <span className="text-xs text-muted-foreground ml-auto">{timeAgo(v.date)}</span>
+                  </div>
+                  <p className={`text-sm mt-1 ${i === 0 ? "text-foreground/80" : "text-muted-foreground"}`}>
+                    {v.summary}
+                  </p>
+                </button>
+
+                {isExpanded && (
+                  <div className="pl-9 pb-3 animate-in slide-in-from-top-2 duration-200">
+                    <div className="bg-accent/20 rounded-lg p-4 border border-border/30">
+                      <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">Changes</h4>
+                      <ul className="space-y-2">
+                        {v.changes.map((c, ci) => (
+                          <li key={ci} className="flex items-start gap-2 text-sm text-foreground/80">
+                            <ChevronRight className="w-3.5 h-3.5 text-nexus-indigo mt-0.5 shrink-0" />
+                            <span>{c}</span>
+                          </li>
+                        ))}
+                      </ul>
+                      <div className="flex items-center gap-4 mt-4 pt-3 border-t border-border/30">
+                        <span className="text-xs text-muted-foreground flex items-center gap-1">
+                          <HardDrive className="w-3 h-3" /> {v.wasmSize}
+                        </span>
+                        <span className="text-xs text-muted-foreground flex items-center gap-1">
+                          <Download className="w-3 h-3" /> {formatNumber(v.downloads)} installs
+                        </span>
+                        <span className="text-xs text-muted-foreground flex items-center gap-1">
+                          <Clock className="w-3 h-3" /> {v.date}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ─── Dependency Info Section ─────────────────────────────────────────────── */
+function DependencyInfoSection({ skillName }: { skillName: string }) {
+  const deps = useMemo(() => getSkillDependencies(skillName), [skillName]);
+  const hasDeps = deps.requires.length > 0 || deps.optionalDeps.length > 0 || deps.commonlyUsedWith.length > 0 || deps.dependedOnBy.length > 0;
+
+  if (!hasDeps) return null;
+
+  const DepChip = ({ name, type }: { name: string; type: "requires" | "optional" | "commonly-used-with" | "depended-on-by" }) => {
+    const colors = {
+      requires: "border-red-500/30 bg-red-500/10 text-red-400",
+      optional: "border-nexus-amber/30 bg-nexus-amber/10 text-nexus-amber",
+      "commonly-used-with": "border-nexus-cyan/30 bg-nexus-cyan/10 text-nexus-cyan",
+      "depended-on-by": "border-nexus-indigo/30 bg-nexus-indigo/10 text-nexus-indigo",
+    };
+    return (
+      <Link href={`/marketplace/${name}`}>
+        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-xs font-medium hover:opacity-80 transition-opacity cursor-pointer ${colors[type]}`}>
+          <Package className="w-3 h-3" />
+          {name}
+        </span>
+      </Link>
+    );
+  };
+
+  return (
+    <div className="bg-card/60 border border-border/50 rounded-xl p-5">
+      <h2 className="text-lg font-semibold flex items-center gap-2 mb-5">
+        <Link2 className="w-5 h-5 text-nexus-cyan" />
+        Dependencies & Related Skills
+      </h2>
+
+      <div className="space-y-4">
+        {deps.requires.length > 0 && (
+          <div>
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2 flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-red-400" /> Required
+            </h3>
+            <div className="flex flex-wrap gap-2">
+              {deps.requires.map((n) => <DepChip key={n} name={n} type="requires" />)}
+            </div>
+          </div>
+        )}
+
+        {deps.optionalDeps.length > 0 && (
+          <div>
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2 flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-nexus-amber" /> Optional
+            </h3>
+            <div className="flex flex-wrap gap-2">
+              {deps.optionalDeps.map((n) => <DepChip key={n} name={n} type="optional" />)}
+            </div>
+          </div>
+        )}
+
+        {deps.commonlyUsedWith.length > 0 && (
+          <div>
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2 flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-nexus-cyan" /> Commonly Used With
+            </h3>
+            <div className="flex flex-wrap gap-2">
+              {deps.commonlyUsedWith.map((n) => <DepChip key={n} name={n} type="commonly-used-with" />)}
+            </div>
+          </div>
+        )}
+
+        {deps.dependedOnBy.length > 0 && (
+          <div>
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2 flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-nexus-indigo" /> Depended On By
+            </h3>
+            <div className="flex flex-wrap gap-2">
+              {deps.dependedOnBy.map((n) => <DepChip key={n} name={n} type="depended-on-by" />)}
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div className="mt-4 pt-3 border-t border-border/30">
+        <Link href="/marketplace/dependencies">
+          <span className="text-xs text-nexus-cyan hover:underline cursor-pointer flex items-center gap-1">
+            View full dependency graph <ArrowRight className="w-3 h-3" />
+          </span>
+        </Link>
+      </div>
     </div>
   );
 }
@@ -493,6 +679,12 @@ export default function SkillDetailPage() {
                 </div>
               </div>
             </div>
+
+            {/* Version History */}
+            <VersionHistorySection skillName={skill.name} />
+
+            {/* Dependency Info */}
+            <DependencyInfoSection skillName={skill.name} />
 
             {/* Reviews */}
             <ReviewsSection skillName={skill.name} />
