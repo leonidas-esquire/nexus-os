@@ -1,19 +1,16 @@
-import { describe, expect, it, beforeAll, afterAll } from "vitest";
+import { describe, expect, it, vi, beforeEach } from "vitest";
 import { appRouter } from "./routers";
 import type { TrpcContext } from "./_core/context";
 
-/**
- * Blog system integration tests.
- * These test the tRPC procedures through the router caller.
- */
+// ─── Test Helpers ──────────────────────────────────────────────────
 
 type AuthenticatedUser = NonNullable<TrpcContext["user"]>;
 
 function createAdminContext(): TrpcContext {
   const user: AuthenticatedUser = {
     id: 1,
-    openId: "admin-test-user",
-    email: "admin@nexus.test",
+    openId: "admin-user",
+    email: "admin@nexus.os",
     name: "Admin User",
     loginMethod: "manus",
     role: "admin",
@@ -21,15 +18,41 @@ function createAdminContext(): TrpcContext {
     updatedAt: new Date(),
     lastSignedIn: new Date(),
   };
+
   return {
     user,
     req: {
       protocol: "https",
-      headers: { "user-agent": "vitest" },
+      headers: {},
     } as TrpcContext["req"],
     res: {
-      clearCookie: () => {},
-    } as TrpcContext["res"],
+      clearCookie: vi.fn(),
+    } as unknown as TrpcContext["res"],
+  };
+}
+
+function createUserContext(): TrpcContext {
+  const user: AuthenticatedUser = {
+    id: 2,
+    openId: "regular-user",
+    email: "user@nexus.os",
+    name: "Regular User",
+    loginMethod: "manus",
+    role: "user",
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    lastSignedIn: new Date(),
+  };
+
+  return {
+    user,
+    req: {
+      protocol: "https",
+      headers: {},
+    } as TrpcContext["req"],
+    res: {
+      clearCookie: vi.fn(),
+    } as unknown as TrpcContext["res"],
   };
 }
 
@@ -38,448 +61,306 @@ function createPublicContext(): TrpcContext {
     user: null,
     req: {
       protocol: "https",
-      headers: { "user-agent": "vitest" },
+      headers: {},
     } as TrpcContext["req"],
     res: {
-      clearCookie: () => {},
-    } as TrpcContext["res"],
+      clearCookie: vi.fn(),
+    } as unknown as TrpcContext["res"],
   };
 }
 
-describe("blog.authors", () => {
-  const adminCaller = appRouter.createCaller(createAdminContext());
-  const publicCaller = appRouter.createCaller(createPublicContext());
-  let authorId: string;
+// ─── Tests ─────────────────────────────────────────────────────────
 
-  it("creates an author via admin procedure", async () => {
-    const result = await adminCaller.blog.authors.upsert({
-      name: "Test Author",
-      slug: "test-author",
-      email: "test@nexus.test",
-      bio: "A test author for vitest",
-      authorRole: "contributor",
-    });
-    expect(result).toHaveProperty("id");
-    expect(typeof result.id).toBe("string");
-    authorId = result.id;
-  });
-
-  it("lists authors (public)", async () => {
-    const authors = await publicCaller.blog.authors.list();
-    expect(Array.isArray(authors)).toBe(true);
-    const found = authors.find((a: any) => a.slug === "test-author");
-    expect(found).toBeTruthy();
-    expect(found?.name).toBe("Test Author");
-  });
-
-  it("gets author by slug (public)", async () => {
-    const author = await publicCaller.blog.authors.getBySlug({ slug: "test-author" });
-    expect(author).toBeTruthy();
-    expect(author?.name).toBe("Test Author");
-  });
-
-  it("updates an author", async () => {
-    const result = await adminCaller.blog.authors.upsert({
-      id: authorId,
-      name: "Updated Author",
-      slug: "test-author",
-      bio: "Updated bio",
-      authorRole: "editor",
-    });
-    expect(result.id).toBe(authorId);
-
-    const author = await publicCaller.blog.authors.getBySlug({ slug: "test-author" });
-    expect(author?.name).toBe("Updated Author");
-    expect(author?.authorRole).toBe("editor");
-  });
-
-  it("rejects unauthenticated author creation", async () => {
-    await expect(
-      publicCaller.blog.authors.upsert({
-        name: "Hacker",
-        slug: "hacker",
-      })
-    ).rejects.toThrow();
-  });
-});
-
-describe("blog.tags", () => {
-  const adminCaller = appRouter.createCaller(createAdminContext());
-  const publicCaller = appRouter.createCaller(createPublicContext());
-  let tagId: string;
-
-  it("creates a tag", async () => {
-    const result = await adminCaller.blog.tags.upsert({
-      name: "Testing",
-      slug: "testing",
-      description: "Test tag",
-      color: "#ff0000",
-    });
-    expect(result).toHaveProperty("id");
-    tagId = result.id;
-  });
-
-  it("lists tags (public)", async () => {
-    const tags = await publicCaller.blog.tags.list();
-    expect(Array.isArray(tags)).toBe(true);
-    const found = tags.find((t: any) => t.slug === "testing");
-    expect(found).toBeTruthy();
-    expect(found?.color).toBe("#ff0000");
-  });
-
-  it("gets tag by slug", async () => {
-    const tag = await publicCaller.blog.tags.getBySlug({ slug: "testing" });
-    expect(tag).toBeTruthy();
-    expect(tag?.name).toBe("Testing");
-  });
-});
-
-describe("blog.posts", () => {
-  const adminCaller = appRouter.createCaller(createAdminContext());
-  const publicCaller = appRouter.createCaller(createPublicContext());
-  let postId: string;
-  let postSlug: string;
-  let authorId: string;
-  let tagId: string;
-
-  beforeAll(async () => {
-    // Ensure we have an author and tag
-    const authorResult = await adminCaller.blog.authors.upsert({
-      name: "Post Author",
-      slug: "post-author",
-      email: "postauthor@nexus.test",
-      authorRole: "admin",
-    });
-    authorId = authorResult.id;
-
-    const tagResult = await adminCaller.blog.tags.upsert({
-      name: "Integration",
-      slug: "integration",
-      color: "#0000ff",
-    });
-    tagId = tagResult.id;
-  });
-
-  it("creates a draft post", async () => {
-    const result = await adminCaller.blog.posts.create({
-      title: "Test Blog Post",
-      content: "<p>This is a test blog post with enough words to calculate reading time properly.</p>",
-      authorId,
-      status: "draft",
-      tagIds: [tagId],
-      excerpt: "A test blog post",
-    });
-    expect(result).toHaveProperty("id");
-    expect(result).toHaveProperty("slug");
-    expect(result.slug).toBe("test-blog-post");
-    postId = result.id;
-    postSlug = result.slug;
-  });
-
-  it("lists posts with status filter", async () => {
-    const { posts, total } = await publicCaller.blog.posts.list({ status: "draft" });
-    expect(total).toBeGreaterThanOrEqual(1);
-    const found = posts.find((p: any) => p.id === postId);
-    expect(found).toBeTruthy();
-    expect(found?.title).toBe("Test Blog Post");
-  });
-
-  it("gets post by slug", async () => {
-    const post = await publicCaller.blog.posts.getBySlug({ slug: postSlug });
-    expect(post).toBeTruthy();
-    expect(post?.title).toBe("Test Blog Post");
-    expect(post?.author).toBeTruthy();
-    expect(post?.author?.name).toBe("Post Author");
-    expect(post?.tags).toBeTruthy();
-    expect(post?.tags?.length).toBeGreaterThanOrEqual(1);
-  });
-
-  it("gets post by id (admin)", async () => {
-    const post = await adminCaller.blog.posts.getById({ id: postId });
-    expect(post).toBeTruthy();
-    expect(post?.title).toBe("Test Blog Post");
-    expect(post?.tagIds).toContain(tagId);
-  });
-
-  it("updates a post", async () => {
-    const result = await adminCaller.blog.posts.update({
-      id: postId,
-      title: "Updated Blog Post",
-      status: "published",
-    });
-    expect(result.success).toBe(true);
-
-    const post = await publicCaller.blog.posts.getBySlug({ slug: postSlug });
-    expect(post?.title).toBe("Updated Blog Post");
-    expect(post?.publishedAt).toBeTruthy();
-  });
-
-  it("tracks a view", async () => {
-    const result = await publicCaller.blog.posts.trackView({
-      postId,
-      referrer: "https://google.com",
-    });
-    expect(result.success).toBe(true);
-
-    // Verify view count
-    const post = await publicCaller.blog.posts.getBySlug({ slug: postSlug });
-    expect(post?.viewCount).toBeGreaterThanOrEqual(1);
-  });
-
-  it("searches posts", async () => {
-    const { posts } = await publicCaller.blog.posts.list({
-      search: "Updated Blog",
-    });
-    const found = posts.find((p: any) => p.id === postId);
-    expect(found).toBeTruthy();
-  });
-
-  it("filters by tag slug", async () => {
-    const { posts } = await publicCaller.blog.posts.list({
-      tagSlug: "integration",
-    });
-    const found = posts.find((p: any) => p.id === postId);
-    expect(found).toBeTruthy();
-  });
-
-  it("filters by author slug", async () => {
-    const { posts } = await publicCaller.blog.posts.list({
-      authorSlug: "post-author",
-    });
-    const found = posts.find((p: any) => p.id === postId);
-    expect(found).toBeTruthy();
-  });
-
-  it("creates a post with ogImageAlt and coverImageAlt", async () => {
-    const result = await adminCaller.blog.posts.create({
-      title: "Alt Text Test Post",
-      content: "<p>Testing alt text fields</p>",
-      authorId,
-      status: "draft",
-      coverImage: "https://example.com/cover.jpg",
-      coverImageAlt: "A descriptive cover image alt",
-      ogImage: "https://example.com/og.jpg",
-      ogImageAlt: "OG image alt description",
-    });
-    expect(result).toHaveProperty("id");
-
-    // Verify the fields are persisted
-    const post = await adminCaller.blog.posts.getById({ id: result.id });
-    expect(post?.coverImageAlt).toBe("A descriptive cover image alt");
-    expect(post?.ogImageAlt).toBe("OG image alt description");
-
-    // Clean up
-    await adminCaller.blog.posts.delete({ id: result.id });
-  });
-
-  it("creates a post with a category", async () => {
-    // Create a category first
-    const cat = await adminCaller.blog.categories.upsert({
-      name: "Post Category Test",
-      slug: "post-category-test",
-      color: "#00ff00",
-    });
-
-    const result = await adminCaller.blog.posts.create({
-      title: "Categorized Post",
-      content: "<p>Post with category</p>",
-      authorId,
-      status: "draft",
-      categoryId: cat.id,
-    });
-    expect(result).toHaveProperty("id");
-
-    // Verify category is persisted
-    const post = await adminCaller.blog.posts.getById({ id: result.id });
-    expect(post?.categoryId).toBe(cat.id);
-
-    // Verify enriched post has category
-    const enriched = await publicCaller.blog.posts.getBySlug({ slug: result.slug });
-    expect(enriched?.category).toBeTruthy();
-    expect(enriched?.category?.name).toBe("Post Category Test");
-
-    // Clean up
-    await adminCaller.blog.posts.delete({ id: result.id });
-    await adminCaller.blog.categories.delete({ id: cat.id });
-  });
-
-  it("updates ogImageAlt on an existing post", async () => {
-    const result = await adminCaller.blog.posts.update({
-      id: postId,
-      ogImageAlt: "Updated OG alt text",
-    });
-    expect(result.success).toBe(true);
-
-    const post = await adminCaller.blog.posts.getById({ id: postId });
-    expect(post?.ogImageAlt).toBe("Updated OG alt text");
-  });
-
-  it("rejects unauthenticated post creation", async () => {
-    await expect(
-      publicCaller.blog.posts.create({
-        title: "Hacked Post",
-        content: "<p>bad</p>",
-        authorId: "fake",
-      })
-    ).rejects.toThrow();
-  });
-});
-
-describe("blog.stats", () => {
-  const adminCaller = appRouter.createCaller(createAdminContext());
-  const publicCaller = appRouter.createCaller(createPublicContext());
-
-  it("returns overview stats for admin", async () => {
-    const stats = await adminCaller.blog.stats.overview();
-    expect(stats).toHaveProperty("totalPosts");
-    expect(stats).toHaveProperty("publishedCount");
-    expect(stats).toHaveProperty("draftCount");
-    expect(stats).toHaveProperty("totalViews30d");
-    expect(stats).toHaveProperty("tagCount");
-    expect(stats).toHaveProperty("authorCount");
-    expect(typeof stats.totalPosts).toBe("number");
-  });
-
-  it("rejects unauthenticated stats access", async () => {
-    await expect(publicCaller.blog.stats.overview()).rejects.toThrow();
-  });
-});
-
-describe("blog.relatedPosts", () => {
-  const adminCaller = appRouter.createCaller(createAdminContext());
-  const publicCaller = appRouter.createCaller(createPublicContext());
-
-  it("sets and gets related posts", async () => {
-    // Create two posts
-    const authors = await publicCaller.blog.authors.list();
-    const authorId = authors[0]?.id;
-    if (!authorId) return; // Skip if no author
-
-    const post1 = await adminCaller.blog.posts.create({
-      title: "Related Post 1",
-      content: "<p>First related post</p>",
-      authorId,
-      status: "published",
-    });
-    const post2 = await adminCaller.blog.posts.create({
-      title: "Related Post 2",
-      content: "<p>Second related post</p>",
-      authorId,
-      status: "published",
-    });
-
-    // Set related
-    await adminCaller.blog.relatedPosts.set({
-      postId: post1.id,
-      relatedIds: [post2.id],
-    });
-
-    // Get related
-    const related = await publicCaller.blog.relatedPosts.get({ postId: post1.id });
-    expect(related.length).toBe(1);
-    expect(related[0]?.id).toBe(post2.id);
-  });
-});
-
-describe("blog.categories", () => {
-  const adminCaller = appRouter.createCaller(createAdminContext());
-  const publicCaller = appRouter.createCaller(createPublicContext());
-  let categoryId: string;
-
-  it("creates a category", async () => {
-    const result = await adminCaller.blog.categories.upsert({
-      name: "Test Category",
-      slug: "test-category",
-      description: "A test category",
-      color: "#ff6600",
-    });
-    expect(result).toHaveProperty("id");
-    categoryId = result.id;
-  });
-
-  it("lists categories (public)", async () => {
-    const categories = await publicCaller.blog.categories.list();
-    expect(Array.isArray(categories)).toBe(true);
-    const found = categories.find((c: any) => c.slug === "test-category");
-    expect(found).toBeTruthy();
-    expect(found?.color).toBe("#ff6600");
-  });
-
-  it("gets category by slug", async () => {
-    const category = await publicCaller.blog.categories.getBySlug({ slug: "test-category" });
-    expect(category).toBeTruthy();
-    expect(category?.name).toBe("Test Category");
-  });
-
-  it("rejects unauthenticated category creation", async () => {
-    await expect(
-      publicCaller.blog.categories.upsert({
-        name: "Hacked",
-        slug: "hacked",
-      })
-    ).rejects.toThrow();
-  });
-});
-
-describe("blog.feed", () => {
-  const publicCaller = appRouter.createCaller(createPublicContext());
-
-  it("returns RSS data", async () => {
-    const posts = await publicCaller.blog.feed.rss();
+describe("Blog Public Router", () => {
+  it("blog.list returns an array", async () => {
+    const caller = appRouter.createCaller(createPublicContext());
+    const posts = await caller.blog.list();
     expect(Array.isArray(posts)).toBe(true);
   });
 
-  it("returns sitemap data", async () => {
-    const data = await publicCaller.blog.feed.sitemap();
-    expect(data).toHaveProperty("posts");
-    expect(data).toHaveProperty("tags");
-    expect(Array.isArray(data.posts)).toBe(true);
-    expect(Array.isArray(data.tags)).toBe(true);
+  it("blog.featured returns null or a post object", async () => {
+    const caller = appRouter.createCaller(createPublicContext());
+    const featured = await caller.blog.featured();
+    // Either null or an object with an id
+    if (featured !== null) {
+      expect(featured).toHaveProperty("id");
+      expect(featured).toHaveProperty("title");
+      expect(featured).toHaveProperty("slug");
+    }
+  });
+
+  it("blog.getBySlug returns NOT_FOUND for non-existent slug", async () => {
+    const caller = appRouter.createCaller(createPublicContext());
+    await expect(
+      caller.blog.getBySlug({ slug: "this-slug-does-not-exist-xyz-123" })
+    ).rejects.toThrow("Post not found");
   });
 });
 
-// Cleanup
-afterAll(async () => {
+describe("Admin Blog Router — Access Control", () => {
+  it("adminBlog.list rejects non-admin users", async () => {
+    const caller = appRouter.createCaller(createUserContext());
+    await expect(
+      caller.adminBlog.list({ limit: 10, offset: 0 })
+    ).rejects.toThrow();
+  });
+
+  it("adminBlog.list rejects unauthenticated users", async () => {
+    const caller = appRouter.createCaller(createPublicContext());
+    await expect(
+      caller.adminBlog.list({ limit: 10, offset: 0 })
+    ).rejects.toThrow();
+  });
+
+  it("adminBlog.upsert rejects non-admin users", async () => {
+    const caller = appRouter.createCaller(createUserContext());
+    await expect(
+      caller.adminBlog.upsert({
+        title: "Test Post",
+        excerpt: "Test excerpt",
+        content: "# Hello",
+      })
+    ).rejects.toThrow();
+  });
+
+  it("adminBlog.delete rejects non-admin users", async () => {
+    const caller = appRouter.createCaller(createUserContext());
+    await expect(
+      caller.adminBlog.delete({ id: 999 })
+    ).rejects.toThrow();
+  });
+});
+
+describe("Admin Blog Router — CRUD", () => {
   const adminCaller = appRouter.createCaller(createAdminContext());
-  const publicCaller = appRouter.createCaller(createPublicContext());
+  let createdPostId: number;
+  let createdSlug: string;
 
-  // Clean up test posts
-  try {
-    const { posts } = await publicCaller.blog.posts.list({ limit: 100 });
-    for (const post of posts) {
-      if (post.title.includes("Test") || post.title.includes("Updated") || post.title.includes("Related")) {
-        await adminCaller.blog.posts.delete({ id: post.id });
-      }
-    }
-  } catch {}
+  it("adminBlog.upsert creates a new post", async () => {
+    const result = await adminCaller.adminBlog.upsert({
+      title: "Test Blog Post",
+      excerpt: "This is a test excerpt for the blog post.",
+      content: "## Introduction\n\nThis is the body of the test post.\n\n### Section One\n\nSome content here.",
+      author: "Test Author",
+      category: "tutorial",
+      tags: JSON.stringify(["test", "vitest"]),
+      readingTimeMinutes: 3,
+      featured: false,
+      published: true,
+    });
 
-  // Clean up test tags
-  try {
-    const tags = await publicCaller.blog.tags.list();
-    for (const tag of tags) {
-      if (tag.slug === "testing" || tag.slug === "integration") {
-        await adminCaller.blog.tags.delete({ id: tag.id });
-      }
-    }
-  } catch {}
+    expect(result).toHaveProperty("id");
+    expect(result).toHaveProperty("slug");
+    expect(typeof result.id).toBe("number");
+    expect(result.slug).toBe("test-blog-post");
+    createdPostId = result.id;
+    createdSlug = result.slug;
+  });
 
-  // Clean up test authors
-  try {
-    const authors = await publicCaller.blog.authors.list();
-    for (const author of authors) {
-      if (author.slug === "test-author" || author.slug === "post-author") {
-        await adminCaller.blog.authors.delete({ id: author.id });
-      }
-    }
-  } catch {}
+  it("adminBlog.getById returns the created post", async () => {
+    const post = await adminCaller.adminBlog.getById({ id: createdPostId });
+    expect(post).not.toBeNull();
+    expect(post!.title).toBe("Test Blog Post");
+    expect(post!.excerpt).toBe("This is a test excerpt for the blog post.");
+    expect(post!.category).toBe("tutorial");
+    expect(post!.author).toBe("Test Author");
+    expect(post!.published).toBe(true);
+    expect(post!.readingTimeMinutes).toBe(3);
+  });
 
-  // Clean up test categories
-  try {
-    const categories = await publicCaller.blog.categories.list();
-    for (const cat of categories) {
-      if (cat.slug === "test-category") {
-        await adminCaller.blog.categories.delete({ id: cat.id });
-      }
+  it("blog.getBySlug returns the published post", async () => {
+    const publicCaller = appRouter.createCaller(createPublicContext());
+    const post = await publicCaller.blog.getBySlug({ slug: createdSlug });
+    expect(post.title).toBe("Test Blog Post");
+    expect(post.slug).toBe(createdSlug);
+  });
+
+  it("adminBlog.upsert updates an existing post", async () => {
+    const result = await adminCaller.adminBlog.upsert({
+      id: createdPostId,
+      title: "Updated Blog Post",
+      slug: createdSlug,
+      excerpt: "Updated excerpt.",
+      content: "## Updated Content\n\nNew body.",
+      author: "Test Author",
+      category: "explainer",
+      featured: true,
+      published: true,
+    });
+
+    expect(result.id).toBe(createdPostId);
+
+    const post = await adminCaller.adminBlog.getById({ id: createdPostId });
+    expect(post!.title).toBe("Updated Blog Post");
+    expect(post!.category).toBe("explainer");
+    expect(post!.featured).toBe(true);
+  });
+
+  it("adminBlog.list returns posts with total count", async () => {
+    const result = await adminCaller.adminBlog.list({ limit: 10, offset: 0 });
+    expect(result).toHaveProperty("posts");
+    expect(result).toHaveProperty("total");
+    expect(Array.isArray(result.posts)).toBe(true);
+    expect(result.total).toBeGreaterThanOrEqual(1);
+  });
+
+  it("blog.getBySlug returns NOT_FOUND for unpublished post", async () => {
+    // Make post unpublished
+    await adminCaller.adminBlog.upsert({
+      id: createdPostId,
+      title: "Updated Blog Post",
+      slug: createdSlug,
+      excerpt: "Updated excerpt.",
+      content: "## Updated Content\n\nNew body.",
+      published: false,
+    });
+
+    const publicCaller = appRouter.createCaller(createPublicContext());
+    await expect(
+      publicCaller.blog.getBySlug({ slug: createdSlug })
+    ).rejects.toThrow("Post not found");
+
+    // Re-publish for cleanup
+    await adminCaller.adminBlog.upsert({
+      id: createdPostId,
+      title: "Updated Blog Post",
+      slug: createdSlug,
+      excerpt: "Updated excerpt.",
+      content: "## Updated Content\n\nNew body.",
+      published: true,
+    });
+  });
+
+  it("adminBlog.delete removes the post", async () => {
+    const result = await adminCaller.adminBlog.delete({
+      id: createdPostId,
+      title: "Updated Blog Post",
+    });
+    expect(result).toEqual({ success: true });
+
+    // Verify it's gone
+    await expect(
+      adminCaller.adminBlog.getById({ id: createdPostId })
+    ).rejects.toThrow("Post not found");
+  });
+});
+
+describe("Admin Blog Router — Preview Token", () => {
+  const adminCaller = appRouter.createCaller(createAdminContext());
+
+  it("previewToken creates a token and getPreview retrieves the draft", async () => {
+    const { token } = await adminCaller.adminBlog.previewToken({
+      title: "Preview Test Post",
+      excerpt: "Preview excerpt",
+      content: "## Preview Content\n\nThis is a preview.",
+      author: "Preview Author",
+      category: "opinion",
+      tags: JSON.stringify(["preview"]),
+      readingTimeMinutes: 2,
+      featuredImageUrl: null,
+      featuredImageAlt: null,
+    });
+
+    expect(typeof token).toBe("string");
+    expect(token.length).toBeGreaterThan(0);
+
+    // Retrieve the preview (public procedure)
+    const publicCaller = appRouter.createCaller(createPublicContext());
+    const preview = await publicCaller.adminBlog.getPreview({ token });
+    expect(preview).toHaveProperty("title", "Preview Test Post");
+    expect(preview).toHaveProperty("content");
+    expect(preview).toHaveProperty("category", "opinion");
+  });
+
+  it("getPreview returns NOT_FOUND for invalid token", async () => {
+    const publicCaller = appRouter.createCaller(createPublicContext());
+    await expect(
+      publicCaller.adminBlog.getPreview({ token: "invalid-token-xyz" })
+    ).rejects.toThrow("Preview not found or expired");
+  });
+});
+
+describe("Admin Blog Router — Category Validation", () => {
+  const adminCaller = appRouter.createCaller(createAdminContext());
+
+  it("rejects invalid category values", async () => {
+    await expect(
+      adminCaller.adminBlog.upsert({
+        title: "Invalid Category Post",
+        excerpt: "Test",
+        content: "Test",
+        category: "invalid-category" as any,
+      })
+    ).rejects.toThrow();
+  });
+
+  it("accepts all valid categories", async () => {
+    const validCategories = [
+      "explainer",
+      "tutorial",
+      "opinion",
+      "case-study",
+      "announcement",
+      "release",
+    ] as const;
+
+    for (const category of validCategories) {
+      const result = await adminCaller.adminBlog.upsert({
+        title: `Category Test: ${category}`,
+        excerpt: "Testing category",
+        content: "Content",
+        category,
+        published: false,
+      });
+      expect(result).toHaveProperty("id");
+      // Clean up
+      await adminCaller.adminBlog.delete({ id: result.id });
     }
-  } catch {}
+  });
+});
+
+describe("Admin Blog Router — Featured Image and Alt Text", () => {
+  const adminCaller = appRouter.createCaller(createAdminContext());
+
+  it("stores and retrieves featuredImageUrl and featuredImageAlt", async () => {
+    const result = await adminCaller.adminBlog.upsert({
+      title: "Image Test Post",
+      excerpt: "Testing image fields",
+      content: "Content with image",
+      featuredImageUrl: "https://example.com/image.jpg",
+      featuredImageAlt: "A descriptive alt text",
+      ogImageOverride: "https://example.com/og-image.jpg",
+      published: true,
+    });
+
+    const post = await adminCaller.adminBlog.getById({ id: result.id });
+    expect(post!.featuredImageUrl).toBe("https://example.com/image.jpg");
+    expect(post!.featuredImageAlt).toBe("A descriptive alt text");
+    expect(post!.ogImageOverride).toBe("https://example.com/og-image.jpg");
+
+    // Clean up
+    await adminCaller.adminBlog.delete({ id: result.id });
+  });
+});
+
+describe("Admin Blog Router — Scheduled Publishing", () => {
+  const adminCaller = appRouter.createCaller(createAdminContext());
+
+  it("stores scheduledPublishAt field", async () => {
+    const futureDate = new Date(Date.now() + 24 * 60 * 60 * 1000); // tomorrow
+    const result = await adminCaller.adminBlog.upsert({
+      title: "Scheduled Post",
+      excerpt: "This post is scheduled",
+      content: "Content",
+      published: false,
+      scheduledPublishAt: futureDate,
+    });
+
+    const post = await adminCaller.adminBlog.getById({ id: result.id });
+    expect(post!.published).toBe(false);
+    expect(post!.scheduledPublishAt).not.toBeNull();
+
+    // Clean up
+    await adminCaller.adminBlog.delete({ id: result.id });
+  });
 });

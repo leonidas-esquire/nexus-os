@@ -2,7 +2,7 @@ import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, router } from "./_core/trpc";
-import { blogRouter } from "./blogRouter";
+import { blogPublicRouter, adminBlogRouter } from "./blogRouter";
 
 export const appRouter = router({
   system: systemRouter,
@@ -17,7 +17,8 @@ export const appRouter = router({
     }),
   }),
 
-  blog: blogRouter,
+  blog: blogPublicRouter,
+  adminBlog: adminBlogRouter,
 });
 
 export type AppRouter = typeof appRouter;

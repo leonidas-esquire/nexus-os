@@ -1,10 +1,27 @@
-import express, { type Express } from "express";
+import express, { type Express, type Response } from "express";
 import fs from "fs";
 import { type Server } from "http";
 import { nanoid } from "nanoid";
 import path from "path";
 import { createServer as createViteServer } from "vite";
 import viteConfig from "../../vite.config";
+
+/**
+ * Replace default meta tags in the HTML template with SSR-injected blog meta.
+ */
+function injectBlogMeta(html: string, metaTags: string): string {
+  let result = html;
+  // Remove existing title tag
+  result = result.replace(/<title>[^<]*<\/title>/, "");
+  // Remove existing og: and twitter: meta tags and description
+  result = result.replace(
+    /<meta\s+(?:property="og:|name="twitter:|name="description")[^>]*\/?>\s*/g,
+    ""
+  );
+  // Insert new meta tags after <head>
+  result = result.replace(/<head>/, `<head>\n    ${metaTags}`);
+  return result;
+}
 
 export async function setupVite(app: Express, server: Server) {
   const serverOptions = {
@@ -38,6 +55,10 @@ export async function setupVite(app: Express, server: Server) {
         `src="/src/main.tsx"`,
         `src="/src/main.tsx?v=${nanoid()}"`
       );
+      // Inject SSR meta tags if set by blog middleware
+      if (res.locals.blogMeta) {
+        template = injectBlogMeta(template, res.locals.blogMeta);
+      }
       const page = await vite.transformIndexHtml(url, template);
       res.status(200).set({ "Content-Type": "text/html" }).end(page);
     } catch (e) {
@@ -62,6 +83,14 @@ export function serveStatic(app: Express) {
 
   // fall through to index.html if the file doesn't exist
   app.use("*", (_req, res) => {
-    res.sendFile(path.resolve(distPath, "index.html"));
+    const indexPath = path.resolve(distPath, "index.html");
+    // Inject SSR meta tags if set by blog middleware
+    if (res.locals.blogMeta) {
+      let html = fs.readFileSync(indexPath, "utf-8");
+      html = injectBlogMeta(html, res.locals.blogMeta);
+      res.status(200).set({ "Content-Type": "text/html" }).end(html);
+    } else {
+      res.sendFile(indexPath);
+    }
   });
 }

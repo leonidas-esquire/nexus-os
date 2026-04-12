@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /blog/
+Allow: /blog/feed.xml
+Sitemap: https://aiagents.nexus/sitemap.xml

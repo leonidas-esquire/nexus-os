@@ -8,6 +8,9 @@ import { appRouter } from "../routers";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
 import { feedRouter } from "../blogFeedRoutes";
+import { blogUploadRouter } from "../blogUploadRoute";
+import { startScheduledJobs } from "../scheduledJobs";
+import { registerBlogSsrMiddleware } from "../blogSsrMiddleware";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -36,7 +39,9 @@ async function startServer() {
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
   // OAuth callback under /api/oauth/callback
   registerOAuthRoutes(app);
-  // Blog RSS feed and sitemap routes
+  // Blog image upload (multipart/form-data via multer — must come before tRPC)
+  app.use(blogUploadRouter);
+  // Blog Atom feed and sitemap routes
   app.use(feedRouter);
   // tRPC API
   app.use(
@@ -46,12 +51,19 @@ async function startServer() {
       createContext,
     })
   );
+  // Blog SSR middleware — injects OG/Twitter meta tags for crawlers
+  // Must come BEFORE Vite/static catch-all
+  registerBlogSsrMiddleware(app);
+
   // development mode uses Vite, production mode uses static files
   if (process.env.NODE_ENV === "development") {
     await setupVite(app, server);
   } else {
     serveStatic(app);
   }
+
+  // Start scheduled jobs (e.g. auto-publish scheduled posts)
+  startScheduledJobs();
 
   const preferredPort = parseInt(process.env.PORT || "3000");
   const port = await findAvailablePort(preferredPort);

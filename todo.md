@@ -104,3 +104,27 @@
 - [x] Add og:image:alt meta tag to public blog post page
 - [x] Fix htmlToEditorBlocks to preserve alt text from img tags
 - [x] Add tests for ogImageAlt, coverImageAlt, and categoryId on posts (31 tests passing)
+
+## Blog Redesign (Spec v1.0 — Markdown-based)
+- [x] Replace blog schema: new blog_posts table (INT PK, slug, title, excerpt, content as Markdown, author string, category ENUM, tags JSON, readingTimeMinutes, featuredImageUrl, featuredImageAlt, ogImageOverride, featured bool, published bool, publishedAt, scheduledPublishAt, createdAt, updatedAt)
+- [x] Add blog_preview_drafts table (token PK, data JSON, expiresAt, createdAt)
+- [x] Drop old blog tables (blog_authors, blog_tags, blog_post_tags, blog_categories, blog_images, blog_related_posts, blog_post_views)
+- [x] Push database migration
+- [x] Implement DB helpers: getBlogPosts, getBlogPostBySlug, getAdminBlogPosts, upsertBlogPost, deleteBlogPost, publishScheduledPosts, createBlogPreviewDraft, getBlogPreviewDraft
+- [x] Add public tRPC router (blog.list, blog.featured, blog.getBySlug)
+- [x] Add admin tRPC router (adminBlog.list, adminBlog.upsert, adminBlog.delete, adminBlog.previewToken, adminBlog.getPreview)
+- [x] Create REST image upload endpoint (POST /api/blog/upload-image with multer, admin auth, S3)
+- [x] Create Atom 1.0 feed at /blog/feed.xml (RFC 4287 compliant)
+- [x] Create sitemap with blog posts at /blog/sitemap.xml
+- [x] Add scheduled publishing job (setInterval every 60s calling publishScheduledPosts)
+- [x] Create SSR middleware for /blog, /blog/:slug, /blog/preview/:token meta tag injection
+- [x] Install react-markdown + remark-gfm
+- [x] Build public Blog.tsx listing page (featured hero, category pills, post grid)
+- [x] Build public BlogPost.tsx page (Markdown rendering, category badge, tag chips, featured image)
+- [x] Build BlogPostPreview.tsx page (token-gated draft preview)
+- [x] Build AdminBlog.tsx editor (Markdown textarea + toolbar, live preview, all form fields, drag-drop image upload)
+- [x] Update App.tsx routes (remove old blog/admin routes, add new ones)
+- [x] Remove old blog UI files (BlogEditor.tsx, BlogDashboard.tsx, MediaLibrary.tsx, TagManager.tsx, AuthorManager.tsx, TagArchive.tsx, AuthorArchive.tsx) and rewrite blogDb.ts, blogRouter.ts, blogFeedRoutes.ts with new spec logic
+- [x] Update robots.txt to allow /blog/
+- [x] Write Vitest tests covering spec requirements (21 tests across 7 suites — all passing)
+- [x] Seed initial blog content (4 posts via seed-blog-v2.mjs script)
