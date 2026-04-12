@@ -250,6 +250,70 @@ describe("blog.posts", () => {
     expect(found).toBeTruthy();
   });
 
+  it("creates a post with ogImageAlt and coverImageAlt", async () => {
+    const result = await adminCaller.blog.posts.create({
+      title: "Alt Text Test Post",
+      content: "<p>Testing alt text fields</p>",
+      authorId,
+      status: "draft",
+      coverImage: "https://example.com/cover.jpg",
+      coverImageAlt: "A descriptive cover image alt",
+      ogImage: "https://example.com/og.jpg",
+      ogImageAlt: "OG image alt description",
+    });
+    expect(result).toHaveProperty("id");
+
+    // Verify the fields are persisted
+    const post = await adminCaller.blog.posts.getById({ id: result.id });
+    expect(post?.coverImageAlt).toBe("A descriptive cover image alt");
+    expect(post?.ogImageAlt).toBe("OG image alt description");
+
+    // Clean up
+    await adminCaller.blog.posts.delete({ id: result.id });
+  });
+
+  it("creates a post with a category", async () => {
+    // Create a category first
+    const cat = await adminCaller.blog.categories.upsert({
+      name: "Post Category Test",
+      slug: "post-category-test",
+      color: "#00ff00",
+    });
+
+    const result = await adminCaller.blog.posts.create({
+      title: "Categorized Post",
+      content: "<p>Post with category</p>",
+      authorId,
+      status: "draft",
+      categoryId: cat.id,
+    });
+    expect(result).toHaveProperty("id");
+
+    // Verify category is persisted
+    const post = await adminCaller.blog.posts.getById({ id: result.id });
+    expect(post?.categoryId).toBe(cat.id);
+
+    // Verify enriched post has category
+    const enriched = await publicCaller.blog.posts.getBySlug({ slug: result.slug });
+    expect(enriched?.category).toBeTruthy();
+    expect(enriched?.category?.name).toBe("Post Category Test");
+
+    // Clean up
+    await adminCaller.blog.posts.delete({ id: result.id });
+    await adminCaller.blog.categories.delete({ id: cat.id });
+  });
+
+  it("updates ogImageAlt on an existing post", async () => {
+    const result = await adminCaller.blog.posts.update({
+      id: postId,
+      ogImageAlt: "Updated OG alt text",
+    });
+    expect(result.success).toBe(true);
+
+    const post = await adminCaller.blog.posts.getById({ id: postId });
+    expect(post?.ogImageAlt).toBe("Updated OG alt text");
+  });
+
   it("rejects unauthenticated post creation", async () => {
     await expect(
       publicCaller.blog.posts.create({

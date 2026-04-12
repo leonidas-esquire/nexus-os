@@ -79,6 +79,7 @@ export const blogPosts = mysqlTable("blog_posts", {
   coverImage: text("coverImage"),
   coverImageAlt: text("coverImageAlt"),
   ogImage: text("ogImage"),
+  ogImageAlt: text("ogImageAlt"),
   ogTitle: text("ogTitle"),
   ogDescription: text("ogDescription"),
   authorId: varchar("authorId", { length: 36 }).notNull(),

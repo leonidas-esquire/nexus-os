@@ -47,6 +47,7 @@ export default function BlogPost() {
     setMeta("og:title", post.ogTitle || post.title);
     setMeta("og:description", post.ogDescription || post.excerpt || "");
     setMeta("og:image", post.ogImage || post.coverImage || "");
+    setMeta("og:image:alt", (post as any).ogImageAlt || post.coverImageAlt || post.title);
     setMeta("og:url", `https://aiagents.nexus/blog/${post.slug}`);
     setMeta("og:type", "article");
     setMeta("twitter:card", "summary_large_image");

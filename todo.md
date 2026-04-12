@@ -94,3 +94,13 @@
 - [x] Add cover images to seeded posts via CDN upload (3 AI-generated images)
 - [x] Ensure categories work properly in blog editor (General tab with combobox)
 - [x] Add category filter to blog index page alongside tag filter
+
+## Bug Fixes (Round 3)
+- [x] Fix H2/H3 heading toolbar buttons (now use convertToHeading() to convert current block type)
+- [x] Add alt text option for uploaded images (ImageUploadField now has altText/onAltTextChange props)
+- [x] Make category option more discoverable ("Add category" button visible below title + in Settings panel)
+- [x] Add ogImageAlt column to blogPosts schema and push migration
+- [x] Wire ogImageAlt through blog router (create + update mutations) and editor state
+- [x] Add og:image:alt meta tag to public blog post page
+- [x] Fix htmlToEditorBlocks to preserve alt text from img tags
+- [x] Add tests for ogImageAlt, coverImageAlt, and categoryId on posts (31 tests passing)

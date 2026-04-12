@@ -47,3 +47,11 @@ Verification Notes - Blog System
    - introducing-nexus-os: AI architecture visualization
    - building-your-first-agent: Terminal with WASM modules
    - token-cost-optimization: Cost reduction visualization
+
+11. Blog Editor Fix Round 3 (April 12, 2026):
+   - FORMATTING TOOLBAR: All 17 toolbar buttons visible
+   - H2/H3 BUTTONS: Now use convertToHeading() which converts current block instead of inserting new empty block
+   - CATEGORY SELECTOR: "Add category" button visible directly below title in editor area (not just in Settings panel)
+   - TAGS: Displayed as badges below title (Orchestration, Rust, AI Agents visible)
+   - IMAGE ALT TEXT: ImageUploadField now accepts altText/onAltTextChange props for cover and OG images
+   - POST CONTENT: Full article content loads correctly
