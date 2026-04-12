@@ -620,3 +620,157 @@ export const INSTALLED_SKILLS: InstalledSkill[] = [
   { name: "json-parser", version: "1.2.0", publisher: "@verified-dev", installedAt: "2026-02-10", calls: 1245, spend: 0.12 },
   { name: "email-extractor", version: "2.0.1", publisher: "@data-tools", installedAt: "2026-01-20", calls: 892, spend: 0.18 },
 ];
+
+// ─── Reviews ─────────────────────────────────────────────────────────────────
+
+export interface Review {
+  id: string;
+  author: string;
+  authorHandle: string;
+  rating: number;
+  title: string;
+  body: string;
+  date: string;
+  helpful: number;
+  verified: boolean;
+}
+
+const REVIEW_POOL: Review[] = [
+  {
+    id: "r1", author: "Alice Chen", authorHandle: "@alice-ml", rating: 5,
+    title: "Blazing fast and reliable",
+    body: "We've been using this in production for 6 months. Handles 50K calls/day without a single failure. The JQ-like query syntax is a huge time saver for our data pipeline agents.",
+    date: "2026-03-28", helpful: 42, verified: true,
+  },
+  {
+    id: "r2", author: "Marcus Webb", authorHandle: "@mwebb", rating: 5,
+    title: "Best in class for the price",
+    body: "Switched from a custom solution and cut our latency by 60%. The WASM sandbox gives us confidence that untrusted payloads won't cause issues. Highly recommend.",
+    date: "2026-03-15", helpful: 31, verified: true,
+  },
+  {
+    id: "r3", author: "Priya Sharma", authorHandle: "@priya-dev", rating: 4,
+    title: "Great skill, minor docs gap",
+    body: "The core functionality is excellent — fast, accurate, and well-tested. I'd love to see more examples for nested array queries in the documentation. Otherwise perfect.",
+    date: "2026-02-20", helpful: 18, verified: true,
+  },
+  {
+    id: "r4", author: "James O'Brien", authorHandle: "@jobrien", rating: 5,
+    title: "Exactly what our agents needed",
+    body: "Integrated this into our multi-agent workflow and it just works. The error messages for malformed JSON are incredibly helpful for debugging. 10/10.",
+    date: "2026-02-05", helpful: 27, verified: false,
+  },
+  {
+    id: "r5", author: "Yuki Tanaka", authorHandle: "@yuki-t", rating: 4,
+    title: "Solid performance, good value",
+    body: "At $0.0001/call this is a steal. We process millions of JSON documents monthly and the cost is negligible. Would give 5 stars if streaming support was added.",
+    date: "2026-01-18", helpful: 15, verified: true,
+  },
+  {
+    id: "r6", author: "Sarah Kim", authorHandle: "@skim-ai", rating: 5,
+    title: "Transformed our NLP pipeline",
+    body: "The sentiment analysis is remarkably accurate across English, Spanish, and Korean. Emotion detection adds a layer our previous solution didn't have. Worth every cent.",
+    date: "2026-03-22", helpful: 38, verified: true,
+  },
+  {
+    id: "r7", author: "Dev Patel", authorHandle: "@devp", rating: 3,
+    title: "Good but could be faster",
+    body: "Works well for most use cases but latency spikes on very large inputs. The 200ms timeout is tight for documents over 2MB. Hope to see optimizations in the next version.",
+    date: "2026-02-10", helpful: 12, verified: true,
+  },
+  {
+    id: "r8", author: "Emma Wilson", authorHandle: "@ewilson", rating: 5,
+    title: "Clean API, great results",
+    body: "The structured output with confidence scores makes it easy to build reliable downstream logic. We use this for email validation in our onboarding flow and it catches 99% of bad addresses.",
+    date: "2026-03-05", helpful: 22, verified: true,
+  },
+  {
+    id: "r9", author: "Carlos Ruiz", authorHandle: "@cruiz", rating: 4,
+    title: "Reliable CSV handling",
+    body: "Handles edge cases that broke our previous parser — quoted fields, embedded newlines, mixed encodings. The schema detection is a nice bonus. Free tier is generous.",
+    date: "2026-01-25", helpful: 19, verified: false,
+  },
+  {
+    id: "r10", author: "Lena Müller", authorHandle: "@lena-m", rating: 5,
+    title: "Essential for data pipelines",
+    body: "We parse hundreds of CSV files daily and this skill handles them all flawlessly. Type inference saves us hours of manual schema definition. Highly recommend for any data-heavy workflow.",
+    date: "2026-02-28", helpful: 25, verified: true,
+  },
+];
+
+// Map skill names to their reviews (deterministic based on skill index)
+export function getReviewsForSkill(skillName: string): Review[] {
+  const idx = SKILLS.findIndex((s) => s.name === skillName);
+  if (idx === -1) return [];
+  // Each skill gets 3-5 reviews, cycling through the pool
+  const count = 3 + (idx % 3);
+  const reviews: Review[] = [];
+  for (let i = 0; i < count; i++) {
+    const r = REVIEW_POOL[(idx * 3 + i) % REVIEW_POOL.length];
+    reviews.push({ ...r, id: `${skillName}-${r.id}` });
+  }
+  return reviews;
+}
+
+// ─── Analytics Data (Developer Portal) ───────────────────────────────────────
+
+export interface DailyMetric {
+  date: string;
+  calls: number;
+  revenue: number;
+}
+
+function generateDailyMetrics(baseCalls: number, baseRevenue: number, days: number): DailyMetric[] {
+  const metrics: DailyMetric[] = [];
+  const now = new Date("2026-04-11");
+  for (let i = days - 1; i >= 0; i--) {
+    const d = new Date(now);
+    d.setDate(d.getDate() - i);
+    const dateStr = d.toISOString().slice(0, 10);
+    // Add some variance
+    const variance = 0.7 + Math.sin(i * 0.5) * 0.3 + (i % 7 < 2 ? -0.15 : 0.1);
+    const dayCalls = Math.round(baseCalls * variance);
+    const dayRevenue = parseFloat((baseRevenue * variance).toFixed(4));
+    metrics.push({ date: dateStr, calls: dayCalls, revenue: dayRevenue });
+  }
+  return metrics;
+}
+
+export const ANALYTICS_JSON_PARSER = generateDailyMetrics(80000, 8.0, 30);
+export const ANALYTICS_CSV_PARSER = generateDailyMetrics(30000, 3.0, 30);
+
+export const ANALYTICS_COMBINED: DailyMetric[] = ANALYTICS_JSON_PARSER.map((m, i) => ({
+  date: m.date,
+  calls: m.calls + ANALYTICS_CSV_PARSER[i].calls,
+  revenue: parseFloat((m.revenue + ANALYTICS_CSV_PARSER[i].revenue).toFixed(4)),
+}));
+
+// ─── Compare Skills Helper ───────────────────────────────────────────────────
+
+export interface CompareField {
+  label: string;
+  key: string;
+  getValue: (s: Skill) => string;
+  highlight?: "lower-better" | "higher-better";
+}
+
+export const COMPARE_FIELDS: CompareField[] = [
+  { label: "Version", key: "version", getValue: (s) => `v${s.version}` },
+  { label: "Publisher", key: "publisher", getValue: (s) => s.publisher.handle },
+  { label: "Category", key: "category", getValue: (s) => s.category },
+  { label: "Price", key: "price", getValue: (s) => formatPrice(s.pricing) },
+  { label: "Trust", key: "trust", getValue: (s) => s.trust.verified ? trustBadge(s.trust) : "Unverified" },
+  { label: "T-Score", key: "tscore", getValue: (s) => s.trust.tScore?.toString() ?? "—", highlight: "higher-better" },
+  { label: "Rating", key: "rating", getValue: (s) => `${s.stats.rating} / 5`, highlight: "higher-better" },
+  { label: "Reviews", key: "reviews", getValue: (s) => formatNumber(s.stats.reviews), highlight: "higher-better" },
+  { label: "Total Calls", key: "calls", getValue: (s) => formatNumber(s.stats.totalCalls), highlight: "higher-better" },
+  { label: "Avg Latency", key: "latency", getValue: (s) => `${s.stats.avgLatencyMs}ms`, highlight: "lower-better" },
+  { label: "Success Rate", key: "success", getValue: (s) => `${s.stats.successRate}%`, highlight: "higher-better" },
+  { label: "WASM Size", key: "size", getValue: (s) => s.wasmSize },
+  { label: "License", key: "license", getValue: (s) => s.license },
+  { label: "Max Input", key: "maxInput", getValue: (s) => s.limits.maxInputSize },
+  { label: "Max Execution", key: "maxExec", getValue: (s) => s.limits.maxExecutionTime, highlight: "lower-better" },
+  { label: "Memory Limit", key: "memLimit", getValue: (s) => s.limits.memoryLimit },
+  { label: "Inputs", key: "inputs", getValue: (s) => s.inputs.join(", ") },
+  { label: "Outputs", key: "outputs", getValue: (s) => s.outputs.join(", ") },
+];

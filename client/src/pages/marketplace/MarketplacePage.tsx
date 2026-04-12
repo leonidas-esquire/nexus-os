@@ -11,7 +11,7 @@ import {
   Package, ChevronRight, ExternalLink, Zap, TrendingUp,
   FileJson, Calculator, Brain, Lock, Database, Globe,
   Type, Image, Shuffle, Menu, X, Sun, Moon, Code2,
-  BookOpen, LayoutDashboard,
+  BookOpen, LayoutDashboard, GitCompareArrows,
 } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 import {
@@ -135,6 +135,12 @@ export default function MarketplacePage() {
 
           {/* Desktop nav */}
           <div className="hidden md:flex items-center gap-4 text-sm">
+            <Link href="/marketplace/compare">
+              <span className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
+                <GitCompareArrows className="w-4 h-4" />
+                Compare
+              </span>
+            </Link>
             <Link href="/marketplace/developer">
               <span className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
                 <LayoutDashboard className="w-4 h-4" />
@@ -173,6 +179,11 @@ export default function MarketplacePage() {
         {/* Mobile menu */}
         {mobileMenuOpen && (
           <div className="md:hidden border-t border-border/50 bg-background/95 backdrop-blur-xl p-4 space-y-3">
+            <Link href="/marketplace/compare">
+              <span className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground py-2 cursor-pointer">
+                <GitCompareArrows className="w-4 h-4" /> Compare Skills
+              </span>
+            </Link>
             <Link href="/marketplace/developer">
               <span className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground py-2 cursor-pointer">
                 <LayoutDashboard className="w-4 h-4" /> Developer Portal

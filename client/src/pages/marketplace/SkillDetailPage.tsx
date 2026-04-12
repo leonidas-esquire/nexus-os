@@ -10,12 +10,14 @@ import {
   Package, Clock, Zap, Activity, ChevronRight, GitBranch,
   FileText, Terminal, Tag, Cpu, HardDrive, Timer,
   Sun, Moon, Code2, BookOpen, LayoutDashboard, Menu, X,
+  MessageSquare, ThumbsUp, User,
 } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 import { toast } from "sonner";
 import {
   SKILLS, formatNumber, formatPrice, formatMoney, trustBadge, timeAgo,
-  type Skill,
+  getReviewsForSkill,
+  type Skill, type Review,
 } from "./marketplaceData";
 
 /* ─── Stat Card ───────────────────────────────────────────────────────────── */
@@ -46,6 +48,223 @@ function CopyButton({ text }: { text: string }) {
     <button onClick={handleCopy} className="p-1.5 rounded-md hover:bg-accent transition-colors">
       {copied ? <Check className="w-4 h-4 text-nexus-green" /> : <Copy className="w-4 h-4 text-muted-foreground" />}
     </button>
+  );
+}
+
+/* ─── Star Rating Input ───────────────────────────────────────────────────── */
+function StarRating({ value, onChange, readonly = false }: { value: number; onChange?: (v: number) => void; readonly?: boolean }) {
+  const [hover, setHover] = useState(0);
+  return (
+    <div className="flex items-center gap-0.5">
+      {[1, 2, 3, 4, 5].map((star) => (
+        <button
+          key={star}
+          type="button"
+          disabled={readonly}
+          onClick={() => onChange?.(star)}
+          onMouseEnter={() => !readonly && setHover(star)}
+          onMouseLeave={() => !readonly && setHover(0)}
+          className={`${readonly ? 'cursor-default' : 'cursor-pointer'} transition-colors`}
+        >
+          <Star
+            className={`w-4 h-4 ${
+              star <= (hover || value)
+                ? 'text-nexus-amber fill-nexus-amber'
+                : 'text-muted-foreground/30'
+            }`}
+          />
+        </button>
+      ))}
+    </div>
+  );
+}
+
+/* ─── Reviews Section ─────────────────────────────────────────────────────── */
+function ReviewsSection({ skillName }: { skillName: string }) {
+  const reviews = useMemo(() => getReviewsForSkill(skillName), [skillName]);
+  const [showForm, setShowForm] = useState(false);
+  const [newRating, setNewRating] = useState(0);
+  const [newTitle, setNewTitle] = useState("");
+  const [newBody, setNewBody] = useState("");
+  const [localReviews, setLocalReviews] = useState<Review[]>([]);
+  const [sortBy, setSortBy] = useState<"recent" | "helpful">("recent");
+
+  const allReviews = useMemo(() => {
+    const combined = [...localReviews, ...reviews];
+    return sortBy === "helpful"
+      ? combined.sort((a, b) => b.helpful - a.helpful)
+      : combined.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  }, [reviews, localReviews, sortBy]);
+
+  const avgRating = allReviews.length > 0
+    ? allReviews.reduce((a, r) => a + r.rating, 0) / allReviews.length
+    : 0;
+
+  const ratingDist = [5, 4, 3, 2, 1].map((star) => ({
+    star,
+    count: allReviews.filter((r) => r.rating === star).length,
+    pct: allReviews.length > 0
+      ? (allReviews.filter((r) => r.rating === star).length / allReviews.length) * 100
+      : 0,
+  }));
+
+  const handleSubmit = () => {
+    if (newRating === 0) { toast.error("Please select a rating"); return; }
+    if (!newTitle.trim()) { toast.error("Please add a title"); return; }
+    const review: Review = {
+      id: `local-${Date.now()}`,
+      author: "You",
+      authorHandle: "@you",
+      rating: newRating,
+      title: newTitle,
+      body: newBody,
+      date: new Date().toISOString().slice(0, 10),
+      helpful: 0,
+      verified: false,
+    };
+    setLocalReviews((prev) => [review, ...prev]);
+    setShowForm(false);
+    setNewRating(0);
+    setNewTitle("");
+    setNewBody("");
+    toast.success("Review submitted!");
+  };
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-lg font-semibold flex items-center gap-2">
+          <MessageSquare className="w-5 h-5 text-nexus-indigo" />
+          Reviews
+          <span className="text-sm font-normal text-muted-foreground">({allReviews.length})</span>
+        </h2>
+        <button
+          onClick={() => setShowForm(!showForm)}
+          className="text-sm text-nexus-indigo hover:text-nexus-indigo/80 transition-colors font-medium"
+        >
+          {showForm ? "Cancel" : "Write a Review"}
+        </button>
+      </div>
+
+      {/* Rating Summary */}
+      <div className="bg-card/60 border border-border/50 rounded-xl p-5 mb-6">
+        <div className="flex items-start gap-6">
+          <div className="text-center">
+            <p className="text-3xl font-bold">{avgRating.toFixed(1)}</p>
+            <StarRating value={Math.round(avgRating)} readonly />
+            <p className="text-xs text-muted-foreground mt-1">{allReviews.length} reviews</p>
+          </div>
+          <div className="flex-1 space-y-1.5">
+            {ratingDist.map((d) => (
+              <div key={d.star} className="flex items-center gap-2 text-sm">
+                <span className="w-3 text-right text-muted-foreground">{d.star}</span>
+                <Star className="w-3 h-3 text-nexus-amber fill-nexus-amber" />
+                <div className="flex-1 h-2 bg-muted/30 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-nexus-amber rounded-full transition-all"
+                    style={{ width: `${d.pct}%` }}
+                  />
+                </div>
+                <span className="w-6 text-right text-xs text-muted-foreground">{d.count}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Write Review Form */}
+      {showForm && (
+        <div className="bg-card/60 border border-nexus-indigo/30 rounded-xl p-5 mb-6">
+          <h3 className="font-medium mb-3">Write a Review</h3>
+          <div className="space-y-3">
+            <div>
+              <label className="text-xs text-muted-foreground block mb-1">Rating</label>
+              <StarRating value={newRating} onChange={setNewRating} />
+            </div>
+            <div>
+              <label className="text-xs text-muted-foreground block mb-1">Title</label>
+              <input
+                type="text"
+                value={newTitle}
+                onChange={(e) => setNewTitle(e.target.value)}
+                placeholder="Summarize your experience"
+                className="w-full px-3 py-2 bg-background border border-border/50 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-nexus-indigo/40"
+              />
+            </div>
+            <div>
+              <label className="text-xs text-muted-foreground block mb-1">Review (optional)</label>
+              <textarea
+                value={newBody}
+                onChange={(e) => setNewBody(e.target.value)}
+                placeholder="Share details about your experience..."
+                rows={3}
+                className="w-full px-3 py-2 bg-background border border-border/50 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-nexus-indigo/40 resize-none"
+              />
+            </div>
+            <button
+              onClick={handleSubmit}
+              className="px-4 py-2 bg-nexus-indigo text-white rounded-lg text-sm font-medium hover:bg-nexus-indigo/90 transition-colors"
+            >
+              Submit Review
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Sort */}
+      <div className="flex items-center gap-2 mb-4">
+        <span className="text-xs text-muted-foreground">Sort by:</span>
+        <button
+          onClick={() => setSortBy("recent")}
+          className={`text-xs px-2 py-1 rounded ${sortBy === "recent" ? "bg-nexus-indigo/10 text-nexus-indigo font-medium" : "text-muted-foreground hover:text-foreground"}`}
+        >
+          Most Recent
+        </button>
+        <button
+          onClick={() => setSortBy("helpful")}
+          className={`text-xs px-2 py-1 rounded ${sortBy === "helpful" ? "bg-nexus-indigo/10 text-nexus-indigo font-medium" : "text-muted-foreground hover:text-foreground"}`}
+        >
+          Most Helpful
+        </button>
+      </div>
+
+      {/* Review List */}
+      <div className="space-y-4">
+        {allReviews.map((r) => (
+          <div key={r.id} className="bg-card/40 border border-border/30 rounded-xl p-4">
+            <div className="flex items-start justify-between mb-2">
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 rounded-full bg-nexus-indigo/10 flex items-center justify-center">
+                  <User className="w-3.5 h-3.5 text-nexus-indigo" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium">{r.author}</p>
+                  <p className="text-xs text-muted-foreground">{r.authorHandle}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                {r.verified && (
+                  <span className="text-[10px] px-1.5 py-0.5 bg-nexus-green/10 text-nexus-green rounded font-medium">Verified</span>
+                )}
+                <span className="text-xs text-muted-foreground">{timeAgo(r.date)}</span>
+              </div>
+            </div>
+            <StarRating value={r.rating} readonly />
+            <h4 className="font-medium text-sm mt-2">{r.title}</h4>
+            {r.body && <p className="text-sm text-muted-foreground mt-1 leading-relaxed">{r.body}</p>}
+            <div className="flex items-center gap-3 mt-3 pt-2 border-t border-border/20">
+              <button
+                onClick={() => toast.success("Marked as helpful")}
+                className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <ThumbsUp className="w-3 h-3" />
+                Helpful ({r.helpful})
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }
 
@@ -274,6 +493,9 @@ export default function SkillDetailPage() {
                 </div>
               </div>
             </div>
+
+            {/* Reviews */}
+            <ReviewsSection skillName={skill.name} />
           </div>
 
           {/* ─── Right Column (1/3) ───────────────────────────────────────── */}

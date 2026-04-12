@@ -10,6 +10,7 @@ import ManualLayout from "./pages/docs/ManualLayout";
 import MarketplacePage from "./pages/marketplace/MarketplacePage";
 import SkillDetailPage from "./pages/marketplace/SkillDetailPage";
 import DeveloperPortal from "./pages/marketplace/DeveloperPortal";
+import CompareSkills from "./pages/marketplace/CompareSkills";
 
 
 function Router() {
@@ -17,6 +18,7 @@ function Router() {
     <Switch>
       <Route path={"/"} component={Home} />
       <Route path={"/marketplace"} component={MarketplacePage} />
+      <Route path={"/marketplace/compare"} component={CompareSkills} />
       <Route path={"/marketplace/developer"} component={DeveloperPortal} />
       <Route path={"/marketplace/:skillName"} component={SkillDetailPage} />
       <Route path={"/docs/manual"} component={ManualLayout} />

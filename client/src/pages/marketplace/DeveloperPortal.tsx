@@ -16,8 +16,9 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { toast } from "sonner";
 import {
   DEVELOPER_EARNINGS, PAYOUTS, RECENT_ACTIVITY,
+  ANALYTICS_JSON_PARSER, ANALYTICS_CSV_PARSER, ANALYTICS_COMBINED,
   formatNumber, formatMoney,
-  type DeveloperEarnings, type Payout, type ActivityEntry,
+  type DeveloperEarnings, type Payout, type ActivityEntry, type DailyMetric,
 } from "./marketplaceData";
 
 const DEV_HERO = "https://d2xsxph8kpxj0f.cloudfront.net/310419663030909471/NRmiWdZq2JgxyAQQ5B7Zs7/marketplace-dev-portal-24RhdqPyGkQzi2H9ffNfe7.webp";
@@ -36,6 +37,255 @@ function SummaryCard({
       </div>
       <p className={`text-2xl sm:text-3xl font-bold ${accent || "text-foreground"}`}>{value}</p>
       {sub && <p className="text-xs text-muted-foreground mt-1">{sub}</p>}
+    </div>
+  );
+}
+
+/* ─── Sparkline SVG ─────────────────────────────────────────────────────── */
+function Sparkline({
+  data,
+  dataKey,
+  color = "var(--color-nexus-indigo)",
+  width = 200,
+  height = 48,
+}: {
+  data: DailyMetric[];
+  dataKey: "calls" | "revenue";
+  color?: string;
+  width?: number;
+  height?: number;
+}) {
+  if (data.length === 0) return null;
+  const values = data.map((d) => d[dataKey]);
+  const max = Math.max(...values);
+  const min = Math.min(...values);
+  const range = max - min || 1;
+  const padding = 2;
+  const points = values.map((v, i) => {
+    const x = padding + (i / (values.length - 1)) * (width - padding * 2);
+    const y = height - padding - ((v - min) / range) * (height - padding * 2);
+    return `${x},${y}`;
+  });
+  const pathD = `M${points.join(" L")}`;
+  const areaD = `${pathD} L${width - padding},${height} L${padding},${height} Z`;
+
+  return (
+    <svg width={width} height={height} className="overflow-visible">
+      <defs>
+        <linearGradient id={`spark-grad-${dataKey}-${color.replace(/[^a-z0-9]/gi, "")}`} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor={color} stopOpacity="0.3" />
+          <stop offset="100%" stopColor={color} stopOpacity="0" />
+        </linearGradient>
+      </defs>
+      <path
+        d={areaD}
+        fill={`url(#spark-grad-${dataKey}-${color.replace(/[^a-z0-9]/gi, "")})`}
+      />
+      <path
+        d={pathD}
+        fill="none"
+        stroke={color}
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <circle
+        cx={parseFloat(points[points.length - 1].split(",")[0])}
+        cy={parseFloat(points[points.length - 1].split(",")[1])}
+        r="3"
+        fill={color}
+      />
+    </svg>
+  );
+}
+
+/* ─── Bar Chart SVG ─────────────────────────────────────────────────────── */
+function BarChart({
+  data,
+  dataKey,
+  color = "var(--color-nexus-indigo)",
+  height = 120,
+}: {
+  data: DailyMetric[];
+  dataKey: "calls" | "revenue";
+  color?: string;
+  height?: number;
+}) {
+  if (data.length === 0) return null;
+  const values = data.map((d) => d[dataKey]);
+  const max = Math.max(...values);
+  const barWidth = 100 / data.length;
+  const gap = barWidth * 0.2;
+
+  return (
+    <div className="w-full" style={{ height }}>
+      <svg width="100%" height="100%" viewBox={`0 0 100 ${height}`} preserveAspectRatio="none">
+        {data.map((d, i) => {
+          const barH = max > 0 ? (d[dataKey] / max) * (height - 20) : 0;
+          const x = i * barWidth + gap / 2;
+          const w = barWidth - gap;
+          return (
+            <g key={i}>
+              <rect
+                x={x}
+                y={height - barH}
+                width={w}
+                height={barH}
+                rx="1"
+                fill={color}
+                opacity={i === data.length - 1 ? 1 : 0.6}
+              />
+            </g>
+          );
+        })}
+      </svg>
+      <div className="flex justify-between text-[9px] text-muted-foreground mt-1 px-0.5">
+        <span>{data[0]?.date.slice(5)}</span>
+        <span>{data[Math.floor(data.length / 2)]?.date.slice(5)}</span>
+        <span>{data[data.length - 1]?.date.slice(5)}</span>
+      </div>
+    </div>
+  );
+}
+
+/* ─── Analytics Panel ───────────────────────────────────────────────────── */
+function AnalyticsPanel() {
+  const [period, setPeriod] = useState<"7d" | "14d" | "30d">("30d");
+  const [metric, setMetric] = useState<"calls" | "revenue">("calls");
+
+  const sliceData = (data: DailyMetric[]) => {
+    const days = period === "7d" ? 7 : period === "14d" ? 14 : 30;
+    return data.slice(-days);
+  };
+
+  const combinedSlice = sliceData(ANALYTICS_COMBINED);
+  const jsonSlice = sliceData(ANALYTICS_JSON_PARSER);
+  const csvSlice = sliceData(ANALYTICS_CSV_PARSER);
+
+  const totalCalls = combinedSlice.reduce((a, d) => a + d.calls, 0);
+  const totalRevenue = combinedSlice.reduce((a, d) => a + d.revenue, 0);
+  const avgDailyCalls = Math.round(totalCalls / combinedSlice.length);
+  const avgDailyRevenue = totalRevenue / combinedSlice.length;
+
+  // Compute trend (last 7 days vs previous 7 days)
+  const recent7 = ANALYTICS_COMBINED.slice(-7);
+  const prev7 = ANALYTICS_COMBINED.slice(-14, -7);
+  const recentSum = recent7.reduce((a, d) => a + d[metric], 0);
+  const prevSum = prev7.reduce((a, d) => a + d[metric], 0);
+  const trendPct = prevSum > 0 ? ((recentSum - prevSum) / prevSum) * 100 : 0;
+
+  return (
+    <div className="space-y-6">
+      {/* Controls */}
+      <div className="flex items-center justify-between">
+        <h2 className="font-semibold flex items-center gap-2">
+          <BarChart3 className="w-5 h-5 text-nexus-indigo" />
+          Analytics
+        </h2>
+        <div className="flex items-center gap-2">
+          <div className="flex bg-card/60 border border-border/50 rounded-lg overflow-hidden">
+            {(["calls", "revenue"] as const).map((m) => (
+              <button
+                key={m}
+                onClick={() => setMetric(m)}
+                className={`px-3 py-1.5 text-xs font-medium capitalize transition-colors ${
+                  metric === m
+                    ? "bg-nexus-indigo text-white"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {m}
+              </button>
+            ))}
+          </div>
+          <div className="flex bg-card/60 border border-border/50 rounded-lg overflow-hidden">
+            {(["7d", "14d", "30d"] as const).map((p) => (
+              <button
+                key={p}
+                onClick={() => setPeriod(p)}
+                className={`px-2.5 py-1.5 text-xs font-medium transition-colors ${
+                  period === p
+                    ? "bg-nexus-indigo text-white"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {p}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Summary Row with Sparklines */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="bg-card/60 border border-border/50 rounded-xl p-4">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs text-muted-foreground uppercase tracking-wider">
+              {metric === "calls" ? "Total Calls" : "Total Revenue"}
+            </span>
+            <span className={`text-xs font-medium ${trendPct >= 0 ? "text-nexus-green" : "text-red-400"}`}>
+              {trendPct >= 0 ? "+" : ""}{trendPct.toFixed(1)}%
+            </span>
+          </div>
+          <p className="text-xl font-bold mb-2">
+            {metric === "calls" ? formatNumber(totalCalls) : formatMoney(totalRevenue)}
+          </p>
+          <Sparkline data={combinedSlice} dataKey={metric} color="var(--color-nexus-indigo)" width={180} height={36} />
+        </div>
+        <div className="bg-card/60 border border-border/50 rounded-xl p-4">
+          <span className="text-xs text-muted-foreground uppercase tracking-wider block mb-2">
+            json-parser
+          </span>
+          <p className="text-lg font-bold mb-2">
+            {metric === "calls"
+              ? formatNumber(jsonSlice.reduce((a, d) => a + d.calls, 0))
+              : formatMoney(jsonSlice.reduce((a, d) => a + d.revenue, 0))}
+          </p>
+          <Sparkline data={jsonSlice} dataKey={metric} color="var(--color-nexus-green)" width={180} height={36} />
+        </div>
+        <div className="bg-card/60 border border-border/50 rounded-xl p-4">
+          <span className="text-xs text-muted-foreground uppercase tracking-wider block mb-2">
+            csv-parser
+          </span>
+          <p className="text-lg font-bold mb-2">
+            {metric === "calls"
+              ? formatNumber(csvSlice.reduce((a, d) => a + d.calls, 0))
+              : formatMoney(csvSlice.reduce((a, d) => a + d.revenue, 0))}
+          </p>
+          <Sparkline data={csvSlice} dataKey={metric} color="var(--color-nexus-cyan)" width={180} height={36} />
+        </div>
+      </div>
+
+      {/* Bar Chart — Daily Breakdown */}
+      <div className="bg-card/60 border border-border/50 rounded-xl p-5">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-sm font-medium">
+            Daily {metric === "calls" ? "Call Volume" : "Revenue"}
+          </h3>
+          <span className="text-xs text-muted-foreground">
+            Avg: {metric === "calls" ? formatNumber(avgDailyCalls) + "/day" : formatMoney(avgDailyRevenue) + "/day"}
+          </span>
+        </div>
+        <BarChart data={combinedSlice} dataKey={metric} color="var(--color-nexus-indigo)" height={120} />
+      </div>
+
+      {/* Per-Skill Bar Charts */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="bg-card/60 border border-border/50 rounded-xl p-4">
+          <h3 className="text-sm font-medium mb-3 flex items-center gap-2">
+            <div className="w-2 h-2 rounded-full bg-nexus-green" />
+            json-parser
+          </h3>
+          <BarChart data={jsonSlice} dataKey={metric} color="var(--color-nexus-green)" height={80} />
+        </div>
+        <div className="bg-card/60 border border-border/50 rounded-xl p-4">
+          <h3 className="text-sm font-medium mb-3 flex items-center gap-2">
+            <div className="w-2 h-2 rounded-full bg-nexus-cyan" />
+            csv-parser
+          </h3>
+          <BarChart data={csvSlice} dataKey={metric} color="var(--color-nexus-cyan)" height={80} />
+        </div>
+      </div>
     </div>
   );
 }
@@ -182,7 +432,11 @@ export default function DeveloperPortal() {
 
         {/* ─── Overview Tab ───────────────────────────────────────────────── */}
         {activeTab === "overview" && (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 pb-20">
+          <div className="space-y-6 pb-20">
+            {/* Analytics Charts */}
+            <AnalyticsPanel />
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Earnings Table */}
             <div className="lg:col-span-2">
               <div className="bg-card/60 border border-border/50 rounded-xl overflow-hidden">
@@ -253,6 +507,7 @@ export default function DeveloperPortal() {
                 </div>
               </div>
             </div>
+          </div>
           </div>
         )}
 
