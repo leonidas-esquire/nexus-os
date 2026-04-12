@@ -24,6 +24,10 @@ import AdminBlog from "./pages/admin/AdminBlog";
 import LegalIndex from "./pages/legal/LegalIndex";
 import TermsOfService from "./pages/legal/TermsOfService";
 import PrivacyPolicy from "./pages/legal/PrivacyPolicy";
+import ShowcaseIndex from "./pages/showcase/ShowcaseIndex";
+import ShowcaseSubmit from "./pages/showcase/ShowcaseSubmit";
+import ShowcaseProject from "./pages/showcase/ShowcaseProject";
+import AdminShowcase from "./pages/admin/AdminShowcase";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -51,6 +55,12 @@ function Router() {
       <Route path="/blog/:slug" component={BlogPost} />
       {/* Blog — admin */}
       <Route path="/admin/blog" component={AdminBlog} />
+      {/* Showcase — public */}
+      <Route path="/showcase" component={ShowcaseIndex} />
+      <Route path="/showcase/submit" component={ShowcaseSubmit} />
+      <Route path="/showcase/:slug" component={ShowcaseProject} />
+      {/* Showcase — admin */}
+      <Route path="/admin/showcase" component={AdminShowcase} />
       {/* Legal */}
       <Route path="/legal" component={LegalIndex} />
       <Route path="/legal/terms" component={TermsOfService} />

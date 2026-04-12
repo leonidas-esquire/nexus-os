@@ -158,4 +158,33 @@
 - [x] Create .github/ISSUE_TEMPLATE/bug_report.md
 - [x] Create .github/ISSUE_TEMPLATE/feature_request.md
 - [x] Create .github/ISSUE_TEMPLATE/config.yml (template chooser config)
-- [ ] Push all files to GitHub (leonidas-esquire/nexus-os)
+- [x] Push all files to GitHub (leonidas-esquire/nexus-os)
+
+## Bug Fixes (Round 5)
+- [x] Fix GitHub repo default branch showing MIT instead of Apache 2.0 (changed default from master to main)
+- [x] README.md license badge and License section already correct on main branch (Apache 2.0)
+
+## GitHub Repo Maintenance
+- [x] Delete stale master branch
+- [x] Add branch protection rules on main (1 approving review, dismiss stale reviews, linear history, no force pushes)
+- [x] Create v0.1.0 GitHub Release with release notes (https://github.com/leonidas-esquire/nexus-os/releases/tag/v0.1.0)
+
+## Showcase Feature
+- [x] Create showcase_projects table (id, slug, title, tagline, description, screenshots, links, author info, features_used, category, status, stats, timestamps)
+- [x] Create showcase_upvotes table (project_id + user_ip_hash composite PK)
+- [x] Push database migration
+- [x] Implement showcase DB helpers (list, getBySlug, submit, upvote toggle, admin CRUD)
+- [x] Create public tRPC router (showcase.list, showcase.featured, showcase.getBySlug, showcase.upvote, showcase.categories)
+- [x] Create submission tRPC router (showcase.submit)
+- [x] Create admin tRPC router (adminShowcase.list, adminShowcase.pending, adminShowcase.update, adminShowcase.approve, adminShowcase.feature, adminShowcase.reject, adminShowcase.delete)
+- [x] Create REST image upload endpoint (POST /api/showcase/upload-image)
+- [x] Build /showcase gallery page (featured hero, category pills, search, sort, responsive grid, pagination)
+- [x] Build /showcase/submit form (project details, feature checkboxes, media upload, links, author info, validation)
+- [x] Build /showcase/[slug] project detail page (screenshot gallery, markdown description, stats, related projects, upvote)
+- [x] Build /admin/showcase admin panel (pending queue, approve/reject/feature, project table, search/filter)
+- [x] Update App.tsx routes for all showcase pages
+- [x] Add Showcase to main navigation
+- [x] Add Showcase link to footer Community section
+- [x] Write Vitest tests for showcase feature (21 tests — all passing)
+- [x] Seed sample showcase projects for initial content (6 projects: 3 featured, 3 approved)
+- [ ] Push to GitHub

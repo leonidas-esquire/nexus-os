@@ -198,6 +198,7 @@ function Nav() {
           <a href="/docs/manual" className="hover:text-foreground transition-colors">manual</a>
           <a href="/marketplace" className="text-nexus-green hover:text-nexus-green/80 transition-colors font-medium">marketplace</a>
           <a href="/blog" className="text-nexus-cyan hover:text-nexus-cyan/80 transition-colors font-medium">blog</a>
+          <a href="/showcase" className="text-amber-400 hover:text-amber-400/80 transition-colors font-medium">showcase</a>
         </div>
 
         <div className="flex items-center gap-3">
@@ -1138,6 +1139,8 @@ function Footer() {
               <li><a href="/docs/manual" className="text-muted-foreground hover:text-foreground transition-colors">User Manual</a></li>
               <li><a href="#features" className="text-muted-foreground hover:text-foreground transition-colors">Features</a></li>
               <li><a href="/marketplace" className="text-muted-foreground hover:text-foreground transition-colors">Skill Marketplace</a></li>
+              <li><a href="/showcase" className="text-muted-foreground hover:text-foreground transition-colors">Community Showcase</a></li>
+              <li><a href="/blog" className="text-muted-foreground hover:text-foreground transition-colors">Blog</a></li>
             </ul>
           </div>
 
@@ -1162,7 +1165,7 @@ function Footer() {
 
         <div className="mt-12 pt-8 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-4">
           <span className="font-mono text-xs text-muted-foreground">
-            aiagents.nexus — MIT License
+            aiagents.nexus — Apache-2.0 License
           </span>
           <span className="font-mono text-xs text-muted-foreground">
             Built with Rust, Axum, SQLite, WASM

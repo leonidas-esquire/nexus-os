@@ -60,3 +60,62 @@ export const blogPreviewDrafts = mysqlTable("blog_preview_drafts", {
 
 export type BlogPreviewDraft = typeof blogPreviewDrafts.$inferSelect;
 export type InsertBlogPreviewDraft = typeof blogPreviewDrafts.$inferInsert;
+
+// ─── Showcase Projects ──────────────────────────────────────────────
+export const showcaseProjects = mysqlTable("showcase_projects", {
+  id: varchar("id", { length: 36 }).primaryKey(), // UUID
+  slug: varchar("slug", { length: 256 }).notNull().unique(),
+  title: varchar("title", { length: 256 }).notNull(),
+  tagline: varchar("tagline", { length: 512 }).notNull(),
+  description: text("description").notNull(), // Markdown
+  screenshotUrl: varchar("screenshotUrl", { length: 2048 }).notNull(),
+  screenshots: json("screenshots"), // JSON array of additional screenshot URLs
+  demoUrl: varchar("demoUrl", { length: 2048 }),
+  repoUrl: varchar("repoUrl", { length: 2048 }),
+  websiteUrl: varchar("websiteUrl", { length: 2048 }),
+  videoUrl: varchar("videoUrl", { length: 2048 }),
+  authorName: varchar("authorName", { length: 256 }).notNull(),
+  authorHandle: varchar("authorHandle", { length: 128 }),
+  authorEmail: varchar("authorEmail", { length: 320 }).notNull(),
+  authorAvatar: varchar("authorAvatar", { length: 2048 }),
+  authorTwitter: varchar("authorTwitter", { length: 128 }),
+  authorGithub: varchar("authorGithub", { length: 128 }),
+  featuresUsed: json("featuresUsed"), // JSON array e.g. ["Supervisor","Pool"]
+  category: mysqlEnum("showcase_category", [
+    "ai-agents",
+    "automation",
+    "devops",
+    "research",
+    "trading",
+    "other",
+  ]).notNull().default("other"),
+  status: mysqlEnum("showcase_status", [
+    "pending",
+    "approved",
+    "featured",
+    "rejected",
+  ]).notNull().default("pending"),
+  featured: boolean("featured").notNull().default(false),
+  featuredOrder: int("featuredOrder").default(0),
+  githubStars: int("githubStars").default(0),
+  upvotes: int("upvotes").notNull().default(0),
+  views: int("views").notNull().default(0),
+  submittedAt: timestamp("submittedAt").defaultNow().notNull(),
+  approvedAt: timestamp("approvedAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type ShowcaseProject = typeof showcaseProjects.$inferSelect;
+export type InsertShowcaseProject = typeof showcaseProjects.$inferInsert;
+
+// ─── Showcase Upvotes ───────────────────────────────────────────────
+export const showcaseUpvotes = mysqlTable("showcase_upvotes", {
+  id: int("id").autoincrement().primaryKey(),
+  projectId: varchar("projectId", { length: 36 }).notNull(),
+  userIpHash: varchar("userIpHash", { length: 128 }).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type ShowcaseUpvote = typeof showcaseUpvotes.$inferSelect;
+export type InsertShowcaseUpvote = typeof showcaseUpvotes.$inferInsert;
