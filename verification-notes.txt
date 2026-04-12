@@ -32,3 +32,18 @@ Verification Notes - Blog System
    - Category selector with prefilled dropdown + custom category creation
    - OG Image upload in Media tab
    - Server compiles with zero TypeScript errors
+
+9. Blog Index Category Filter Verification (April 12, 2026):
+   - Category filter row: Engineering, Product, Tutorials, Research, Community, Case Studies, Opinion (7 categories)
+   - Tag filter row: AI Agents, Edge Computing, Orchestration, Rust, Tutorials, WASM (6 tags)
+   - Featured post: "Building Your First AI Agent with Nexus OS" with cover image visible
+   - Post cards: "Introducing Nexus OS" and "WASM Skills: 90% Cost Savings" with cover images
+   - Search bar present
+   - All cover images loading correctly from CDN
+   - Category and tag badges visible on post cards
+
+10. Cover Images Updated (April 12, 2026):
+   - All 3 seeded posts now have cover images and OG images
+   - introducing-nexus-os: AI architecture visualization
+   - building-your-first-agent: Terminal with WASM modules
+   - token-cost-optimization: Cost reduction visualization

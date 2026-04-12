@@ -124,14 +124,18 @@ function editorBlocksToHtml(blocks: any[]): string {
 
 const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB
 
-// ─── Toolbar Button ─────────────────────────────────────────────
+// ─── Toolbar Button ─────────────────────────────────
 
-function ToolbarBtn({ icon: Icon, label, onClick, active }: {
-  icon: any; label: string; onClick: () => void; active?: boolean;
+function ToolbarBtn({ icon: Icon, label, onClick, active = false }: {
+  icon: any;
+  label: string;
+  onClick: () => void;
+  active?: boolean;
 }) {
   return (
     <button
       type="button"
+      onMouseDown={e => e.preventDefault()}
       onClick={onClick}
       title={label}
       className={`p-1.5 rounded-md transition-colors hover:bg-white/10 ${active ? "bg-white/15 text-nexus-indigo" : "text-muted-foreground hover:text-foreground"}`}
@@ -745,10 +749,18 @@ export default function BlogEditor() {
             <ToolbarBtn icon={Italic} label="Italic (Ctrl+I)" onClick={() => applyInlineStyle("italic")} />
             <ToolbarBtn icon={Highlighter} label="Highlight" onClick={() => {
               const sel = window.getSelection();
-              if (sel && !sel.isCollapsed) document.execCommand("hiliteColor", false, "#fef08a");
-              else toast.info("Select text to highlight");
+              if (sel && !sel.isCollapsed) {
+                document.execCommand("hiliteColor", false, "#fef08a");
+              } else {
+                toast.info("Select text to highlight");
+              }
             }} />
             <ToolbarBtn icon={Link2} label="Link" onClick={() => {
+              const sel = window.getSelection();
+              if (!sel || sel.isCollapsed) {
+                toast.info("Select text first to add a link");
+                return;
+              }
               const url = prompt("Enter URL:");
               if (url) document.execCommand("createLink", false, url);
             }} />

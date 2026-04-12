@@ -158,6 +158,7 @@ export async function listPosts(opts: {
   status?: string;
   tagSlug?: string;
   authorSlug?: string;
+  categorySlug?: string;
   search?: string;
   page?: number;
   limit?: number;
@@ -200,6 +201,13 @@ export async function listPosts(opts: {
     const author = await getAuthorBySlug(opts.authorSlug);
     if (!author) return { posts: [], total: 0 };
     conditions.push(eq(blogPosts.authorId, author.id));
+  }
+
+  // If filtering by category slug
+  if (opts.categorySlug) {
+    const category = await getCategoryBySlug(opts.categorySlug);
+    if (!category) return { posts: [], total: 0 };
+    conditions.push(eq(blogPosts.categoryId, category.id));
   }
 
   const where = conditions.length > 0 ? and(...conditions) : undefined;

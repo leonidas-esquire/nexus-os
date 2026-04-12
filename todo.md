@@ -88,3 +88,9 @@
 - [x] Professional formatting: highlight, table, divider, warning/callout, raw HTML, checklist blocks
 - [x] Update public blog pages to display categories (BlogIndex + BlogPost)
 - [x] Seed default categories (7: Engineering, Product, Tutorials, Research, Community, Case Studies, Opinion)
+
+## Formatting & Editor Fixes (Round 2)
+- [x] Fix formatting toolbar controls (added onMouseDown preventDefault to preserve selection)
+- [x] Add cover images to seeded posts via CDN upload (3 AI-generated images)
+- [x] Ensure categories work properly in blog editor (General tab with combobox)
+- [x] Add category filter to blog index page alongside tag filter

@@ -3,8 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Link } from "wouter";
-import { useState, useMemo, useEffect } from "react";
-import { Search, ArrowRight, Clock, Calendar, Tag, ChevronLeft, ChevronRight, Rss, Folder } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Search, ArrowRight, Clock, Calendar, Tag, ChevronLeft, ChevronRight, Rss, Folder, X } from "lucide-react";
 
 function formatDate(d: Date | string | null): string {
   if (!d) return "";
@@ -14,26 +14,42 @@ function formatDate(d: Date | string | null): string {
 export default function BlogIndex() {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
+  const [activeCategory, setActiveCategory] = useState<string | null>(null);
+  const [activeTag, setActiveTag] = useState<string | null>(null);
 
   const postsQuery = trpc.blog.posts.list.useQuery({
     status: "published",
     search: search || undefined,
+    categorySlug: activeCategory || undefined,
+    tagSlug: activeTag || undefined,
     page,
     limit: 12,
   });
   const tagsQuery = trpc.blog.tags.list.useQuery();
+  const categoriesQuery = trpc.blog.categories.list.useQuery();
 
   const posts = postsQuery.data?.posts ?? [];
   const total = postsQuery.data?.total ?? 0;
   const totalPages = Math.ceil(total / 12);
   const tags = tagsQuery.data ?? [];
+  const categories = categoriesQuery.data ?? [];
 
-  // Featured post = first post
+  // Featured post = first post (only on page 1 with no filters)
+  const showFeatured = page === 1 && !search && !activeCategory && !activeTag;
   const [featured, ...rest] = posts;
 
   useEffect(() => {
     document.title = "Blog — Nexus OS";
   }, []);
+
+  const clearFilters = () => {
+    setActiveCategory(null);
+    setActiveTag(null);
+    setSearch("");
+    setPage(1);
+  };
+
+  const hasActiveFilters = !!activeCategory || !!activeTag || !!search;
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -69,9 +85,9 @@ export default function BlogIndex() {
           </p>
         </div>
 
-        {/* Search + Tags */}
-        <div className="flex flex-col sm:flex-row gap-4 mb-10">
-          <div className="relative flex-1 max-w-md">
+        {/* Search */}
+        <div className="mb-6">
+          <div className="relative max-w-md">
             <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
             <Input
               placeholder="Search articles..."
@@ -80,19 +96,94 @@ export default function BlogIndex() {
               className="pl-9 bg-nexus-surface/50 border-border font-mono text-sm"
             />
           </div>
-          <div className="flex flex-wrap gap-2">
-            {tags.slice(0, 8).map(tag => (
-              <Link key={tag.id} href={`/blog/tag/${tag.slug}`}>
-                <Badge variant="outline" className="cursor-pointer hover:border-nexus-indigo/40 hover:bg-nexus-indigo/5 transition-colors font-mono text-xs">
-                  {tag.name}
-                </Badge>
-              </Link>
-            ))}
-          </div>
         </div>
 
+        {/* Category Filter */}
+        {categories.length > 0 && (
+          <div className="mb-4">
+            <div className="flex items-center gap-2 mb-2">
+              <Folder size={14} className="text-muted-foreground" />
+              <span className="text-xs font-mono text-muted-foreground uppercase tracking-wider">Categories</span>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {categories.map(cat => (
+                <button
+                  key={cat.id}
+                  onClick={() => { setActiveCategory(activeCategory === cat.slug ? null : cat.slug); setPage(1); }}
+                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-mono transition-all border ${
+                    activeCategory === cat.slug
+                      ? "bg-nexus-green/20 text-nexus-green border-nexus-green/40"
+                      : "bg-nexus-surface/30 text-muted-foreground border-border hover:border-nexus-green/30 hover:text-nexus-green"
+                  }`}
+                >
+                  <Folder size={11} />
+                  {cat.name}
+                  {activeCategory === cat.slug && <X size={11} className="ml-0.5" />}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Tag Filter */}
+        {tags.length > 0 && (
+          <div className="mb-8">
+            <div className="flex items-center gap-2 mb-2">
+              <Tag size={14} className="text-muted-foreground" />
+              <span className="text-xs font-mono text-muted-foreground uppercase tracking-wider">Tags</span>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {tags.slice(0, 12).map(tag => (
+                <button
+                  key={tag.id}
+                  onClick={() => { setActiveTag(activeTag === tag.slug ? null : tag.slug); setPage(1); }}
+                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-mono transition-all border ${
+                    activeTag === tag.slug
+                      ? "bg-nexus-indigo/20 text-nexus-indigo border-nexus-indigo/40"
+                      : "bg-nexus-surface/30 text-muted-foreground border-border hover:border-nexus-indigo/30 hover:text-nexus-indigo"
+                  }`}
+                >
+                  <Tag size={11} />
+                  {tag.name}
+                  {activeTag === tag.slug && <X size={11} className="ml-0.5" />}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Active Filters Bar */}
+        {hasActiveFilters && (
+          <div className="flex items-center gap-3 mb-8 pb-4 border-b border-border">
+            <span className="text-xs font-mono text-muted-foreground">Filtering by:</span>
+            {activeCategory && (
+              <Badge className="bg-nexus-green/10 text-nexus-green border-nexus-green/30 text-xs gap-1">
+                <Folder size={10} />
+                {categories.find(c => c.slug === activeCategory)?.name}
+                <button onClick={() => setActiveCategory(null)} className="ml-1 hover:text-white"><X size={10} /></button>
+              </Badge>
+            )}
+            {activeTag && (
+              <Badge className="bg-nexus-indigo/10 text-nexus-indigo border-nexus-indigo/30 text-xs gap-1">
+                <Tag size={10} />
+                {tags.find(t => t.slug === activeTag)?.name}
+                <button onClick={() => setActiveTag(null)} className="ml-1 hover:text-white"><X size={10} /></button>
+              </Badge>
+            )}
+            {search && (
+              <Badge variant="outline" className="text-xs gap-1">
+                Search: "{search}"
+                <button onClick={() => setSearch("")} className="ml-1 hover:text-foreground"><X size={10} /></button>
+              </Badge>
+            )}
+            <button onClick={clearFilters} className="text-xs font-mono text-muted-foreground hover:text-foreground transition-colors ml-auto">
+              Clear all
+            </button>
+          </div>
+        )}
+
         {/* Featured Post */}
-        {featured && page === 1 && !search && (
+        {featured && showFeatured && (
           <Link href={`/blog/${featured.slug}`}>
             <article className="group mb-12 grid lg:grid-cols-2 gap-6 p-6 rounded-xl border border-border bg-nexus-surface/20 hover:border-nexus-indigo/30 transition-all cursor-pointer">
               {featured.coverImage && (
@@ -149,7 +240,7 @@ export default function BlogIndex() {
 
         {/* Post Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {(page === 1 && !search ? rest : posts).map(post => (
+          {(showFeatured ? rest : posts).map(post => (
             <Link key={post.id} href={`/blog/${post.slug}`}>
               <article className="group h-full flex flex-col rounded-lg border border-border bg-nexus-surface/10 hover:border-nexus-indigo/30 transition-all cursor-pointer overflow-hidden">
                 {post.coverImage && (
@@ -195,8 +286,13 @@ export default function BlogIndex() {
           <div className="text-center py-20">
             <p className="text-muted-foreground font-mono text-lg mb-2">No articles found</p>
             <p className="text-muted-foreground/60 text-sm">
-              {search ? "Try a different search term" : "Check back soon for new content"}
+              {hasActiveFilters ? "Try different filters or search terms" : "Check back soon for new content"}
             </p>
+            {hasActiveFilters && (
+              <Button variant="outline" size="sm" onClick={clearFilters} className="mt-4 font-mono text-xs">
+                Clear all filters
+              </Button>
+            )}
           </div>
         )}
 

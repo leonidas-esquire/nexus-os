@@ -144,6 +144,7 @@ export const blogRouter = router({
         status: z.string().optional(),
         tagSlug: z.string().optional(),
         authorSlug: z.string().optional(),
+        categorySlug: z.string().optional(),
         search: z.string().optional(),
         page: z.number().optional(),
         limit: z.number().optional(),

@@ -1,0 +1,31 @@
+TOOLBAR FIX ANALYSIS
+====================
+
+PROBLEM:
+1. Bold/Italic/Highlight/Link use document.execCommand() which doesn't work with Editor.js
+   - Editor.js manages its own contenteditable blocks
+   - execCommand may work on the focused block's contenteditable but clicking the toolbar 
+     button first removes focus/selection from the editor
+   - The mousedown event on the toolbar button causes the text selection to collapse
+
+2. Block insertion (insertBlock) should work since it uses Editor.js API directly
+   - But the issue is that clicking toolbar buttons steals focus from the editor
+
+SOLUTION APPROACH:
+1. For inline formatting (bold, italic, highlight, link):
+   - Use e.preventDefault() on mousedown to prevent stealing focus
+   - Use document.execCommand which actually DOES work inside contenteditable elements
+     when the selection is preserved
+   - The key fix: add onMouseDown={e => e.preventDefault()} to ToolbarBtn to keep selection
+
+2. For block insertion:
+   - These already use Editor.js API correctly
+   - But also need mousedown preventDefault to keep editor focus
+
+3. Alternative approach for inline tools:
+   - Editor.js has built-in inline toolbar (marker, inline-code, bold, italic)
+   - These are already registered as tools
+   - The external toolbar just needs to properly preserve selection before executing
+
+KEY FIX: The ToolbarBtn component needs onMouseDown={e => e.preventDefault()} 
+to prevent the button click from stealing focus/selection from the editor.
