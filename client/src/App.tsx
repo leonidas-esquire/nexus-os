@@ -17,9 +17,18 @@ import PublisherProfile from "./pages/marketplace/PublisherProfile";
 import WatchlistPage from "./pages/marketplace/WatchlistPage";
 import LeaderboardPage from "./pages/marketplace/LeaderboardPage";
 import AdminDashboard from "./pages/marketplace/AdminDashboard";
-
+import BlogIndex from "./pages/blog/BlogIndex";
+import BlogPost from "./pages/blog/BlogPost";
+import TagArchive from "./pages/blog/TagArchive";
+import AuthorArchive from "./pages/blog/AuthorArchive";
+import BlogDashboard from "./pages/admin/BlogDashboard";
+import BlogEditor from "./pages/admin/BlogEditor";
+import MediaLibrary from "./pages/admin/MediaLibrary";
+import TagManager from "./pages/admin/TagManager";
+import AuthorManager from "./pages/admin/AuthorManager";
 
 function Router() {
+  // make sure to consider if you need authentication for certain routes
   return (
     <Switch>
       <Route path={"/"} component={Home} />
@@ -38,6 +47,16 @@ function Router() {
       <Route path={"/docs"} component={DocsLayout} />
       <Route path={"/docs/:section"} component={DocsLayout} />
       <Route path={"/docs/:section/:page"} component={DocsLayout} />
+      <Route path="/blog" component={BlogIndex} />
+      <Route path="/blog/tag/:tag" component={TagArchive} />
+      <Route path="/blog/author/:author" component={AuthorArchive} />
+      <Route path="/blog/:slug" component={BlogPost} />
+      <Route path="/admin/blog" component={BlogDashboard} />
+      <Route path="/admin/blog/new" component={BlogEditor} />
+      <Route path="/admin/blog/edit/:id" component={BlogEditor} />
+      <Route path="/admin/blog/media" component={MediaLibrary} />
+      <Route path="/admin/blog/tags" component={TagManager} />
+      <Route path="/admin/blog/authors" component={AuthorManager} />
       <Route path={"/404"} component={NotFound} />
       <Route component={NotFound} />
     </Switch>
