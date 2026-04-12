@@ -195,6 +195,7 @@ function Nav() {
           <a href="#edge" className="hover:text-foreground transition-colors">edge</a>
           <a href="#pricing" className="hover:text-foreground transition-colors">pricing</a>
           <a href="/docs" className="text-nexus-indigo hover:text-nexus-indigo/80 transition-colors font-medium">docs</a>
+          <a href="/docs/manual" className="hover:text-foreground transition-colors">manual</a>
         </div>
 
         <div className="flex items-center gap-3">
@@ -1131,7 +1132,8 @@ function Footer() {
             <h4 className="font-mono text-xs uppercase tracking-widest text-muted-foreground mb-4">Resources</h4>
             <ul className="space-y-2 text-sm">
               <li><a href={GITHUB_URL} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">GitHub</a></li>
-              <li><a href="/docs" className="text-muted-foreground hover:text-foreground transition-colors">Documentation</a></li>
+              <li><a href="/docs" className="text-muted-foreground hover:text-foreground transition-colors">API Documentation</a></li>
+              <li><a href="/docs/manual" className="text-muted-foreground hover:text-foreground transition-colors">User Manual</a></li>
               <li><a href="#features" className="text-muted-foreground hover:text-foreground transition-colors">Features</a></li>
             </ul>
           </div>

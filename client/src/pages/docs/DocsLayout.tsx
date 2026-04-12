@@ -17,6 +17,7 @@ import {
   Menu,
   X,
   History,
+  BookOpen,
 } from "lucide-react";
 import { DOC_SECTIONS, getFlatPages, getPageByPath, getAdjacentPages } from "./docsData";
 import DocSearch from "./DocSearch";
@@ -119,6 +120,17 @@ function Sidebar({
           </div>
         );
       })}
+
+      {/* Link to User Manual */}
+      <div className="border-t border-border/50 mt-4 pt-4">
+        <Link href="/docs/manual">
+          <span className="flex items-center gap-2 px-3 py-2 rounded-md text-sm text-nexus-indigo hover:bg-nexus-indigo/10 transition-colors font-medium">
+            <BookOpen className="w-4 h-4" />
+            User Manual
+            <span className="text-[10px] text-muted-foreground/60 ml-auto">101 pages</span>
+          </span>
+        </Link>
+      </div>
     </nav>
   );
 }
