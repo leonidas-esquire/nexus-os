@@ -71,3 +71,7 @@
 - [x] Install @editorjs/image package (already in dependencies)
 - [x] Add image plugin to Editor.js config with drag-and-drop support
 - [x] Wire image upload to S3 via tRPC mutation (uploadByFile + uploadByUrl)
+
+## Bug Fixes
+- [x] Fix editor showing blank for existing posts that have HTML content but no contentJson
+- [x] Added htmlToEditorBlocks() converter as fallback (no seed update needed)

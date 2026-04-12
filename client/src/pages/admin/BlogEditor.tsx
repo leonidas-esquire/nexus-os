@@ -28,6 +28,85 @@ import Warning from "@editorjs/warning";
 import RawTool from "@editorjs/raw";
 import ImageTool from "@editorjs/image";
 
+/**
+ * Convert HTML content to Editor.js block format.
+ * This handles posts that were seeded or created without contentJson.
+ */
+function htmlToEditorBlocks(html: string): any {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(html, "text/html");
+  const blocks: any[] = [];
+
+  const processNode = (node: Element) => {
+    const tag = node.tagName.toLowerCase();
+
+    if (tag.match(/^h[2-4]$/)) {
+      blocks.push({ type: "header", data: { text: node.innerHTML, level: parseInt(tag[1]) } });
+    } else if (tag === "p") {
+      const text = node.innerHTML.trim();
+      if (text) blocks.push({ type: "paragraph", data: { text } });
+    } else if (tag === "ul" || tag === "ol") {
+      const items = Array.from(node.querySelectorAll(":scope > li")).map(li => ({
+        content: li.innerHTML,
+        items: [],
+      }));
+      blocks.push({
+        type: "list",
+        data: { style: tag === "ol" ? "ordered" : "unordered", items },
+      });
+    } else if (tag === "pre") {
+      const code = node.querySelector("code");
+      blocks.push({ type: "code", data: { code: code ? code.textContent || "" : node.textContent || "" } });
+    } else if (tag === "blockquote") {
+      const p = node.querySelector("p");
+      const cite = node.querySelector("cite");
+      blocks.push({
+        type: "quote",
+        data: { text: p ? p.innerHTML : node.innerHTML, caption: cite ? cite.textContent || "" : "" },
+      });
+    } else if (tag === "hr") {
+      blocks.push({ type: "delimiter", data: {} });
+    } else if (tag === "figure") {
+      const img = node.querySelector("img");
+      const figcaption = node.querySelector("figcaption");
+      if (img) {
+        blocks.push({
+          type: "image",
+          data: {
+            file: { url: img.getAttribute("src") || "" },
+            caption: figcaption ? figcaption.textContent || "" : img.getAttribute("alt") || "",
+            withBorder: false,
+            stretched: false,
+            withBackground: false,
+          },
+        });
+      }
+    } else if (tag === "table") {
+      const rows = Array.from(node.querySelectorAll("tr")).map(tr =>
+        Array.from(tr.querySelectorAll("td, th")).map(cell => cell.innerHTML)
+      );
+      const hasHeadings = node.querySelector("th") !== null;
+      blocks.push({ type: "table", data: { content: rows, withHeadings: hasHeadings } });
+    } else if (tag === "div" && node.classList.contains("warning")) {
+      const strong = node.querySelector("strong");
+      const p = node.querySelector("p");
+      blocks.push({
+        type: "warning",
+        data: { title: strong?.textContent || "", message: p?.textContent || "" },
+      });
+    }
+  };
+
+  Array.from(doc.body.children).forEach(processNode);
+
+  // If no blocks were parsed, fall back to a single raw HTML block
+  if (blocks.length === 0 && html.trim()) {
+    blocks.push({ type: "raw", data: { html } });
+  }
+
+  return { time: Date.now(), blocks, version: "2.28.0" };
+}
+
 function slugify(text: string): string {
   return text
     .toLowerCase()
@@ -126,10 +205,16 @@ export default function BlogEditor() {
     if (isEditing && !postQuery.data) return;
 
     let initialData: any = undefined;
-    if (isEditing && postQuery.data?.contentJson) {
-      try {
-        initialData = JSON.parse(postQuery.data.contentJson);
-      } catch {}
+    if (isEditing && postQuery.data) {
+      if (postQuery.data.contentJson) {
+        try {
+          initialData = JSON.parse(postQuery.data.contentJson);
+        } catch {}
+      }
+      // Fallback: convert HTML content to Editor.js blocks
+      if (!initialData && postQuery.data.content) {
+        initialData = htmlToEditorBlocks(postQuery.data.content);
+      }
     }
 
     const editor = new EditorJS({

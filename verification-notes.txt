@@ -17,3 +17,8 @@ Verification Notes - Blog System
 4. TypeScript: zero errors
 5. Tests: 24/24 passing
 6. Editor.js image plugin: configured with uploadByFile (drag-and-drop) and uploadByUrl
+
+7. Editor Fix Verification (April 12, 2026):
+   - The "Introducing Nexus OS" post now loads correctly in the editor
+   - All content blocks visible: H2 headers, paragraphs, code blocks, inline code, bold text
+   - htmlToEditorBlocks() successfully converts HTML to Editor.js blocks when contentJson is null
