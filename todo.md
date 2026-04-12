@@ -142,4 +142,4 @@
 - [x] Add meta tags (noindex, follow) for legal pages
 - [x] Add footer links to Terms, Privacy, and Contact across site
 - [x] Register routes in App.tsx
-- [ ] Push to GitHub repo
+- [x] Push to GitHub repo (leonidas-esquire/nexus-os)
