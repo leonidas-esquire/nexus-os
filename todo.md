@@ -151,3 +151,11 @@
 - [x] Update .gitignore (Rust-focused, exclude secrets and private docs)
 - [x] Create SECURITY.md (security vulnerability reporting policy)
 - [x] Push all files to GitHub (leonidas-esquire/nexus-os)
+
+## GitHub Community Files
+- [x] Create CODE_OF_CONDUCT.md (Contributor Covenant v2.1)
+- [x] Update CONTRIBUTING.md to reference CODE_OF_CONDUCT.md instead of inline CoC
+- [x] Create .github/ISSUE_TEMPLATE/bug_report.md
+- [x] Create .github/ISSUE_TEMPLATE/feature_request.md
+- [x] Create .github/ISSUE_TEMPLATE/config.yml (template chooser config)
+- [ ] Push all files to GitHub (leonidas-esquire/nexus-os)

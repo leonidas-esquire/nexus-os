@@ -18,14 +18,7 @@ Thank you for your interest in contributing to Nexus OS! This document provides 
 
 ## Code of Conduct
 
-We are committed to providing a welcoming and inclusive environment. By participating in this project, you agree to abide by our Code of Conduct:
-
-- **Be respectful** — Treat everyone with respect and kindness.
-- **Be constructive** — Provide helpful feedback and suggestions.
-- **Be inclusive** — Welcome people of all backgrounds and experience levels.
-- **Be patient** — Remember that everyone is learning.
-
-Unacceptable behavior includes harassment, discrimination, and personal attacks. Report violations to conduct@aiagents.nexus.
+This project and everyone participating in it is governed by the [Nexus OS Code of Conduct](CODE_OF_CONDUCT.md). By participating, you are expected to uphold this code. Please report unacceptable behavior to [conduct@aiagents.nexus](mailto:conduct@aiagents.nexus).
 
 ---
 
