@@ -16,6 +16,7 @@ import DependencyGraph from "./pages/marketplace/DependencyGraph";
 import PublisherProfile from "./pages/marketplace/PublisherProfile";
 import WatchlistPage from "./pages/marketplace/WatchlistPage";
 import LeaderboardPage from "./pages/marketplace/LeaderboardPage";
+import AdminDashboard from "./pages/marketplace/AdminDashboard";
 
 
 function Router() {
@@ -28,6 +29,7 @@ function Router() {
       <Route path={"/marketplace/dependencies"} component={DependencyGraph} />
       <Route path={"/marketplace/watchlist"} component={WatchlistPage} />
       <Route path={"/marketplace/leaderboard"} component={LeaderboardPage} />
+      <Route path={"/marketplace/admin"} component={AdminDashboard} />
       <Route path={"/marketplace/publisher/:handle"} component={PublisherProfile} />
       <Route path={"/marketplace/:skillName"} component={SkillDetailPage} />
       <Route path={"/docs/manual"} component={ManualLayout} />

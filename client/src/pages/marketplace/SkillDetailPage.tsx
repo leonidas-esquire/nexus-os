@@ -5,6 +5,7 @@
  */
 import { useMemo, useState } from "react";
 import InstallModal from "./InstallModal";
+import ReportSkillModal from "./ReportSkillModal";
 import { Link, useParams } from "wouter";
 import {
   ArrowLeft, Star, Shield, Download, ExternalLink, Copy, Check,
@@ -774,6 +775,7 @@ export default function SkillDetailPage() {
   const params = useParams<{ skillName: string }>();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showInstallModal, setShowInstallModal] = useState(false);
+  const [showReportModal, setShowReportModal] = useState(false);
   const { theme, toggleTheme } = useTheme();
 
   const skill = useMemo(() => {
@@ -811,6 +813,11 @@ export default function SkillDetailPage() {
         trustBadge={trustBadge(skill.trust)}
         isOpen={showInstallModal}
         onClose={() => setShowInstallModal(false)}
+      />
+      <ReportSkillModal
+        skillName={skill.name}
+        isOpen={showReportModal}
+        onClose={() => setShowReportModal(false)}
       />
       {/* ─── Nav ──────────────────────────────────────────────────────────── */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border/50">
@@ -1080,6 +1087,15 @@ export default function SkillDetailPage() {
                   <ExternalLink className="w-3.5 h-3.5" />
                 </a>
               )}
+
+              {/* Report Skill */}
+              <button
+                onClick={() => setShowReportModal(true)}
+                className="flex items-center justify-center gap-2 w-full mt-3 px-4 py-2 text-xs text-muted-foreground/60 hover:text-red-400 hover:bg-red-500/5 rounded-lg transition-all"
+              >
+                <AlertTriangle className="w-3.5 h-3.5" />
+                Report this skill
+              </button>
             </div>
 
             {/* Publisher Card */}
