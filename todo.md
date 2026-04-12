@@ -150,4 +150,4 @@
 - [x] Create CONTRIBUTING.md (contributing guide, CoC, development setup, PR process)
 - [x] Update .gitignore (Rust-focused, exclude secrets and private docs)
 - [x] Create SECURITY.md (security vulnerability reporting policy)
-- [ ] Push all files to GitHub (leonidas-esquire/nexus-os)
+- [x] Push all files to GitHub (leonidas-esquire/nexus-os)
