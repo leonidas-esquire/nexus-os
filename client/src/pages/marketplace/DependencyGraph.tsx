@@ -10,6 +10,7 @@ import {
   Link2, ArrowRight, Filter, Eye, EyeOff,
 } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
+import NotificationBell from "./NotificationBell";
 import {
   SKILLS, SKILL_DEPENDENCIES, getGraphNodes,
   type SkillNode, type SkillDependency,
@@ -265,6 +266,7 @@ export default function DependencyGraph() {
                 <Code2 className="w-3.5 h-3.5" /> Docs
               </span>
             </Link>
+            <NotificationBell />
             <button onClick={toggleTheme} className="p-2 rounded-lg hover:bg-accent transition-colors">
               {theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
             </button>

@@ -11,6 +11,7 @@ import {
   Sun, Moon, Code2, BookOpen, LayoutDashboard, Menu,
 } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
+import NotificationBell from "./NotificationBell";
 import {
   SKILLS, COMPARE_FIELDS, formatNumber, formatPrice, trustBadge,
   type Skill,
@@ -191,6 +192,7 @@ export default function CompareSkills() {
                 <Code2 className="w-4 h-4" /> Docs
               </span>
             </Link>
+            <NotificationBell />
             <button
               onClick={() => toggleTheme?.()}
               className="p-2 rounded-lg hover:bg-accent transition-colors"

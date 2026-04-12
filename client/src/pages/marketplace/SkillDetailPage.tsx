@@ -15,10 +15,11 @@ import {
 } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 import { toast } from "sonner";
+import NotificationBell from "./NotificationBell";
 import {
   SKILLS, formatNumber, formatPrice, formatMoney, trustBadge, timeAgo,
-  getReviewsForSkill, getVersionHistory, getSkillDependencies,
-  type Skill, type Review, type VersionEntry,
+  getReviewsForSkill, getVersionHistory, getSkillDependencies, getSkillUsageExamples,
+  type Skill, type Review, type VersionEntry, type UsageExample,
 } from "./marketplaceData";
 
 /* ─── Stat Card ───────────────────────────────────────────────────────────── */
@@ -76,6 +77,92 @@ function StarRating({ value, onChange, readonly = false }: { value: number; onCh
           />
         </button>
       ))}
+    </div>
+  );
+}
+
+/* ─── Usage Examples Section ──────────────────────────────────────────────── */
+function UsageExamplesSection({ skillName }: { skillName: string }) {
+  const examples = useMemo(() => getSkillUsageExamples(skillName), [skillName]);
+  const [activeTab, setActiveTab] = useState(0);
+  const [copied, setCopied] = useState(false);
+
+  if (examples.length === 0) return null;
+
+  const active = examples[activeTab];
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(active.code);
+    setCopied(true);
+    toast.success("Code copied!");
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const langColors: Record<string, string> = {
+    toml: "text-nexus-amber",
+    rust: "text-orange-400",
+    python: "text-blue-400",
+    bash: "text-nexus-green",
+    json: "text-nexus-cyan",
+  };
+
+  const langLabels: Record<string, string> = {
+    toml: "TOML",
+    rust: "Rust",
+    python: "Python",
+    bash: "Bash",
+    json: "JSON",
+  };
+
+  return (
+    <div className="bg-card/40 border border-border/30 rounded-xl overflow-hidden">
+      <div className="px-5 pt-4 pb-3 flex items-center justify-between">
+        <h3 className="font-semibold flex items-center gap-2">
+          <Code2 className="w-5 h-5 text-nexus-indigo" />
+          Usage Examples
+        </h3>
+        <button
+          onClick={handleCopy}
+          className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-all"
+        >
+          {copied ? <Check className="w-3.5 h-3.5 text-nexus-green" /> : <Copy className="w-3.5 h-3.5" />}
+          {copied ? "Copied" : "Copy"}
+        </button>
+      </div>
+
+      {/* Language Tabs */}
+      <div className="px-5 flex gap-1 border-b border-border/30">
+        {examples.map((ex, i) => (
+          <button
+            key={i}
+            onClick={() => { setActiveTab(i); setCopied(false); }}
+            className={`px-3 py-2 text-xs font-medium border-b-2 transition-all ${
+              activeTab === i
+                ? "border-nexus-indigo text-foreground"
+                : "border-transparent text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            {ex.title}
+          </button>
+        ))}
+      </div>
+
+      {/* Description */}
+      <div className="px-5 py-2.5 bg-accent/10 border-b border-border/20">
+        <p className="text-xs text-muted-foreground">{active.description}</p>
+      </div>
+
+      {/* Code Block */}
+      <div className="relative">
+        <div className="absolute top-2 right-3">
+          <span className={`text-[10px] font-mono font-bold uppercase tracking-wider ${langColors[active.language] || "text-muted-foreground"}`}>
+            {langLabels[active.language] || active.language}
+          </span>
+        </div>
+        <pre className="p-5 overflow-x-auto text-sm leading-relaxed">
+          <code className="font-mono text-foreground/90 whitespace-pre">{active.code}</code>
+        </pre>
+      </div>
     </div>
   );
 }
@@ -511,6 +598,7 @@ export default function SkillDetailPage() {
                 <LayoutDashboard className="w-4 h-4" /> Developer
               </span>
             </Link>
+            <NotificationBell />
             <button
               onClick={() => toggleTheme?.()}
               className="p-2 rounded-lg hover:bg-accent transition-colors"
@@ -679,6 +767,9 @@ export default function SkillDetailPage() {
                 </div>
               </div>
             </div>
+
+            {/* Usage Examples */}
+            <UsageExamplesSection skillName={skill.name} />
 
             {/* Version History */}
             <VersionHistorySection skillName={skill.name} />

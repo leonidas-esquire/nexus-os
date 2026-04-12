@@ -6,8 +6,9 @@
  */
 import { useState, useMemo } from "react";
 import { Link } from "wouter";
-import {
-  Search, Star, Shield, ShieldCheck, Download, ArrowRight,
+import { toast } from "sonner";
+import NotificationBell from "./NotificationBell";
+import {  Search, Star, Shield, ShieldCheck, Download, ArrowRight,
   Package, ChevronRight, ExternalLink, Zap, TrendingUp,
   FileJson, Calculator, Brain, Lock, Database, Globe,
   Type, Image, Shuffle, Menu, X, Sun, Moon, Code2,
@@ -160,6 +161,7 @@ export default function MarketplacePage() {
                 Manual
               </span>
             </Link>
+            <NotificationBell />
             <button
               onClick={() => toggleTheme?.()}
               className="p-2 rounded-lg hover:bg-accent transition-colors"

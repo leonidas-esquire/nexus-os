@@ -3,7 +3,7 @@
  * Developer dashboard with earnings, published skills, recent activity,
  * payout history, and publish flow.
  */
-import { useState } from "react";
+import { useState, lazy, Suspense } from "react";
 import { Link } from "wouter";
 import {
   DollarSign, TrendingUp, Package, Activity, ArrowRight,
@@ -14,6 +14,8 @@ import {
 } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 import { toast } from "sonner";
+import PublishWizard from "./PublishWizard";
+import NotificationBell from "./NotificationBell";
 import {
   DEVELOPER_EARNINGS, PAYOUTS, RECENT_ACTIVITY,
   ANALYTICS_JSON_PARSER, ANALYTICS_CSV_PARSER, ANALYTICS_COMBINED,
@@ -294,6 +296,7 @@ function AnalyticsPanel() {
 export default function DeveloperPortal() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<"overview" | "skills" | "payouts">("overview");
+  const [showPublishWizard, setShowPublishWizard] = useState(false);
   const { theme, toggleTheme } = useTheme();
 
   const totalRevenue = DEVELOPER_EARNINGS.reduce((a, e) => a + e.revenue, 0);
@@ -328,6 +331,7 @@ export default function DeveloperPortal() {
                 <Code2 className="w-4 h-4" /> Docs
               </span>
             </Link>
+            <NotificationBell />
             <button
               onClick={() => toggleTheme?.()}
               className="p-2 rounded-lg hover:bg-accent transition-colors"
@@ -366,7 +370,7 @@ export default function DeveloperPortal() {
             </div>
             <div className="flex gap-3">
               <button
-                onClick={() => toast.info("Publish flow: naos marketplace publish ./my-skill/")}
+                onClick={() => setShowPublishWizard(true)}
                 className="inline-flex items-center gap-2 px-4 py-2.5 bg-nexus-indigo text-white rounded-xl font-medium text-sm hover:bg-nexus-indigo/90 transition-colors"
               >
                 <Plus className="w-4 h-4" />
@@ -517,7 +521,7 @@ export default function DeveloperPortal() {
             <div className="flex items-center justify-between mb-4">
               <h2 className="font-semibold">Your Published Skills</h2>
               <button
-                onClick={() => toast.info("Run: naos marketplace publish ./my-skill/")}
+                onClick={() => setShowPublishWizard(true)}
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-nexus-indigo text-white rounded-lg text-sm font-medium hover:bg-nexus-indigo/90 transition-colors"
               >
                 <Plus className="w-4 h-4" /> Publish New
@@ -678,6 +682,9 @@ export default function DeveloperPortal() {
           </div>
         )}
       </section>
+
+      {/* Publish Wizard Modal */}
+      {showPublishWizard && <PublishWizard onClose={() => setShowPublishWizard(false)} />}
 
       {/* ─── Footer ───────────────────────────────────────────────────────── */}
       <footer className="border-t border-border/50 py-8">

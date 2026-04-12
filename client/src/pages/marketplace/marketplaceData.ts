@@ -1079,3 +1079,303 @@ export function getSkillDependencies(skillName: string): {
     .map((d) => d.from);
   return { requires, optionalDeps, commonlyUsedWith, dependedOnBy };
 }
+
+
+/* ─── Skill Usage Examples ───────────────────────────────────────────────── */
+export interface UsageExample {
+  title: string;
+  language: "toml" | "rust" | "python" | "bash" | "json";
+  code: string;
+  description: string;
+}
+
+export const SKILL_USAGE_EXAMPLES: Record<string, UsageExample[]> = {
+  "json-parser": [
+    {
+      title: "Agent Config (TOML)",
+      language: "toml",
+      description: "Add json-parser to your agent's skill dependencies in nexus.config.toml",
+      code: `[agent.skills]
+json-parser = { version = "^1.2.0", priority = "high" }
+
+[[agent.routes]]
+pattern = "parse this JSON"
+skill   = "json-parser"
+input   = "{{ message.content }}"`,
+    },
+    {
+      title: "Rust SDK",
+      language: "rust",
+      description: "Call json-parser programmatically from Rust using the Nexus SDK",
+      code: `use nexus_sdk::SkillClient;
+
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let client = SkillClient::new("json-parser")?;
+
+    let result = client.invoke(serde_json::json!({
+        "input": r#"{"users": [{"name": "Alice"}]}"#,
+        "query": ".users[0].name"
+    })).await?;
+
+    println!("Parsed: {}", result["output"]);
+    Ok(())
+}`,
+    },
+    {
+      title: "Python SDK",
+      language: "python",
+      description: "Use the Nexus Python SDK to invoke json-parser in your scripts",
+      code: `from nexus import SkillClient
+
+client = SkillClient("json-parser")
+
+result = client.invoke({
+    "input": '{"users": [{"name": "Alice", "age": 30}]}',
+    "query": ".users[0]"
+})
+
+print(f"Name: {result['output']['name']}")
+print(f"Age: {result['output']['age']}")`,
+    },
+    {
+      title: "CLI Usage",
+      language: "bash",
+      description: "Invoke json-parser directly from the command line",
+      code: `# Parse JSON from stdin
+echo '{"key": "value"}' | naos skill invoke json-parser
+
+# Parse with a JQ-like query
+naos skill invoke json-parser \\
+  --input '{"users": [{"name": "Alice"}]}' \\
+  --query '.users[0].name'
+
+# Stream large JSON files
+cat large-file.json | naos skill invoke json-parser --stream`,
+    },
+  ],
+  "csv-parser": [
+    {
+      title: "Agent Config (TOML)",
+      language: "toml",
+      description: "Route CSV parsing tasks to csv-parser in your agent config",
+      code: `[agent.skills]
+csv-parser = { version = "^2.0.0" }
+
+[[agent.routes]]
+pattern = "parse CSV"
+skill   = "csv-parser"
+input   = "{{ message.content }}"`,
+    },
+    {
+      title: "Python SDK",
+      language: "python",
+      description: "Parse CSV data with custom delimiters and header options",
+      code: `from nexus import SkillClient
+
+client = SkillClient("csv-parser")
+
+csv_data = """name,age,city
+Alice,30,NYC
+Bob,25,LA"""
+
+result = client.invoke({
+    "input": csv_data,
+    "options": {"header": True, "delimiter": ","}
+})
+
+for row in result["rows"]:
+    print(f"{row['name']} lives in {row['city']}")`,
+    },
+    {
+      title: "CLI Usage",
+      language: "bash",
+      description: "Parse CSV files from the command line",
+      code: `# Parse a CSV file
+naos skill invoke csv-parser --file data.csv
+
+# Custom delimiter
+naos skill invoke csv-parser \\
+  --file data.tsv \\
+  --options '{"delimiter": "\\t"}'`,
+    },
+  ],
+  "email-extractor": [
+    {
+      title: "Agent Config (TOML)",
+      language: "toml",
+      description: "Configure email extraction in your agent pipeline",
+      code: `[agent.skills]
+email-extractor = { version = "^1.0.0" }
+
+[[agent.routes]]
+pattern = "find emails in"
+skill   = "email-extractor"
+input   = "{{ message.content }}"`,
+    },
+    {
+      title: "Python SDK",
+      language: "python",
+      description: "Extract and validate email addresses from text content",
+      code: `from nexus import SkillClient
+
+client = SkillClient("email-extractor")
+
+result = client.invoke({
+    "input": "Contact us at hello@nexus.dev or support@nexus.dev",
+    "options": {"validate_mx": True, "deduplicate": True}
+})
+
+for email in result["emails"]:
+    print(f"{email['address']} (valid: {email['mx_valid']})")`,
+    },
+  ],
+  "sentiment-analyzer": [
+    {
+      title: "Agent Config (TOML)",
+      language: "toml",
+      description: "Add sentiment analysis to your agent's NLP pipeline",
+      code: `[agent.skills]
+sentiment-analyzer = { version = "^1.0.0" }
+
+[[agent.routes]]
+pattern = "analyze sentiment"
+skill   = "sentiment-analyzer"
+input   = "{{ message.content }}"`,
+    },
+    {
+      title: "Python SDK",
+      language: "python",
+      description: "Analyze sentiment with confidence scores and aspect detection",
+      code: `from nexus import SkillClient
+
+client = SkillClient("sentiment-analyzer")
+
+result = client.invoke({
+    "input": "The new feature is amazing but the docs need work",
+    "options": {"aspects": True, "language": "en"}
+})
+
+print(f"Overall: {result['sentiment']} ({result['confidence']:.0%})")
+for aspect in result.get("aspects", []):
+    print(f"  {aspect['topic']}: {aspect['sentiment']}")`,
+    },
+  ],
+  "regex-matcher": [
+    {
+      title: "Agent Config (TOML)",
+      language: "toml",
+      description: "Configure regex matching in your agent",
+      code: `[agent.skills]
+regex-matcher = { version = "^1.0.0" }
+
+[[agent.routes]]
+pattern = "match regex"
+skill   = "regex-matcher"
+input   = "{{ message.content }}"`,
+    },
+    {
+      title: "Rust SDK",
+      language: "rust",
+      description: "Use regex-matcher for high-performance pattern matching",
+      code: `use nexus_sdk::SkillClient;
+
+let client = SkillClient::new("regex-matcher")?;
+
+let result = client.invoke(serde_json::json!({
+    "input": "Order #12345 shipped on 2026-04-11",
+    "patterns": [
+        {"name": "order_id", "regex": "#(\\\\d+)"},
+        {"name": "date", "regex": "\\\\d{4}-\\\\d{2}-\\\\d{2}"}
+    ]
+})).await?;
+
+println!("Order: {}", result["matches"]["order_id"]);`,
+    },
+  ],
+  "sql-builder": [
+    {
+      title: "Agent Config (TOML)",
+      language: "toml",
+      description: "Enable natural language to SQL conversion",
+      code: `[agent.skills]
+sql-builder = { version = "^1.0.0" }
+
+[[agent.routes]]
+pattern = "build SQL query"
+skill   = "sql-builder"
+input   = "{{ message.content }}"`,
+    },
+    {
+      title: "Python SDK",
+      language: "python",
+      description: "Convert natural language queries to parameterized SQL",
+      code: `from nexus import SkillClient
+
+client = SkillClient("sql-builder")
+
+result = client.invoke({
+    "input": "Find all users older than 25 in New York",
+    "schema": {
+        "users": ["id", "name", "age", "city"]
+    },
+    "dialect": "postgresql"
+})
+
+print(f"SQL: {result['query']}")
+print(f"Params: {result['params']}")
+# SQL: SELECT * FROM users WHERE age > $1 AND city = $2
+# Params: [25, "New York"]`,
+    },
+  ],
+  "image-resizer": [
+    {
+      title: "Agent Config (TOML)",
+      language: "toml",
+      description: "Add image processing to your agent pipeline",
+      code: `[agent.skills]
+image-resizer = { version = "^1.0.0" }
+
+[[agent.routes]]
+pattern = "resize image"
+skill   = "image-resizer"
+input   = "{{ message.attachments[0] }}"`,
+    },
+    {
+      title: "CLI Usage",
+      language: "bash",
+      description: "Resize images from the command line with various options",
+      code: `# Resize to specific dimensions
+naos skill invoke image-resizer \\
+  --file photo.jpg \\
+  --options '{"width": 800, "height": 600, "fit": "cover"}'
+
+# Batch resize with quality control
+for img in *.png; do
+  naos skill invoke image-resizer \\
+    --file "$img" \\
+    --options '{"width": 1200, "quality": 85, "format": "webp"}'
+done`,
+    },
+  ],
+};
+
+/** Get usage examples for a skill, with fallback to generic examples */
+export function getSkillUsageExamples(skillName: string): UsageExample[] {
+  if (SKILL_USAGE_EXAMPLES[skillName]) return SKILL_USAGE_EXAMPLES[skillName];
+  // Generic fallback
+  return [
+    {
+      title: "Agent Config (TOML)",
+      language: "toml",
+      description: `Add ${skillName} to your agent's skill dependencies`,
+      code: `[agent.skills]\n${skillName} = { version = "^1.0.0" }\n\n[[agent.routes]]\npattern = "use ${skillName}"\nskill   = "${skillName}"\ninput   = "{{ message.content }}"`,
+    },
+    {
+      title: "CLI Usage",
+      language: "bash",
+      description: `Invoke ${skillName} from the command line`,
+      code: `# Basic invocation\nnaos skill invoke ${skillName} --input "your data here"\n\n# With options\nnaos skill invoke ${skillName} \\\\\n  --input "your data" \\\\\n  --options '{"key": "value"}'`,
+    },
+  ];
+}
