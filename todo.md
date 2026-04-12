@@ -131,3 +131,15 @@
 
 ## Bug Fixes (Round 4)
 - [x] Fix blog feed — moved to /api/blog/feed.xml and /api/blog/sitemap.xml to bypass CDN SPA fallback on production
+
+## Legal Pages
+- [x] Create /legal index page with links to Terms and Privacy
+- [x] Create /legal/terms page with full Terms of Service content
+- [x] Create /legal/privacy page with full Privacy Policy content
+- [x] Add TOC sidebar with anchor links for long documents
+- [x] Add print-friendly CSS styles
+- [x] Mobile responsive design for legal pages
+- [x] Add meta tags (noindex, follow) for legal pages
+- [x] Add footer links to Terms, Privacy, and Contact across site
+- [x] Register routes in App.tsx
+- [ ] Push to GitHub repo

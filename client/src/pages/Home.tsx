@@ -1116,7 +1116,7 @@ function Footer() {
   return (
     <footer className="py-12 border-t border-border bg-nexus-deep">
       <div className="container">
-        <div className="grid md:grid-cols-4 gap-8">
+        <div className="grid md:grid-cols-5 gap-8">
           <div className="md:col-span-2">
             <div className="flex items-center gap-2.5 mb-4">
               <div className="w-7 h-7 rounded-md bg-nexus-indigo/20 flex items-center justify-center border border-nexus-indigo/30">
@@ -1147,6 +1147,15 @@ function Footer() {
               <li><a href="#architecture" className="text-muted-foreground hover:text-foreground transition-colors">Architecture</a></li>
               <li><a href="#pricing" className="text-muted-foreground hover:text-foreground transition-colors">Pricing</a></li>
               <li><a href="/docs/cli-reference/all-commands" className="text-muted-foreground hover:text-foreground transition-colors">CLI Reference</a></li>
+            </ul>
+          </div>
+
+          <div>
+            <h4 className="font-mono text-xs uppercase tracking-widest text-muted-foreground mb-4">Legal</h4>
+            <ul className="space-y-2 text-sm">
+              <li><a href="/legal/terms" className="text-muted-foreground hover:text-foreground transition-colors">Terms of Service</a></li>
+              <li><a href="/legal/privacy" className="text-muted-foreground hover:text-foreground transition-colors">Privacy Policy</a></li>
+              <li><a href="mailto:legal@aiagents.nexus" className="text-muted-foreground hover:text-foreground transition-colors">Contact</a></li>
             </ul>
           </div>
         </div>

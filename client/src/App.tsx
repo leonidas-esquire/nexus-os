@@ -21,6 +21,9 @@ import BlogIndex from "./pages/blog/BlogIndex";
 import BlogPost from "./pages/blog/BlogPost";
 import BlogPostPreview from "./pages/blog/BlogPostPreview";
 import AdminBlog from "./pages/admin/AdminBlog";
+import LegalIndex from "./pages/legal/LegalIndex";
+import TermsOfService from "./pages/legal/TermsOfService";
+import PrivacyPolicy from "./pages/legal/PrivacyPolicy";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -48,6 +51,10 @@ function Router() {
       <Route path="/blog/:slug" component={BlogPost} />
       {/* Blog — admin */}
       <Route path="/admin/blog" component={AdminBlog} />
+      {/* Legal */}
+      <Route path="/legal" component={LegalIndex} />
+      <Route path="/legal/terms" component={TermsOfService} />
+      <Route path="/legal/privacy" component={PrivacyPolicy} />
       <Route path={"/404"} component={NotFound} />
       <Route component={NotFound} />
     </Switch>
