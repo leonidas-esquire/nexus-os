@@ -118,7 +118,7 @@ export function registerBlogSsrMiddleware(app: Express) {
     const { slug } = req.params;
 
     // Skip feed.xml, sitemap.xml, and preview routes
-    if (slug === "feed.xml" || slug === "sitemap.xml" || slug === "preview") {
+    if (slug === "feed.xml" || slug === "sitemap.xml" || slug === "preview" || slug === "api") {
       return next();
     }
 

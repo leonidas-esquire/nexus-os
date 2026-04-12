@@ -128,3 +128,6 @@
 - [x] Update robots.txt to allow /blog/
 - [x] Write Vitest tests covering spec requirements (21 tests across 7 suites — all passing)
 - [x] Seed initial blog content (4 posts via seed-blog-v2.mjs script)
+
+## Bug Fixes (Round 4)
+- [x] Fix blog feed — moved to /api/blog/feed.xml and /api/blog/sitemap.xml to bypass CDN SPA fallback on production

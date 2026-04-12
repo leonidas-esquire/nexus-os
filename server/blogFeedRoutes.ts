@@ -13,7 +13,7 @@ function escapeXml(str: string): string {
 }
 
 // ─── Atom 1.0 Feed (/blog/feed.xml) ────────────────────────────────
-feedRouter.get("/blog/feed.xml", async (_req, res) => {
+feedRouter.get("/api/blog/feed.xml", async (_req, res) => {
   try {
     const posts = await blogDb.getBlogPosts({ limit: 20 });
 
@@ -47,7 +47,7 @@ feedRouter.get("/blog/feed.xml", async (_req, res) => {
   <id>https://aiagents.nexus/blog</id>
   <title>Nexus OS Blog</title>
   <subtitle>News, tutorials, and insights about AI agent orchestration</subtitle>
-  <link rel="self" href="https://aiagents.nexus/blog/feed.xml" type="application/atom+xml" />
+  <link rel="self" href="https://aiagents.nexus/api/blog/feed.xml" type="application/atom+xml" />
   <link rel="alternate" href="https://aiagents.nexus/blog" />
   <updated>${feedUpdated}</updated>
   <author><name>Nexus OS</name></author>
@@ -68,7 +68,7 @@ ${entries}
 });
 
 // ─── Sitemap (/blog/sitemap.xml) ────────────────────────────────
-feedRouter.get("/blog/sitemap.xml", async (_req, res) => {
+feedRouter.get("/api/blog/sitemap.xml", async (_req, res) => {
   try {
     const posts = await blogDb.getBlogPosts({ limit: 9999 });
 
@@ -91,7 +91,7 @@ feedRouter.get("/blog/sitemap.xml", async (_req, res) => {
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://aiagents.nexus/blog/feed.xml</loc>
+    <loc>https://aiagents.nexus/api/blog/feed.xml</loc>
     <changefreq>daily</changefreq>
     <priority>0.3</priority>
   </url>

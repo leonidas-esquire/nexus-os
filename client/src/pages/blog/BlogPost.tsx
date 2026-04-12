@@ -149,7 +149,7 @@ export default function BlogPost() {
           </div>
           <div className="flex items-center gap-3">
             <a
-              href="/blog/feed.xml"
+              href="/api/blog/feed.xml"
               className="text-muted-foreground hover:text-nexus-indigo transition-colors"
               title="Atom Feed"
             >
