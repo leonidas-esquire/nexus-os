@@ -1819,3 +1819,69 @@ export function filterSkills(skills: Skill[], filters: FilterState): Skill[] {
     return true;
   });
 }
+
+/* ─── Publisher Verification Badges ─────────────────────────────────────── */
+
+export type PublisherBadgeTier = "platinum" | "gold" | "silver" | "verified" | "unverified";
+
+export interface PublisherBadgeInfo {
+  tier: PublisherBadgeTier;
+  label: string;
+  color: string;        // tailwind text color
+  bgColor: string;      // tailwind bg color
+  borderColor: string;  // tailwind border color
+}
+
+export function getPublisherBadge(trust: TrustInfo): PublisherBadgeInfo {
+  if (!trust.verified) {
+    return { tier: "unverified", label: "Unverified", color: "text-muted-foreground", bgColor: "bg-muted/50", borderColor: "border-border/50" };
+  }
+  const tier = trust.trustTier ?? "T5";
+  const rating = trust.creditRating ?? "B";
+
+  // Platinum: T1-T2 with AAA
+  if ((tier === "T1" || tier === "T2") && rating === "AAA") {
+    return { tier: "platinum", label: "Platinum", color: "text-purple-300", bgColor: "bg-purple-500/10", borderColor: "border-purple-500/30" };
+  }
+  // Gold: T2-T3 with AA or AAA
+  if ((tier === "T2" || tier === "T3") && (rating === "AAA" || rating === "AA")) {
+    return { tier: "gold", label: "Gold", color: "text-nexus-amber", bgColor: "bg-nexus-amber/10", borderColor: "border-nexus-amber/30" };
+  }
+  // Silver: T3 with A+
+  if (tier === "T3" && (rating === "A" || rating === "AA" || rating === "AAA")) {
+    return { tier: "silver", label: "Silver", color: "text-slate-300", bgColor: "bg-slate-400/10", borderColor: "border-slate-400/30" };
+  }
+  // Default verified
+  return { tier: "verified", label: "Verified", color: "text-nexus-green", bgColor: "bg-nexus-green/10", borderColor: "border-nexus-green/30" };
+}
+
+/* ─── Activity Feed ─────────────────────────────────────────────────────── */
+
+export type ActivityType = "install" | "review" | "publish" | "update" | "milestone";
+
+export interface ActivityEvent {
+  id: string;
+  type: ActivityType;
+  skillName: string;
+  actor: string;
+  message: string;
+  timestamp: string; // relative
+}
+
+export const ACTIVITY_FEED: ActivityEvent[] = [
+  { id: "a1", type: "install", skillName: "json-parser", actor: "@ml-pipeline", message: "installed json-parser v1.2.0", timestamp: "2 min ago" },
+  { id: "a2", type: "review", skillName: "sentiment-analyzer", actor: "@alice-ml", message: "left a 5-star review on sentiment-analyzer", timestamp: "8 min ago" },
+  { id: "a3", type: "publish", skillName: "xml-transform", actor: "@converter", message: "published xml-transform v3.1.0", timestamp: "15 min ago" },
+  { id: "a4", type: "install", skillName: "email-extractor", actor: "@data-bot", message: "installed email-extractor v2.0.1", timestamp: "22 min ago" },
+  { id: "a5", type: "milestone", skillName: "json-parser", actor: "system", message: "json-parser reached 2.5M total calls", timestamp: "34 min ago" },
+  { id: "a6", type: "update", skillName: "csv-parser", actor: "@data-tools", message: "updated csv-parser to v2.1.0", timestamp: "41 min ago" },
+  { id: "a7", type: "review", skillName: "json-parser", actor: "@mwebb", message: "left a 5-star review on json-parser", timestamp: "55 min ago" },
+  { id: "a8", type: "install", skillName: "regex-matcher", actor: "@scraper-agent", message: "installed regex-matcher v1.0.2", timestamp: "1 hr ago" },
+  { id: "a9", type: "publish", skillName: "sql-builder", actor: "@db-forge", message: "published sql-builder v1.0.0", timestamp: "1.5 hr ago" },
+  { id: "a10", type: "install", skillName: "sentiment-analyzer", actor: "@review-bot", message: "installed sentiment-analyzer v3.0.0", timestamp: "2 hr ago" },
+  { id: "a11", type: "milestone", skillName: "email-extractor", actor: "system", message: "email-extractor reached 1M total calls", timestamp: "2.5 hr ago" },
+  { id: "a12", type: "update", skillName: "image-resizer", actor: "@media-tools", message: "updated image-resizer to v2.0.0", timestamp: "3 hr ago" },
+  { id: "a13", type: "review", skillName: "csv-parser", actor: "@priya-dev", message: "left a 4-star review on csv-parser", timestamp: "3.5 hr ago" },
+  { id: "a14", type: "install", skillName: "date-parser", actor: "@calendar-agent", message: "installed date-parser v1.1.0", timestamp: "4 hr ago" },
+  { id: "a15", type: "publish", skillName: "markdown-render", actor: "@utils", message: "published markdown-render v1.3.0", timestamp: "5 hr ago" },
+];

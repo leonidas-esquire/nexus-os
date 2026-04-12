@@ -4,6 +4,7 @@
  * install command, and publisher info.
  */
 import { useMemo, useState } from "react";
+import InstallModal from "./InstallModal";
 import { Link, useParams } from "wouter";
 import {
   ArrowLeft, Star, Shield, Download, ExternalLink, Copy, Check,
@@ -678,6 +679,7 @@ function ReviewsSection({ skillName }: { skillName: string }) {
 export default function SkillDetailPage() {
   const params = useParams<{ skillName: string }>();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [showInstallModal, setShowInstallModal] = useState(false);
   const { theme, toggleTheme } = useTheme();
 
   const skill = useMemo(() => {
@@ -706,6 +708,16 @@ export default function SkillDetailPage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
+      {/* Install Modal */}
+      <InstallModal
+        skillName={skill.name}
+        skillVersion={skill.version}
+        wasmSize={skill.wasmSize}
+        publisher={skill.publisher.handle}
+        trustBadge={trustBadge(skill.trust)}
+        isOpen={showInstallModal}
+        onClose={() => setShowInstallModal(false)}
+      />
       {/* ─── Nav ──────────────────────────────────────────────────────────── */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
@@ -933,7 +945,7 @@ export default function SkillDetailPage() {
               </div>
 
               <button
-                onClick={() => toast.success(`${skill.name} installed successfully!`)}
+                onClick={() => setShowInstallModal(true)}
                 className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-nexus-indigo text-white rounded-xl font-medium text-sm hover:bg-nexus-indigo/90 transition-colors mb-3"
               >
                 <Download className="w-4 h-4" />

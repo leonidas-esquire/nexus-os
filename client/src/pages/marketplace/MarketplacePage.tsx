@@ -13,7 +13,7 @@ import {  Search, Star, Shield, ShieldCheck, Download, ArrowRight,
   FileJson, Calculator, Brain, Lock, Database, Globe,
   Type, Image, Shuffle, Menu, X, Sun, Moon, Code2,
   BookOpen, LayoutDashboard, GitCompareArrows,
-  SlidersHorizontal, RotateCcw,
+  SlidersHorizontal, RotateCcw, Activity,
 } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 import {
@@ -21,7 +21,9 @@ import {
   TRENDING_SKILLS,
   formatNumber, formatPrice, trustBadge, timeAgo,
   filterSkills, parseWasmSizeKB, TRUST_TIER_ORDER,
+  getPublisherBadge, ACTIVITY_FEED,
   type Skill, type FilterState, type TrustTier, type PricingModel,
+  type ActivityType,
 } from "./marketplaceData";
 
 const HERO_IMG = "https://d2xsxph8kpxj0f.cloudfront.net/310419663030909471/NRmiWdZq2JgxyAQQ5B7Zs7/marketplace-hero-C3DUoiijW2xtcomNktXyfq.webp";
@@ -60,15 +62,27 @@ function SkillCard({ skill }: { skill: Skill }) {
           <span className="text-xs font-mono text-muted-foreground">v{skill.version}</span>
         </div>
 
-        {/* Trust Badge */}
-        {skill.trust.verified && (
-          <div className="flex items-center gap-1.5 mb-3">
-            <Shield className="w-3.5 h-3.5 text-nexus-green" />
-            <span className="text-xs font-medium text-nexus-green">
+        {/* Publisher Badge + Trust */}
+        <div className="flex items-center gap-2 mb-3 flex-wrap">
+          {(() => {
+            const badge = getPublisherBadge(skill.trust);
+            return (
+              <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider border ${badge.bgColor} ${badge.color} ${badge.borderColor}`}>
+                {badge.tier === "platinum" && <span className="w-1.5 h-1.5 rounded-full bg-purple-400" />}
+                {badge.tier === "gold" && <span className="w-1.5 h-1.5 rounded-full bg-nexus-amber" />}
+                {badge.tier === "silver" && <span className="w-1.5 h-1.5 rounded-full bg-slate-300" />}
+                {badge.tier === "verified" && <span className="w-1.5 h-1.5 rounded-full bg-nexus-green" />}
+                {badge.label}
+              </span>
+            );
+          })()}
+          {skill.trust.verified && (
+            <span className="inline-flex items-center gap-1 text-xs font-medium text-nexus-green">
+              <Shield className="w-3 h-3" />
               {trustBadge(skill.trust)}
             </span>
-          </div>
-        )}
+          )}
+        </div>
 
         {/* Description */}
         <p className="text-sm text-muted-foreground mb-4 line-clamp-2 leading-relaxed">
@@ -596,14 +610,21 @@ export default function MarketplacePage() {
                           </span>
                         </td>
                         <td className="px-5 py-3.5">
-                          {skill.trust.verified ? (
-                            <span className="inline-flex items-center gap-1 text-xs font-medium text-nexus-green">
-                              <Shield className="w-3 h-3" />
-                              {trustBadge(skill.trust)}
-                            </span>
-                          ) : (
-                            <span className="text-xs text-muted-foreground">—</span>
-                          )}
+                          <div className="flex items-center gap-1.5">
+                            {(() => {
+                              const badge = getPublisherBadge(skill.trust);
+                              return (
+                                <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] font-semibold uppercase tracking-wider border ${badge.bgColor} ${badge.color} ${badge.borderColor}`}>
+                                  {badge.label}
+                                </span>
+                              );
+                            })()}
+                            {skill.trust.verified && (
+                              <span className="text-xs font-medium text-nexus-green">
+                                {trustBadge(skill.trust)}
+                              </span>
+                            )}
+                          </div>
                         </td>
                         <td className="px-5 py-3.5">
                           <span className="flex items-center gap-1 text-sm">
@@ -654,7 +675,17 @@ export default function MarketplacePage() {
                         </div>
                       </div>
                       <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                        <span>{skill.publisher.handle}</span>
+                        <span className="flex items-center gap-1.5">
+                          {skill.publisher.handle}
+                          {(() => {
+                            const badge = getPublisherBadge(skill.trust);
+                            return badge.tier !== "unverified" ? (
+                              <span className={`inline-flex items-center px-1.5 py-0.5 rounded-full text-[8px] font-bold uppercase tracking-wider border ${badge.bgColor} ${badge.color} ${badge.borderColor}`}>
+                                {badge.label}
+                              </span>
+                            ) : null;
+                          })()}
+                        </span>
                         <span className={skill.pricing.model === "free" ? "text-nexus-green font-medium" : ""}>
                           {formatPrice(skill.pricing)}
                         </span>
@@ -668,6 +699,51 @@ export default function MarketplacePage() {
             </section>
           </>
         )}
+
+        {/* Activity Feed */}
+        <section className="mb-12">
+          <div className="flex items-center justify-between mb-5">
+            <h2 className="text-xl font-bold flex items-center gap-2">
+              <Activity className="w-5 h-5 text-nexus-cyan" />
+              Live Activity
+            </h2>
+            <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+              <span className="w-2 h-2 rounded-full bg-nexus-green animate-pulse" />
+              Real-time
+            </span>
+          </div>
+          <div className="bg-card/40 border border-border/30 rounded-xl overflow-hidden divide-y divide-border/20">
+            {ACTIVITY_FEED.slice(0, 8).map((event) => (
+              <div key={event.id} className="flex items-center gap-4 px-5 py-3 hover:bg-card/60 transition-colors group">
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${
+                  event.type === "install" ? "bg-nexus-indigo/15 text-nexus-indigo" :
+                  event.type === "review" ? "bg-nexus-amber/15 text-nexus-amber" :
+                  event.type === "publish" ? "bg-nexus-green/15 text-nexus-green" :
+                  event.type === "update" ? "bg-nexus-cyan/15 text-nexus-cyan" :
+                  "bg-purple-500/15 text-purple-400"
+                }`}>
+                  {event.type === "install" && <Download className="w-3.5 h-3.5" />}
+                  {event.type === "review" && <Star className="w-3.5 h-3.5" />}
+                  {event.type === "publish" && <Package className="w-3.5 h-3.5" />}
+                  {event.type === "update" && <TrendingUp className="w-3.5 h-3.5" />}
+                  {event.type === "milestone" && <Zap className="w-3.5 h-3.5" />}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm">
+                    <span className="font-medium text-foreground">{event.actor}</span>
+                    <span className="text-muted-foreground"> {event.message.replace(event.actor, "")}</span>
+                  </p>
+                </div>
+                <Link href={`/marketplace/${event.skillName}`}>
+                  <span className="text-xs text-nexus-indigo opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer hover:underline">
+                    View
+                  </span>
+                </Link>
+                <span className="text-xs text-muted-foreground shrink-0 w-20 text-right">{event.timestamp}</span>
+              </div>
+            ))}
+          </div>
+        </section>
 
         {/* CTA */}
         <section className="text-center py-16 border-t border-border/30">
