@@ -4,6 +4,7 @@ import NotFound from "@/pages/NotFound";
 import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
+import { FavoritesProvider } from "./contexts/FavoritesContext";
 import Home from "./pages/Home";
 import DocsLayout from "./pages/docs/DocsLayout";
 import ManualLayout from "./pages/docs/ManualLayout";
@@ -13,6 +14,8 @@ import DeveloperPortal from "./pages/marketplace/DeveloperPortal";
 import CompareSkills from "./pages/marketplace/CompareSkills";
 import DependencyGraph from "./pages/marketplace/DependencyGraph";
 import PublisherProfile from "./pages/marketplace/PublisherProfile";
+import WatchlistPage from "./pages/marketplace/WatchlistPage";
+import LeaderboardPage from "./pages/marketplace/LeaderboardPage";
 
 
 function Router() {
@@ -23,6 +26,8 @@ function Router() {
       <Route path={"/marketplace/compare"} component={CompareSkills} />
       <Route path={"/marketplace/developer"} component={DeveloperPortal} />
       <Route path={"/marketplace/dependencies"} component={DependencyGraph} />
+      <Route path={"/marketplace/watchlist"} component={WatchlistPage} />
+      <Route path={"/marketplace/leaderboard"} component={LeaderboardPage} />
       <Route path={"/marketplace/publisher/:handle"} component={PublisherProfile} />
       <Route path={"/marketplace/:skillName"} component={SkillDetailPage} />
       <Route path={"/docs/manual"} component={ManualLayout} />
@@ -42,8 +47,10 @@ function App() {
     <ErrorBoundary>
       <ThemeProvider defaultTheme="dark" switchable={true}>
         <TooltipProvider>
-          <Toaster />
-          <Router />
+          <FavoritesProvider>
+            <Toaster />
+            <Router />
+          </FavoritesProvider>
         </TooltipProvider>
       </ThemeProvider>
     </ErrorBoundary>

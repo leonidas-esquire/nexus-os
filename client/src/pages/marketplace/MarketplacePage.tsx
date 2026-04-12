@@ -12,7 +12,7 @@ import {  Search, Star, Shield, ShieldCheck, Download, ArrowRight,
   Package, ChevronRight, ExternalLink, Zap, TrendingUp,
   FileJson, Calculator, Brain, Lock, Database, Globe,
   Type, Image, Shuffle, Menu, X, Sun, Moon, Code2,
-  BookOpen, LayoutDashboard, GitCompareArrows,
+  BookOpen, LayoutDashboard, GitCompareArrows, Heart, Trophy,
   SlidersHorizontal, RotateCcw, Activity,
 } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
@@ -172,6 +172,18 @@ export default function MarketplacePage() {
               <span className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
                 <GitCompareArrows className="w-4 h-4" />
                 Compare
+              </span>
+            </Link>
+            <Link href="/marketplace/leaderboard">
+              <span className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
+                <Trophy className="w-4 h-4" />
+                Leaderboard
+              </span>
+            </Link>
+            <Link href="/marketplace/watchlist">
+              <span className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
+                <Heart className="w-4 h-4" />
+                Watchlist
               </span>
             </Link>
             <Link href="/marketplace/developer">

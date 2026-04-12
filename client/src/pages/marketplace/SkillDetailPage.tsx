@@ -12,9 +12,10 @@ import {
   FileText, Terminal, Tag, Cpu, HardDrive, Timer,
   Sun, Moon, Code2, BookOpen, LayoutDashboard, Menu, X,
   MessageSquare, ThumbsUp, User, History, AlertTriangle,
-  ArrowRight, GitCommit, Link2,
+  ArrowRight, GitCommit, Link2, Heart, Rss,
 } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
+import { useFavorites } from "@/contexts/FavoritesContext";
 import { toast } from "sonner";
 import NotificationBell from "./NotificationBell";
 import {
@@ -23,6 +24,28 @@ import {
   getSkillSandboxExamples,
   type Skill, type Review, type VersionEntry, type UsageExample, type SandboxExample,
 } from "./marketplaceData";
+
+/* ─── Watchlist Button ────────────────────────────────────────────────────── */
+function WatchlistButton({ skillName, version }: { skillName: string; version: string }) {
+  const { isFavorite, toggleFavorite } = useFavorites();
+  const fav = isFavorite(skillName);
+  return (
+    <button
+      onClick={() => {
+        toggleFavorite(skillName, version);
+        toast(fav ? `Removed ${skillName} from watchlist` : `Added ${skillName} to watchlist`);
+      }}
+      className={`p-3 rounded-xl border transition-all ${
+        fav
+          ? "border-red-400/40 bg-red-400/10 text-red-400 hover:bg-red-400/20"
+          : "border-border text-muted-foreground hover:border-nexus-indigo/30 hover:text-nexus-indigo"
+      }`}
+      title={fav ? "Remove from watchlist" : "Add to watchlist"}
+    >
+      <Heart className={`w-4 h-4 ${fav ? "fill-red-400" : ""}`} />
+    </button>
+  );
+}
 
 /* ─── Stat Card ───────────────────────────────────────────────────────────── */
 function StatCard({ icon, label, value, sub }: { icon: React.ReactNode; label: string; value: string; sub?: string }) {
@@ -675,6 +698,77 @@ function ReviewsSection({ skillName }: { skillName: string }) {
   );
 }
 
+/* ─── RSS Feed Card ──────────────────────────────────────────────────────── */
+function RssFeedCard({ skillName, version }: { skillName: string; version: string }) {
+  const [copied, setCopied] = useState(false);
+  const feedUrl = `https://registry.nexus.os/skills/${skillName}/changelog.rss`;
+  const atomUrl = `https://registry.nexus.os/skills/${skillName}/changelog.atom`;
+  const jsonUrl = `https://registry.nexus.os/api/v1/skills/${skillName}/versions`;
+
+  const copyUrl = (url: string) => {
+    navigator.clipboard.writeText(url);
+    setCopied(true);
+    toast("Feed URL copied to clipboard");
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <div className="bg-card/60 border border-border/50 rounded-xl p-5">
+      <div className="flex items-center gap-2 mb-3">
+        <Rss className="w-4 h-4 text-orange-400" />
+        <h3 className="text-sm font-semibold">Changelog Feed</h3>
+      </div>
+      <p className="text-xs text-muted-foreground mb-3">
+        Subscribe to get notified when new versions of <span className="font-mono">{skillName}</span> are released.
+      </p>
+      <div className="space-y-2">
+        {/* RSS Feed */}
+        <div className="flex items-center gap-2">
+          <div className="flex-1 bg-muted/30 rounded-lg px-3 py-1.5 font-mono text-[10px] text-muted-foreground truncate">
+            {feedUrl}
+          </div>
+          <button
+            onClick={() => copyUrl(feedUrl)}
+            className="p-1.5 rounded-lg hover:bg-accent transition-colors text-muted-foreground hover:text-foreground"
+            title="Copy RSS URL"
+          >
+            {copied ? <Check className="w-3 h-3 text-nexus-green" /> : <Copy className="w-3 h-3" />}
+          </button>
+        </div>
+        {/* Format options */}
+        <div className="flex gap-2 pt-1">
+          <button
+            onClick={() => copyUrl(feedUrl)}
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-orange-400/10 text-orange-400 text-[10px] font-semibold hover:bg-orange-400/20 transition-colors"
+          >
+            <Rss className="w-3 h-3" />
+            RSS 2.0
+          </button>
+          <button
+            onClick={() => copyUrl(atomUrl)}
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-nexus-indigo/10 text-nexus-indigo text-[10px] font-semibold hover:bg-nexus-indigo/20 transition-colors"
+          >
+            <Rss className="w-3 h-3" />
+            Atom
+          </button>
+          <button
+            onClick={() => copyUrl(jsonUrl)}
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-nexus-green/10 text-nexus-green text-[10px] font-semibold hover:bg-nexus-green/20 transition-colors"
+          >
+            <Code2 className="w-3 h-3" />
+            JSON
+          </button>
+        </div>
+      </div>
+      <div className="mt-3 pt-3 border-t border-border/30">
+        <p className="text-[10px] text-muted-foreground">
+          Current: <span className="font-mono">v{version}</span> · Feed includes changelogs, breaking changes, and security advisories.
+        </p>
+      </div>
+    </div>
+  );
+}
+
 /* ─── Main Page ───────────────────────────────────────────────────────────── */
 export default function SkillDetailPage() {
   const params = useParams<{ skillName: string }>();
@@ -944,13 +1038,16 @@ export default function SkillDetailPage() {
                 )}
               </div>
 
-              <button
-                onClick={() => setShowInstallModal(true)}
-                className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-nexus-indigo text-white rounded-xl font-medium text-sm hover:bg-nexus-indigo/90 transition-colors mb-3"
-              >
-                <Download className="w-4 h-4" />
-                Install Skill
-              </button>
+              <div className="flex gap-2 mb-3">
+                <button
+                  onClick={() => setShowInstallModal(true)}
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-nexus-indigo text-white rounded-xl font-medium text-sm hover:bg-nexus-indigo/90 transition-colors"
+                >
+                  <Download className="w-4 h-4" />
+                  Install Skill
+                </button>
+                <WatchlistButton skillName={skill.name} version={skill.version} />
+              </div>
 
               <div className="space-y-3 pt-4 border-t border-border/30">
                 <div className="flex items-center justify-between text-sm">
@@ -1046,6 +1143,9 @@ export default function SkillDetailPage() {
                 </div>
               </div>
             )}
+
+            {/* RSS / Changelog Feed */}
+            <RssFeedCard skillName={skill.name} version={skill.version} />
           </div>
         </div>
       </main>
