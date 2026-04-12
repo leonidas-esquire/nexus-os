@@ -57,3 +57,17 @@
 - [x] Blog test suite added (server/blog.test.ts) — 24 total tests passing across all suites
 - [x] Tests cover: authors CRUD, tags CRUD, posts CRUD, stats, related posts, RSS/sitemap feed data
 - [x] Auth guard tests: unauthenticated access rejected for admin procedures
+
+## Seed Initial Content
+- [x] Create seed script with author profile (Leonidas Esquire Williamson)
+- [x] Create seed tags (AI Agents, Orchestration, Tutorials, Rust, WASM, Edge Computing)
+- [x] Create seed published posts with realistic content
+- [x] Run seed script to populate database
+
+## Navigation
+- [x] Add "Blog" link to landing page navbar
+
+## Editor.js Image Plugin
+- [x] Install @editorjs/image package (already in dependencies)
+- [x] Add image plugin to Editor.js config with drag-and-drop support
+- [x] Wire image upload to S3 via tRPC mutation (uploadByFile + uploadByUrl)

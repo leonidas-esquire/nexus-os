@@ -197,6 +197,7 @@ function Nav() {
           <a href="/docs" className="text-nexus-indigo hover:text-nexus-indigo/80 transition-colors font-medium">docs</a>
           <a href="/docs/manual" className="hover:text-foreground transition-colors">manual</a>
           <a href="/marketplace" className="text-nexus-green hover:text-nexus-green/80 transition-colors font-medium">marketplace</a>
+          <a href="/blog" className="text-nexus-cyan hover:text-nexus-cyan/80 transition-colors font-medium">blog</a>
         </div>
 
         <div className="flex items-center gap-3">

@@ -26,6 +26,7 @@ import Table from "@editorjs/table";
 import Embed from "@editorjs/embed";
 import Warning from "@editorjs/warning";
 import RawTool from "@editorjs/raw";
+import ImageTool from "@editorjs/image";
 
 function slugify(text: string): string {
   return text
@@ -117,6 +118,7 @@ export default function BlogEditor() {
 
   const createMutation = trpc.blog.posts.create.useMutation();
   const updateMutation = trpc.blog.posts.update.useMutation();
+  const imageUploadMutation = trpc.blog.images.upload.useMutation();
 
   // Initialize editor
   useEffect(() => {
@@ -147,6 +149,36 @@ export default function BlogEditor() {
         embed: { class: Embed as any },
         warning: { class: Warning as any },
         raw: { class: RawTool as any },
+        image: {
+          class: ImageTool as any,
+          config: {
+            uploader: {
+              async uploadByFile(file: File) {
+                return new Promise((resolve, reject) => {
+                  const reader = new FileReader();
+                  reader.onload = async () => {
+                    try {
+                      const base64 = (reader.result as string).split(",")[1];
+                      const result = await imageUploadMutation.mutateAsync({
+                        base64,
+                        filename: file.name,
+                        mimeType: file.type,
+                      });
+                      resolve({ success: 1, file: { url: result.url } });
+                    } catch (err) {
+                      reject(err);
+                    }
+                  };
+                  reader.onerror = () => reject(new Error("Failed to read file"));
+                  reader.readAsDataURL(file);
+                });
+              },
+              async uploadByUrl(url: string) {
+                return { success: 1, file: { url } };
+              },
+            },
+          },
+        },
       },
       data: initialData,
       minHeight: 300,

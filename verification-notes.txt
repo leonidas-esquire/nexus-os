@@ -1,0 +1,19 @@
+Verification Notes - Blog System
+================================
+
+1. Landing page: renders correctly with "blog" link visible in nav bar (cyan color)
+2. Blog index (/blog): Shows 3 seeded posts with featured post, tag filters, search bar, RSS link
+   - Featured: "Building Your First AI Agent with Nexus OS" 
+   - Grid: "Introducing Nexus OS" and "WASM Skills: The Secret to 90% Cost Savings"
+   - All 6 tags displayed as filter pills
+   - Author name and reading time shown on cards
+3. Individual post (/blog/building-your-first-agent-with-nexus-os): 
+   - Full article renders with code blocks, lists, headings
+   - Author bio card present
+   - Related articles section at bottom
+   - Share buttons (copy, twitter, linkedin)
+   - Tag badges, reading time, view count displayed
+   - Back to Blog link works
+4. TypeScript: zero errors
+5. Tests: 24/24 passing
+6. Editor.js image plugin: configured with uploadByFile (drag-and-drop) and uploadByUrl
