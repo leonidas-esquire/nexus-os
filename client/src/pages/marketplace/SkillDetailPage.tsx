@@ -19,7 +19,8 @@ import NotificationBell from "./NotificationBell";
 import {
   SKILLS, formatNumber, formatPrice, formatMoney, trustBadge, timeAgo,
   getReviewsForSkill, getVersionHistory, getSkillDependencies, getSkillUsageExamples,
-  type Skill, type Review, type VersionEntry, type UsageExample,
+  getSkillSandboxExamples,
+  type Skill, type Review, type VersionEntry, type UsageExample, type SandboxExample,
 } from "./marketplaceData";
 
 /* ─── Stat Card ───────────────────────────────────────────────────────────── */
@@ -77,6 +78,138 @@ function StarRating({ value, onChange, readonly = false }: { value: number; onCh
           />
         </button>
       ))}
+    </div>
+  );
+}
+
+/* ─── Skill Sandbox / Playground ──────────────────────────────────────────── */
+function SkillSandbox({ skillName }: { skillName: string }) {
+  const examples = useMemo(() => getSkillSandboxExamples(skillName), [skillName]);
+  const [selectedExample, setSelectedExample] = useState(0);
+  const [input, setInput] = useState("");
+  const [output, setOutput] = useState("");
+  const [running, setRunning] = useState(false);
+  const [hasRun, setHasRun] = useState(false);
+  const [latency, setLatency] = useState(0);
+
+  // Set initial input when example changes
+  const currentExample = examples[selectedExample];
+  useState(() => {
+    if (currentExample) setInput(currentExample.input);
+  });
+
+  if (examples.length === 0) return null;
+
+  const handleExampleChange = (idx: number) => {
+    setSelectedExample(idx);
+    setInput(examples[idx].input);
+    setOutput("");
+    setHasRun(false);
+  };
+
+  const handleRun = () => {
+    setRunning(true);
+    setOutput("");
+    const fakeLatency = Math.floor(Math.random() * 5) + 1;
+    setTimeout(() => {
+      setOutput(currentExample.expectedOutput);
+      setLatency(fakeLatency);
+      setRunning(false);
+      setHasRun(true);
+    }, 300 + Math.random() * 700);
+  };
+
+  return (
+    <div className="bg-card/40 border border-border/30 rounded-xl overflow-hidden">
+      <div className="px-5 pt-4 pb-3 flex items-center justify-between">
+        <h3 className="font-semibold flex items-center gap-2">
+          <Terminal className="w-5 h-5 text-nexus-green" />
+          Skill Playground
+          <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-nexus-green/10 text-nexus-green font-medium">LIVE</span>
+        </h3>
+        {hasRun && (
+          <span className="text-[11px] text-muted-foreground">
+            Executed in <span className="text-nexus-green font-medium">{latency}ms</span>
+          </span>
+        )}
+      </div>
+
+      {/* Example Selector */}
+      <div className="px-5 pb-3 flex gap-1.5 flex-wrap">
+        {examples.map((ex, i) => (
+          <button
+            key={i}
+            onClick={() => handleExampleChange(i)}
+            className={`px-2.5 py-1 rounded-lg text-[11px] font-medium transition-all ${
+              selectedExample === i
+                ? "bg-nexus-green/15 text-nexus-green border border-nexus-green/30"
+                : "bg-accent/20 text-muted-foreground hover:text-foreground border border-transparent"
+            }`}
+          >
+            {ex.label}
+          </button>
+        ))}
+      </div>
+
+      <div className="px-5 pb-2">
+        <p className="text-xs text-muted-foreground">{currentExample.description}</p>
+      </div>
+
+      {/* Input/Output Split */}
+      <div className="grid md:grid-cols-2 border-t border-border/30">
+        {/* Input */}
+        <div className="border-r border-border/20">
+          <div className="px-3 py-2 bg-accent/10 border-b border-border/20 flex items-center justify-between">
+            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-nexus-amber">INPUT</span>
+          </div>
+          <textarea
+            value={input || currentExample.input}
+            onChange={(e) => setInput(e.target.value)}
+            className="w-full p-4 bg-transparent text-sm font-mono text-foreground/90 resize-none focus:outline-none min-h-[140px]"
+            spellCheck={false}
+          />
+        </div>
+
+        {/* Output */}
+        <div>
+          <div className="px-3 py-2 bg-accent/10 border-b border-border/20 flex items-center justify-between">
+            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-nexus-cyan">OUTPUT</span>
+            {hasRun && <span className="text-[10px] text-nexus-green">Success</span>}
+          </div>
+          <div className="p-4 min-h-[140px]">
+            {running ? (
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <div className="w-3.5 h-3.5 border-2 border-nexus-green/30 border-t-nexus-green rounded-full animate-spin" />
+                Executing WASM skill...
+              </div>
+            ) : output ? (
+              <pre className="text-sm font-mono text-foreground/90 whitespace-pre-wrap">{output}</pre>
+            ) : (
+              <p className="text-sm text-muted-foreground/50 italic">Click "Run" to execute the skill</p>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Run Button */}
+      <div className="px-5 py-3 border-t border-border/30 flex items-center justify-between bg-accent/5">
+        <div className="flex items-center gap-3 text-[11px] text-muted-foreground">
+          <span className="flex items-center gap-1"><Cpu className="w-3 h-3" /> WASM Sandbox</span>
+          <span className="flex items-center gap-1"><Shield className="w-3 h-3" /> Isolated</span>
+          <span className="flex items-center gap-1"><Timer className="w-3 h-3" /> Max 100ms</span>
+        </div>
+        <button
+          onClick={handleRun}
+          disabled={running}
+          className="px-4 py-1.5 rounded-lg text-sm font-medium bg-nexus-green text-black hover:bg-nexus-green/90 transition-all disabled:opacity-50 flex items-center gap-1.5"
+        >
+          {running ? (
+            <><div className="w-3 h-3 border-2 border-black/30 border-t-black rounded-full animate-spin" /> Running...</>
+          ) : (
+            <><Zap className="w-3.5 h-3.5" /> Run</>
+          )}
+        </button>
+      </div>
     </div>
   );
 }
@@ -768,6 +901,9 @@ export default function SkillDetailPage() {
               </div>
             </div>
 
+            {/* Skill Sandbox / Playground */}
+            <SkillSandbox skillName={skill.name} />
+
             {/* Usage Examples */}
             <UsageExamplesSection skillName={skill.name} />
 
@@ -840,17 +976,19 @@ export default function SkillDetailPage() {
             {/* Publisher Card */}
             <div className="bg-card/60 border border-border/50 rounded-xl p-5">
               <h3 className="text-sm font-semibold mb-3">Publisher</h3>
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 rounded-full bg-nexus-indigo/10 border border-nexus-indigo/20 flex items-center justify-center">
-                  <span className="text-sm font-bold text-nexus-indigo">
-                    {skill.publisher.name.charAt(0)}
-                  </span>
+              <Link href={`/marketplace/publisher/${skill.publisher.handle}`}>
+                <div className="flex items-center gap-3 mb-3 cursor-pointer group">
+                  <div className="w-10 h-10 rounded-full bg-nexus-indigo/10 border border-nexus-indigo/20 flex items-center justify-center">
+                    <span className="text-sm font-bold text-nexus-indigo">
+                      {skill.publisher.name.charAt(0)}
+                    </span>
+                  </div>
+                  <div>
+                    <p className="font-medium text-sm group-hover:text-nexus-indigo transition-colors">{skill.publisher.name}</p>
+                    <p className="text-xs text-muted-foreground">@{skill.publisher.handle}</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="font-medium text-sm">{skill.publisher.name}</p>
-                  <p className="text-xs text-muted-foreground">{skill.publisher.handle}</p>
-                </div>
-              </div>
+              </Link>
               {skill.trust.verified && (
                 <div className="space-y-2 pt-3 border-t border-border/30 text-sm">
                   <div className="flex items-center justify-between">

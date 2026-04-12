@@ -1379,3 +1379,443 @@ export function getSkillUsageExamples(skillName: string): UsageExample[] {
     },
   ];
 }
+
+
+/* ─── Publisher Profiles ──────────────────────────────────────────────────── */
+
+export interface PublisherProfile {
+  handle: string;
+  displayName: string;
+  email: string;
+  bio: string;
+  website?: string;
+  github?: string;
+  verified: boolean;
+  joinedAt: string;
+  auid: string;
+  trustTier: TrustTier;
+  creditRating: CreditRating;
+  tScore: number;
+  totalSkills: number;
+  totalCalls: number;
+  totalRevenue: number;
+  avgRating: number;
+  trustHistory: { date: string; tier: string; rating: string; tScore: number; event: string }[];
+  badges: string[];
+}
+
+export const PUBLISHER_PROFILES: PublisherProfile[] = [
+  {
+    handle: "verified-dev",
+    displayName: "Verified Dev",
+    email: "dev@example.com",
+    bio: "Building high-performance WASM skills for the Nexus ecosystem. Specializing in data parsing, transformation, and validation tools. All skills are MIT-licensed and thoroughly benchmarked.",
+    website: "https://verified-dev.io",
+    github: "verified-dev",
+    verified: true,
+    joinedAt: "2025-09-15",
+    auid: "axis:company:dev:01hx7k2m3n4p5q6r7s8t9u0v1w:a3f7",
+    trustTier: "T2",
+    creditRating: "AAA",
+    tScore: 94,
+    totalSkills: 3,
+    totalCalls: 4930000,
+    totalRevenue: 717.70,
+    avgRating: 4.7,
+    trustHistory: [
+      { date: "2025-09-15", tier: "T5", rating: "B", tScore: 20, event: "Account created, initial assessment" },
+      { date: "2025-11-01", tier: "T4", rating: "BB", tScore: 45, event: "First skill published (json-parser v1.0.0)" },
+      { date: "2025-12-20", tier: "T3", rating: "A", tScore: 62, event: "100K total calls milestone" },
+      { date: "2026-02-01", tier: "T3", rating: "AA", tScore: 78, event: "Second skill published (csv-parser)" },
+      { date: "2026-03-10", tier: "T2", rating: "AAA", tScore: 94, event: "1M total calls, zero security incidents" },
+    ],
+    badges: ["Early Adopter", "Million Calls Club", "Zero Incidents", "Top Publisher"],
+  },
+  {
+    handle: "data-tools",
+    displayName: "Data Tools Inc.",
+    email: "team@data-tools.io",
+    bio: "Enterprise-grade data extraction and validation tools. Our skills power thousands of production agents across finance, healthcare, and e-commerce verticals.",
+    website: "https://data-tools.io",
+    github: "data-tools-inc",
+    verified: true,
+    joinedAt: "2025-10-01",
+    auid: "axis:company:dt:02hy8l3n4o5p6q7r8s9t0u1v2w:b4g8",
+    trustTier: "T3",
+    creditRating: "AA",
+    tScore: 78,
+    totalSkills: 2,
+    totalCalls: 1890000,
+    totalRevenue: 378.00,
+    avgRating: 4.6,
+    trustHistory: [
+      { date: "2025-10-01", tier: "T5", rating: "B", tScore: 18, event: "Account created" },
+      { date: "2025-12-15", tier: "T4", rating: "BB", tScore: 42, event: "email-extractor v1.0.0 published" },
+      { date: "2026-02-10", tier: "T3", rating: "A", tScore: 65, event: "500K calls milestone" },
+      { date: "2026-03-20", tier: "T3", rating: "AA", tScore: 78, event: "email-extractor v2.0.0, major update" },
+    ],
+    badges: ["Enterprise Ready", "500K Calls", "Verified Publisher"],
+  },
+  {
+    handle: "utils",
+    displayName: "Utils Collective",
+    email: "hello@utils.dev",
+    bio: "Open-source utility skills for everyday agent tasks. We believe in free, fast, and reliable tools that just work. Community-driven development with transparent benchmarks.",
+    github: "utils-collective",
+    verified: true,
+    joinedAt: "2025-11-10",
+    auid: "axis:community:uc:03iz9m4o5p6q7r8s9t0u1v2w3x:c5h9",
+    trustTier: "T3",
+    creditRating: "A",
+    tScore: 68,
+    totalSkills: 3,
+    totalCalls: 2780000,
+    totalRevenue: 139.00,
+    avgRating: 4.4,
+    trustHistory: [
+      { date: "2025-11-10", tier: "T5", rating: "B", tScore: 15, event: "Account created" },
+      { date: "2026-01-05", tier: "T4", rating: "BB", tScore: 38, event: "csv-parser v1.0.0 published" },
+      { date: "2026-02-20", tier: "T3", rating: "A", tScore: 58, event: "date-parser and json-diff published" },
+      { date: "2026-03-25", tier: "T3", rating: "A", tScore: 68, event: "1M total calls milestone" },
+    ],
+    badges: ["Open Source Champion", "Million Calls Club", "Community Favorite"],
+  },
+  {
+    handle: "nlp-works",
+    displayName: "NLP Works",
+    email: "research@nlp-works.ai",
+    bio: "AI/ML research lab building state-of-the-art natural language processing skills. Our sentiment analyzer is the most accurate on the marketplace, trained on 50M+ labeled samples.",
+    website: "https://nlp-works.ai",
+    github: "nlp-works",
+    verified: true,
+    joinedAt: "2025-10-20",
+    auid: "axis:company:nlp:04ja0n5p6q7r8s9t0u1v2w3x4y:d6i0",
+    trustTier: "T2",
+    creditRating: "AAA",
+    tScore: 91,
+    totalSkills: 1,
+    totalCalls: 3200000,
+    totalRevenue: 1600.00,
+    avgRating: 4.8,
+    trustHistory: [
+      { date: "2025-10-20", tier: "T5", rating: "B", tScore: 22, event: "Account created" },
+      { date: "2025-12-01", tier: "T4", rating: "A", tScore: 55, event: "sentiment-analyzer v1.0.0 published" },
+      { date: "2026-01-15", tier: "T3", rating: "AA", tScore: 72, event: "500K calls, top-rated skill" },
+      { date: "2026-02-28", tier: "T2", rating: "AAA", tScore: 91, event: "2M calls, zero incidents, v3.0.0 released" },
+    ],
+    badges: ["AI Pioneer", "Top Rated", "2M Calls Club", "Research Lab"],
+  },
+  {
+    handle: "converter",
+    displayName: "Converter Labs",
+    email: "info@converter.dev",
+    bio: "Format conversion specialists. We build fast, reliable skills for transforming data between formats — Markdown, HTML, XML, CSV, and more.",
+    github: "converter-labs",
+    verified: false,
+    joinedAt: "2026-01-05",
+    auid: "axis:indie:cl:05kb1o6q7r8s9t0u1v2w3x4y5z:e7j1",
+    trustTier: "T4",
+    creditRating: "BB",
+    tScore: 42,
+    totalSkills: 1,
+    totalCalls: 450000,
+    totalRevenue: 45.00,
+    avgRating: 4.2,
+    trustHistory: [
+      { date: "2026-01-05", tier: "T5", rating: "B", tScore: 12, event: "Account created" },
+      { date: "2026-02-15", tier: "T4", rating: "BB", tScore: 42, event: "markdown-to-html v1.0.0 published" },
+    ],
+    badges: ["New Publisher"],
+  },
+  {
+    handle: "patterns",
+    displayName: "Pattern Systems",
+    email: "dev@patterns.io",
+    bio: "Text processing and pattern matching experts. Our regex-matcher is the fastest on the marketplace, compiled from hand-optimized Rust with zero-copy parsing.",
+    website: "https://patterns.io",
+    github: "pattern-systems",
+    verified: true,
+    joinedAt: "2025-12-01",
+    auid: "axis:company:ps:06lc2p7r8s9t0u1v2w3x4y5z6a:f8k2",
+    trustTier: "T3",
+    creditRating: "A",
+    tScore: 72,
+    totalSkills: 1,
+    totalCalls: 1100000,
+    totalRevenue: 0,
+    avgRating: 4.5,
+    trustHistory: [
+      { date: "2025-12-01", tier: "T5", rating: "B", tScore: 16, event: "Account created" },
+      { date: "2026-01-20", tier: "T4", rating: "BB", tScore: 48, event: "regex-matcher v1.0.0 published" },
+      { date: "2026-03-05", tier: "T3", rating: "A", tScore: 72, event: "1M calls, v2.0.0 released" },
+    ],
+    badges: ["Speed Champion", "Million Calls Club", "Open Source"],
+  },
+  {
+    handle: "securenet",
+    displayName: "SecureNet",
+    email: "security@securenet.io",
+    bio: "Security-focused validation skills. Every skill undergoes rigorous fuzzing and penetration testing before release. SOC2 compliant development process.",
+    website: "https://securenet.io",
+    github: "securenet-io",
+    verified: true,
+    joinedAt: "2025-11-15",
+    auid: "axis:company:sn:07md3q8s9t0u1v2w3x4y5z6a7b:g9l3",
+    trustTier: "T3",
+    creditRating: "AA",
+    tScore: 80,
+    totalSkills: 2,
+    totalCalls: 1750000,
+    totalRevenue: 175.00,
+    avgRating: 4.6,
+    trustHistory: [
+      { date: "2025-11-15", tier: "T5", rating: "B", tScore: 20, event: "Account created" },
+      { date: "2026-01-10", tier: "T4", rating: "A", tScore: 55, event: "json-validator v1.0.0 published" },
+      { date: "2026-02-25", tier: "T3", rating: "AA", tScore: 80, event: "url-validator published, SOC2 verified" },
+    ],
+    badges: ["Security Expert", "SOC2 Compliant", "Verified Publisher"],
+  },
+  {
+    handle: "vision-ai",
+    displayName: "Vision AI",
+    email: "team@vision-ai.dev",
+    bio: "Computer vision and image processing skills for AI agents. Our image-resizer uses SIMD-optimized WASM for near-native performance.",
+    website: "https://vision-ai.dev",
+    github: "vision-ai",
+    verified: true,
+    joinedAt: "2026-01-15",
+    auid: "axis:company:va:08ne4r9t0u1v2w3x4y5z6a7b8c:h0m4",
+    trustTier: "T4",
+    creditRating: "A",
+    tScore: 55,
+    totalSkills: 1,
+    totalCalls: 950000,
+    totalRevenue: 285.00,
+    avgRating: 4.3,
+    trustHistory: [
+      { date: "2026-01-15", tier: "T5", rating: "B", tScore: 15, event: "Account created" },
+      { date: "2026-02-20", tier: "T4", rating: "BB", tScore: 38, event: "image-resizer v1.0.0 published" },
+      { date: "2026-03-30", tier: "T4", rating: "A", tScore: 55, event: "500K calls milestone" },
+    ],
+    badges: ["Computer Vision", "SIMD Optimized"],
+  },
+  {
+    handle: "querycraft",
+    displayName: "QueryCraft",
+    email: "dev@querycraft.io",
+    bio: "Database and query building tools for AI agents. Our sql-builder generates safe, parameterized queries from natural language with support for PostgreSQL, MySQL, and SQLite.",
+    website: "https://querycraft.io",
+    github: "querycraft",
+    verified: true,
+    joinedAt: "2026-02-01",
+    auid: "axis:company:qc:09of5s0u1v2w3x4y5z6a7b8c9d:i1n5",
+    trustTier: "T4",
+    creditRating: "BB",
+    tScore: 48,
+    totalSkills: 1,
+    totalCalls: 780000,
+    totalRevenue: 234.00,
+    avgRating: 4.4,
+    trustHistory: [
+      { date: "2026-02-01", tier: "T5", rating: "B", tScore: 12, event: "Account created" },
+      { date: "2026-03-10", tier: "T4", rating: "BB", tScore: 48, event: "sql-builder v1.0.0 published" },
+    ],
+    badges: ["Database Expert", "New Publisher"],
+  },
+];
+
+function normalizeHandle(h: string): string {
+  return h.replace(/^@/, "");
+}
+
+export function getPublisherProfile(handle: string): PublisherProfile | undefined {
+  const norm = normalizeHandle(handle);
+  return PUBLISHER_PROFILES.find((p) => normalizeHandle(p.handle) === norm);
+}
+
+export function getPublisherSkills(handle: string): Skill[] {
+  const norm = normalizeHandle(handle);
+  return SKILLS.filter((s) => normalizeHandle(s.publisher.handle) === norm);
+}
+
+/* ─── Skill Sandbox / Playground ──────────────────────────────────────────── */
+
+export interface SandboxExample {
+  label: string;
+  input: string;
+  expectedOutput: string;
+  description: string;
+}
+
+export const SKILL_SANDBOX_EXAMPLES: Record<string, SandboxExample[]> = {
+  "json-parser": [
+    {
+      label: "Basic Parse",
+      input: '{"name": "Alice", "age": 30, "roles": ["admin", "user"]}',
+      expectedOutput: '{\n  "name": "Alice",\n  "age": 30,\n  "roles": [\n    "admin",\n    "user"\n  ]\n}',
+      description: "Parse and pretty-print a JSON object",
+    },
+    {
+      label: "JQ Query",
+      input: '{"data": {"users": [{"name": "Alice"}, {"name": "Bob"}]}}\n---\n.data.users[].name',
+      expectedOutput: '[\n  "Alice",\n  "Bob"\n]',
+      description: "Extract nested values using JQ-like query syntax",
+    },
+    {
+      label: "Array Filter",
+      input: '{"items": [{"price": 10}, {"price": 25}, {"price": 5}]}\n---\n.items[] | select(.price > 8)',
+      expectedOutput: '[\n  {"price": 10},\n  {"price": 25}\n]',
+      description: "Filter array elements by condition",
+    },
+    {
+      label: "Error Handling",
+      input: '{"name": "Alice", age: 30}',
+      expectedOutput: 'Error at line 1, col 18: Expected string key, got identifier "age"\nHint: JSON keys must be quoted strings',
+      description: "Graceful error handling with line/column indicators",
+    },
+  ],
+  "email-extractor": [
+    {
+      label: "Basic Extract",
+      input: "Contact us at support@example.com or sales@company.io for more info.",
+      expectedOutput: '[\n  {"email": "support@example.com", "valid": true, "domain": "example.com"},\n  {"email": "sales@company.io", "valid": true, "domain": "company.io"}\n]',
+      description: "Extract email addresses from plain text",
+    },
+    {
+      label: "HTML Content",
+      input: '<a href="mailto:john@startup.dev">John</a> and <a href="mailto:jane@corp.com">Jane</a>',
+      expectedOutput: '[\n  {"email": "john@startup.dev", "valid": true, "domain": "startup.dev"},\n  {"email": "jane@corp.com", "valid": true, "domain": "corp.com"}\n]',
+      description: "Extract emails from HTML content",
+    },
+    {
+      label: "Validation",
+      input: "Real: user@domain.com, Invalid: not-an-email, Tricky: user@.com",
+      expectedOutput: '[\n  {"email": "user@domain.com", "valid": true, "domain": "domain.com"},\n  {"email": "user@.com", "valid": false, "reason": "Invalid domain"}\n]',
+      description: "Extract and validate email addresses",
+    },
+  ],
+  "csv-parser": [
+    {
+      label: "Basic CSV",
+      input: "name,age,city\nAlice,30,NYC\nBob,25,LA\nCharlie,35,Chicago",
+      expectedOutput: '[\n  {"name": "Alice", "age": 30, "city": "NYC"},\n  {"name": "Bob", "age": 25, "city": "LA"},\n  {"name": "Charlie", "age": 35, "city": "Chicago"}\n]',
+      description: "Parse CSV with automatic type inference",
+    },
+    {
+      label: "Quoted Fields",
+      input: 'name,bio\n"Alice","Loves ""coding"" and data"\n"Bob","Works at Acme, Inc."',
+      expectedOutput: '[\n  {"name": "Alice", "bio": "Loves \\"coding\\" and data"},\n  {"name": "Bob", "bio": "Works at Acme, Inc."}\n]',
+      description: "Handle quoted fields with escaped characters",
+    },
+  ],
+  "sentiment-analyzer": [
+    {
+      label: "Positive",
+      input: "This product is absolutely amazing! Best purchase I've ever made.",
+      expectedOutput: '{\n  "sentiment": "positive",\n  "confidence": 0.96,\n  "emotions": {"joy": 0.82, "surprise": 0.15},\n  "language": "en"\n}',
+      description: "Analyze positive sentiment with emotion detection",
+    },
+    {
+      label: "Negative",
+      input: "Terrible experience. The service was slow and the staff was rude.",
+      expectedOutput: '{\n  "sentiment": "negative",\n  "confidence": 0.93,\n  "emotions": {"anger": 0.65, "disgust": 0.28},\n  "language": "en"\n}',
+      description: "Detect negative sentiment and specific emotions",
+    },
+    {
+      label: "Multi-language",
+      input: "Ce restaurant est fantastique! La nourriture était délicieuse.",
+      expectedOutput: '{\n  "sentiment": "positive",\n  "confidence": 0.91,\n  "emotions": {"joy": 0.78, "satisfaction": 0.20},\n  "language": "fr"\n}',
+      description: "Multi-language sentiment analysis (French)",
+    },
+  ],
+  "regex-matcher": [
+    {
+      label: "Email Pattern",
+      input: "Text: hello@world.com and test@example.org\n---\nPattern: [\\w.+-]+@[\\w-]+\\.[\\w.]+",
+      expectedOutput: '{\n  "matches": ["hello@world.com", "test@example.org"],\n  "count": 2,\n  "positions": [[6, 21], [26, 42]]\n}',
+      description: "Match email addresses using regex pattern",
+    },
+    {
+      label: "Named Groups",
+      input: "Date: 2026-04-11\n---\nPattern: (?P<year>\\d{4})-(?P<month>\\d{2})-(?P<day>\\d{2})",
+      expectedOutput: '{\n  "matches": ["2026-04-11"],\n  "groups": {"year": "2026", "month": "04", "day": "11"}\n}',
+      description: "Extract named capture groups",
+    },
+  ],
+  "markdown-to-html": [
+    {
+      label: "Basic Markdown",
+      input: "# Hello World\\n\\nThis is **bold** and *italic*.\\n\\n- Item 1\\n- Item 2",
+      expectedOutput: '<h1>Hello World</h1>\\n<p>This is <strong>bold</strong> and <em>italic</em>.</p>\\n<ul>\\n<li>Item 1</li>\\n<li>Item 2</li>\\n</ul>',
+      description: "Convert basic Markdown to HTML",
+    },
+  ],
+  "json-validator": [
+    {
+      label: "Valid JSON",
+      input: '{"name": "Alice", "age": 30}',
+      expectedOutput: '{\n  "valid": true,\n  "schema": {"type": "object", "properties": {"name": "string", "age": "number"}}\n}',
+      description: "Validate JSON and infer schema",
+    },
+    {
+      label: "Invalid JSON",
+      input: '{name: "Alice", age: 30}',
+      expectedOutput: '{\n  "valid": false,\n  "errors": [\n    {"line": 1, "col": 2, "message": "Expected string key"},\n    {"line": 1, "col": 17, "message": "Expected string key"}\n  ]\n}',
+      description: "Detect and report JSON validation errors",
+    },
+  ],
+};
+
+export function getSkillSandboxExamples(skillName: string): SandboxExample[] {
+  return SKILL_SANDBOX_EXAMPLES[skillName] || [];
+}
+
+/* ─── Advanced Filter Helpers ─────────────────────────────────────────────── */
+
+export interface FilterState {
+  priceMin: number | null;
+  priceMax: number | null;
+  minTrustTier: TrustTier | null;
+  minRating: number | null;
+  maxWasmSize: number | null;
+  pricingModel: PricingModel | "all";
+}
+
+export const TRUST_TIER_ORDER: TrustTier[] = ["T1", "T2", "T3", "T4", "T5"];
+
+export function parseWasmSizeKB(sizeStr: string): number {
+  const match = sizeStr.match(/([\d.]+)\s*(KB|MB)/i);
+  if (!match) return 0;
+  const val = parseFloat(match[1]);
+  return match[2].toUpperCase() === "MB" ? val * 1024 : val;
+}
+
+export function filterSkills(skills: Skill[], filters: FilterState): Skill[] {
+  return skills.filter((s) => {
+    // Price filter
+    const price = s.pricing.pricePerCall ?? 0;
+    if (filters.priceMin !== null && price < filters.priceMin) return false;
+    if (filters.priceMax !== null && price > filters.priceMax) return false;
+
+    // Pricing model
+    if (filters.pricingModel !== "all" && s.pricing.model !== filters.pricingModel) return false;
+
+    // Trust tier (lower number = higher trust)
+    if (filters.minTrustTier) {
+      const skillIdx = TRUST_TIER_ORDER.indexOf(s.trust.trustTier || "T5");
+      const filterIdx = TRUST_TIER_ORDER.indexOf(filters.minTrustTier);
+      if (skillIdx > filterIdx) return false;
+    }
+
+    // Rating
+    if (filters.minRating !== null && s.stats.rating < filters.minRating) return false;
+
+    // WASM size
+    if (filters.maxWasmSize !== null) {
+      const sizeKB = parseWasmSizeKB(s.wasmSize);
+      if (sizeKB > filters.maxWasmSize) return false;
+    }
+
+    return true;
+  });
+}

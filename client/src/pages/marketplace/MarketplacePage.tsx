@@ -13,13 +13,15 @@ import {  Search, Star, Shield, ShieldCheck, Download, ArrowRight,
   FileJson, Calculator, Brain, Lock, Database, Globe,
   Type, Image, Shuffle, Menu, X, Sun, Moon, Code2,
   BookOpen, LayoutDashboard, GitCompareArrows,
+  SlidersHorizontal, RotateCcw,
 } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 import {
   SKILLS, CATEGORIES, FEATURED_SKILLS, RECENTLY_ADDED,
   TRENDING_SKILLS,
   formatNumber, formatPrice, trustBadge, timeAgo,
-  type Skill,
+  filterSkills, parseWasmSizeKB, TRUST_TIER_ORDER,
+  type Skill, type FilterState, type TrustTier, type PricingModel,
 } from "./marketplaceData";
 
 const HERO_IMG = "https://d2xsxph8kpxj0f.cloudfront.net/310419663030909471/NRmiWdZq2JgxyAQQ5B7Zs7/marketplace-hero-C3DUoiijW2xtcomNktXyfq.webp";
@@ -96,7 +98,19 @@ export default function MarketplacePage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
   const { theme, toggleTheme } = useTheme();
+
+  const defaultFilters: FilterState = {
+    priceMin: null, priceMax: null,
+    minTrustTier: null, minRating: null,
+    maxWasmSize: null, pricingModel: "all",
+  };
+  const [filters, setFilters] = useState<FilterState>(defaultFilters);
+
+  const hasActiveFilters = filters.priceMin !== null || filters.priceMax !== null ||
+    filters.minTrustTier !== null || filters.minRating !== null ||
+    filters.maxWasmSize !== null || filters.pricingModel !== "all";
 
   const filteredSkills = useMemo(() => {
     let results = SKILLS;
@@ -113,10 +127,13 @@ export default function MarketplacePage() {
     if (selectedCategory) {
       results = results.filter((s) => s.category === selectedCategory);
     }
+    if (hasActiveFilters) {
+      results = filterSkills(results, filters);
+    }
     return results;
-  }, [searchQuery, selectedCategory]);
+  }, [searchQuery, selectedCategory, filters, hasActiveFilters]);
 
-  const isSearching = searchQuery.trim() !== "" || selectedCategory !== null;
+  const isSearching = searchQuery.trim() !== "" || selectedCategory !== null || hasActiveFilters;
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -232,8 +249,9 @@ export default function MarketplacePage() {
               Sandboxed execution, AXIS trust verification, and per-call billing.
             </p>
 
-            {/* Search */}
-            <div className="relative max-w-xl">
+            {/* Search + Filter Toggle */}
+            <div className="flex gap-2 items-center">
+            <div className="flex-1 relative max-w-xl">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
               <input
                 type="text"
@@ -243,6 +261,131 @@ export default function MarketplacePage() {
                 className="w-full pl-12 pr-4 py-3.5 bg-card/80 backdrop-blur-sm border border-border/60 rounded-xl text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-nexus-indigo/40 focus:border-nexus-indigo/40 transition-all"
               />
             </div>
+            <button
+              onClick={() => setShowFilters(!showFilters)}
+              className={`shrink-0 p-3.5 rounded-xl border transition-all ${
+                showFilters || hasActiveFilters
+                  ? "bg-nexus-indigo/10 border-nexus-indigo/40 text-nexus-indigo"
+                  : "bg-card/80 border-border/60 text-muted-foreground hover:text-foreground hover:border-border"
+              }`}
+              title="Advanced Filters"
+            >
+              <SlidersHorizontal className="w-5 h-5" />
+            </button>
+            </div>
+
+            {/* Advanced Filters Panel */}
+            {showFilters && (
+              <div className="mt-4 p-5 bg-card/80 backdrop-blur-sm border border-border/60 rounded-xl">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-sm font-semibold flex items-center gap-2">
+                    <SlidersHorizontal className="w-4 h-4 text-nexus-indigo" />
+                    Advanced Filters
+                    {hasActiveFilters && (
+                      <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-nexus-indigo/10 text-nexus-indigo">
+                        Active
+                      </span>
+                    )}
+                  </h3>
+                  {hasActiveFilters && (
+                    <button
+                      onClick={() => setFilters(defaultFilters)}
+                      className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors"
+                    >
+                      <RotateCcw className="w-3 h-3" /> Reset
+                    </button>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+                  {/* Pricing Model */}
+                  <div>
+                    <label className="text-[11px] text-muted-foreground uppercase tracking-wider mb-1.5 block">Pricing</label>
+                    <select
+                      value={filters.pricingModel}
+                      onChange={(e) => setFilters({ ...filters, pricingModel: e.target.value as PricingModel | "all" })}
+                      className="w-full px-3 py-2 bg-background border border-border/50 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-nexus-indigo/40"
+                    >
+                      <option value="all">All Models</option>
+                      <option value="free">Free</option>
+                      <option value="per-call">Per-Call</option>
+                      <option value="flat">Flat Rate</option>
+                    </select>
+                  </div>
+
+                  {/* Price Range */}
+                  <div>
+                    <label className="text-[11px] text-muted-foreground uppercase tracking-wider mb-1.5 block">Max Price ($/call)</label>
+                    <select
+                      value={filters.priceMax === null ? "" : String(filters.priceMax)}
+                      onChange={(e) => setFilters({ ...filters, priceMax: e.target.value ? Number(e.target.value) : null })}
+                      className="w-full px-3 py-2 bg-background border border-border/50 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-nexus-indigo/40"
+                    >
+                      <option value="">Any</option>
+                      <option value="0">Free only</option>
+                      <option value="0.0001">≤ $0.0001</option>
+                      <option value="0.0005">≤ $0.0005</option>
+                      <option value="0.001">≤ $0.001</option>
+                      <option value="0.01">≤ $0.01</option>
+                    </select>
+                  </div>
+
+                  {/* Min Trust Tier */}
+                  <div>
+                    <label className="text-[11px] text-muted-foreground uppercase tracking-wider mb-1.5 block">Min Trust Tier</label>
+                    <select
+                      value={filters.minTrustTier || ""}
+                      onChange={(e) => setFilters({ ...filters, minTrustTier: (e.target.value || null) as TrustTier | null })}
+                      className="w-full px-3 py-2 bg-background border border-border/50 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-nexus-indigo/40"
+                    >
+                      <option value="">Any</option>
+                      <option value="T1">T1 (Highest)</option>
+                      <option value="T2">T2 or better</option>
+                      <option value="T3">T3 or better</option>
+                      <option value="T4">T4 or better</option>
+                    </select>
+                  </div>
+
+                  {/* Min Rating */}
+                  <div>
+                    <label className="text-[11px] text-muted-foreground uppercase tracking-wider mb-1.5 block">Min Rating</label>
+                    <select
+                      value={filters.minRating === null ? "" : String(filters.minRating)}
+                      onChange={(e) => setFilters({ ...filters, minRating: e.target.value ? Number(e.target.value) : null })}
+                      className="w-full px-3 py-2 bg-background border border-border/50 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-nexus-indigo/40"
+                    >
+                      <option value="">Any</option>
+                      <option value="4.5">★ 4.5+</option>
+                      <option value="4.0">★ 4.0+</option>
+                      <option value="3.5">★ 3.5+</option>
+                      <option value="3.0">★ 3.0+</option>
+                    </select>
+                  </div>
+
+                  {/* Max WASM Size */}
+                  <div>
+                    <label className="text-[11px] text-muted-foreground uppercase tracking-wider mb-1.5 block">Max WASM Size</label>
+                    <select
+                      value={filters.maxWasmSize === null ? "" : String(filters.maxWasmSize)}
+                      onChange={(e) => setFilters({ ...filters, maxWasmSize: e.target.value ? Number(e.target.value) : null })}
+                      className="w-full px-3 py-2 bg-background border border-border/50 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-nexus-indigo/40"
+                    >
+                      <option value="">Any</option>
+                      <option value="128">≤ 128 KB</option>
+                      <option value="256">≤ 256 KB</option>
+                      <option value="512">≤ 512 KB</option>
+                      <option value="1024">≤ 1 MB</option>
+                    </select>
+                  </div>
+                </div>
+
+                {hasActiveFilters && (
+                  <div className="mt-3 pt-3 border-t border-border/30 text-xs text-muted-foreground">
+                    Showing {filteredSkills.length} of {SKILLS.length} skills
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Stats row */}
