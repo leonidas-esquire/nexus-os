@@ -75,3 +75,16 @@
 ## Bug Fixes
 - [x] Fix editor showing blank for existing posts that have HTML content but no contentJson
 - [x] Added htmlToEditorBlocks() converter as fallback (no seed update needed)
+
+## Editor Enhancements
+- [x] Add persistent formatting toolbar at top of editor (bold, italic, headings, lists, code, quote, link, image)
+- [x] Increase image upload limit to 100MB
+- [x] Add OG image upload option in post settings panel (Media tab)
+- [x] Add post tags selector in editor settings panel (General tab with toggle badges)
+- [x] Add categories feature with prefilled dropdown + custom category option
+- [x] Add categories database table and migration
+- [x] Add category CRUD endpoints to blog router
+- [x] Add category selector to editor settings panel (General tab with combobox + inline create)
+- [x] Professional formatting: highlight, table, divider, warning/callout, raw HTML, checklist blocks
+- [x] Update public blog pages to display categories (BlogIndex + BlogPost)
+- [x] Seed default categories (7: Engineering, Product, Tutorials, Research, Community, Case Studies, Opinion)

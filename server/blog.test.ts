@@ -317,6 +317,46 @@ describe("blog.relatedPosts", () => {
   });
 });
 
+describe("blog.categories", () => {
+  const adminCaller = appRouter.createCaller(createAdminContext());
+  const publicCaller = appRouter.createCaller(createPublicContext());
+  let categoryId: string;
+
+  it("creates a category", async () => {
+    const result = await adminCaller.blog.categories.upsert({
+      name: "Test Category",
+      slug: "test-category",
+      description: "A test category",
+      color: "#ff6600",
+    });
+    expect(result).toHaveProperty("id");
+    categoryId = result.id;
+  });
+
+  it("lists categories (public)", async () => {
+    const categories = await publicCaller.blog.categories.list();
+    expect(Array.isArray(categories)).toBe(true);
+    const found = categories.find((c: any) => c.slug === "test-category");
+    expect(found).toBeTruthy();
+    expect(found?.color).toBe("#ff6600");
+  });
+
+  it("gets category by slug", async () => {
+    const category = await publicCaller.blog.categories.getBySlug({ slug: "test-category" });
+    expect(category).toBeTruthy();
+    expect(category?.name).toBe("Test Category");
+  });
+
+  it("rejects unauthenticated category creation", async () => {
+    await expect(
+      publicCaller.blog.categories.upsert({
+        name: "Hacked",
+        slug: "hacked",
+      })
+    ).rejects.toThrow();
+  });
+});
+
 describe("blog.feed", () => {
   const publicCaller = appRouter.createCaller(createPublicContext());
 
@@ -365,6 +405,16 @@ afterAll(async () => {
     for (const author of authors) {
       if (author.slug === "test-author" || author.slug === "post-author") {
         await adminCaller.blog.authors.delete({ id: author.id });
+      }
+    }
+  } catch {}
+
+  // Clean up test categories
+  try {
+    const categories = await publicCaller.blog.categories.list();
+    for (const cat of categories) {
+      if (cat.slug === "test-category") {
+        await adminCaller.blog.categories.delete({ id: cat.id });
       }
     }
   } catch {}

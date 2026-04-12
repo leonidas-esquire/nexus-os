@@ -15,6 +15,13 @@
       "when": 1775977381728,
       "tag": "0001_shocking_morlun",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1775983094219,
+      "tag": "0002_whole_jimmy_woo",
+      "breakpoints": true
     }
   ]
 }

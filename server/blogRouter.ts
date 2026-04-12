@@ -101,6 +101,42 @@ export const blogRouter = router({
       }),
   }),
 
+  // ─── Categories ───────────────────────────────────────────
+  categories: router({
+    list: publicProcedure.query(() => blogDb.listCategories()),
+    getBySlug: publicProcedure
+      .input(z.object({ slug: z.string() }))
+      .query(({ input }) => blogDb.getCategoryBySlug(input.slug)),
+    upsert: adminProcedure
+      .input(z.object({
+        id: z.string().optional(),
+        name: z.string().min(1),
+        slug: z.string().min(1),
+        description: z.string().optional(),
+        color: z.string().optional(),
+        icon: z.string().optional(),
+        position: z.number().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const id = await blogDb.upsertCategory({
+          id: input.id || uuid(),
+          name: input.name,
+          slug: input.slug,
+          description: input.description ?? null,
+          color: input.color ?? "#6366f1",
+          icon: input.icon ?? null,
+          position: input.position ?? 0,
+        });
+        return { id };
+      }),
+    delete: adminProcedure
+      .input(z.object({ id: z.string() }))
+      .mutation(async ({ input }) => {
+        await blogDb.deleteCategory(input.id);
+        return { success: true };
+      }),
+  }),
+
   // ─── Posts ─────────────────────────────────────────────────
   posts: router({
     list: publicProcedure
@@ -153,6 +189,7 @@ export const blogRouter = router({
         ogTitle: z.string().optional(),
         ogDescription: z.string().optional(),
         authorId: z.string(),
+        categoryId: z.string().nullable().optional(),
         status: z.enum(["draft", "published", "scheduled", "archived"]).optional(),
         publishedAt: z.date().optional(),
         scheduledFor: z.date().optional(),
@@ -179,6 +216,7 @@ export const blogRouter = router({
           ogTitle: input.ogTitle ?? null,
           ogDescription: input.ogDescription ?? null,
           authorId: input.authorId,
+          categoryId: input.categoryId ?? null,
           status: input.status ?? "draft",
           publishedAt: input.status === "published" ? (input.publishedAt ?? new Date()) : (input.publishedAt ?? null),
           scheduledFor: input.scheduledFor ?? null,
@@ -207,6 +245,7 @@ export const blogRouter = router({
         ogTitle: z.string().optional(),
         ogDescription: z.string().optional(),
         authorId: z.string().optional(),
+        categoryId: z.string().nullable().optional(),
         status: z.enum(["draft", "published", "scheduled", "archived"]).optional(),
         publishedAt: z.date().optional(),
         scheduledFor: z.date().optional(),
@@ -283,7 +322,7 @@ export const blogRouter = router({
 
     upload: adminProcedure
       .input(z.object({
-        base64: z.string(),
+        base64: z.string().max(140_000_000), // ~100MB base64
         filename: z.string(),
         mimeType: z.string(),
         altText: z.string().optional(),

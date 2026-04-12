@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Link } from "wouter";
 import { useState, useMemo, useEffect } from "react";
-import { Search, ArrowRight, Clock, Calendar, Tag, ChevronLeft, ChevronRight, Rss } from "lucide-react";
+import { Search, ArrowRight, Clock, Calendar, Tag, ChevronLeft, ChevronRight, Rss, Folder } from "lucide-react";
 
 function formatDate(d: Date | string | null): string {
   if (!d) return "";
@@ -107,6 +107,11 @@ export default function BlogIndex() {
               <div className="flex flex-col justify-center">
                 <div className="flex items-center gap-2 mb-3">
                   <Badge className="bg-nexus-indigo/20 text-nexus-indigo border-nexus-indigo/30 text-xs">Featured</Badge>
+                  {featured.category && (
+                    <Badge className="bg-nexus-green/10 text-nexus-green border-nexus-green/30 text-xs">
+                      <Folder size={10} className="mr-1" />{featured.category.name}
+                    </Badge>
+                  )}
                   {featured.tags?.slice(0, 2).map(tag => (
                     <Badge key={tag.id} variant="outline" className="text-xs">{tag.name}</Badge>
                   ))}
@@ -158,6 +163,11 @@ export default function BlogIndex() {
                 )}
                 <div className="p-5 flex flex-col flex-1">
                   <div className="flex flex-wrap gap-1.5 mb-3">
+                    {post.category && (
+                      <Badge className="bg-nexus-green/10 text-nexus-green border-nexus-green/30 text-[10px] font-mono">
+                        {post.category.name}
+                      </Badge>
+                    )}
                     {post.tags?.slice(0, 3).map(tag => (
                       <Badge key={tag.id} variant="outline" className="text-[10px] font-mono">{tag.name}</Badge>
                     ))}

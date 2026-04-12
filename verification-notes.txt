@@ -22,3 +22,13 @@ Verification Notes - Blog System
    - The "Introducing Nexus OS" post now loads correctly in the editor
    - All content blocks visible: H2 headers, paragraphs, code blocks, inline code, bold text
    - htmlToEditorBlocks() successfully converts HTML to Editor.js blocks when contentJson is null
+
+8. Editor Enhancement Verification (April 12, 2026):
+   - Formatting Toolbar: VISIBLE at top of editor with all buttons
+   - Bold, Italic, Highlight, Link | H2, H3, H4 | Lists | Quote, Code, Table, Divider | Image, Warning, Raw HTML
+   - Post content loads correctly with all blocks
+   - Tags display below title as badges
+   - Settings panel has tabs: General, Media, SEO
+   - Category selector with prefilled dropdown + custom category creation
+   - OG Image upload in Media tab
+   - Server compiles with zero TypeScript errors

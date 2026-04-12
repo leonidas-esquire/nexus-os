@@ -2,9 +2,9 @@ import { eq, desc, asc, and, sql, inArray, like, or, count } from "drizzle-orm";
 import { getDb } from "./db";
 import {
   blogPosts, blogTags, blogPostTags, blogAuthors,
-  blogImages, blogRelatedPosts, blogPostViews,
-  InsertBlogPost, InsertBlogTag, InsertBlogAuthor, InsertBlogImage,
-  BlogPost, BlogTag, BlogAuthor,
+  blogImages, blogRelatedPosts, blogPostViews, blogCategories,
+  InsertBlogPost, InsertBlogTag, InsertBlogAuthor, InsertBlogImage, InsertBlogCategory,
+  BlogPost, BlogTag, BlogAuthor, BlogCategory,
 } from "../drizzle/schema";
 import { v4 as uuid } from "uuid";
 
@@ -92,6 +92,64 @@ export async function deleteTag(id: string) {
   if (!db) return;
   await db.delete(blogPostTags).where(eq(blogPostTags.tagId, id));
   await db.delete(blogTags).where(eq(blogTags.id, id));
+}
+
+// ─── Categories ─────────────────────────────────────────────
+
+export async function listCategories() {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(blogCategories).orderBy(asc(blogCategories.position), asc(blogCategories.name));
+}
+
+export async function getCategoryById(id: string) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const rows = await db.select().from(blogCategories).where(eq(blogCategories.id, id)).limit(1);
+  return rows[0];
+}
+
+export async function getCategoryBySlug(slug: string) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const rows = await db.select().from(blogCategories).where(eq(blogCategories.slug, slug)).limit(1);
+  return rows[0];
+}
+
+export async function upsertCategory(data: InsertBlogCategory) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  if (!data.id) data.id = uuid();
+  await db.insert(blogCategories).values(data).onDuplicateKeyUpdate({
+    set: {
+      name: data.name,
+      slug: data.slug,
+      description: data.description ?? null,
+      color: data.color ?? "#6366f1",
+      icon: data.icon ?? null,
+      position: data.position ?? 0,
+    },
+  });
+  return data.id;
+}
+
+export async function deleteCategory(id: string) {
+  const db = await getDb();
+  if (!db) return;
+  // Unset categoryId on posts that reference this category
+  await db.update(blogPosts).set({ categoryId: null }).where(eq(blogPosts.categoryId, id));
+  await db.delete(blogCategories).where(eq(blogCategories.id, id));
+}
+
+export async function recalcCategoryCounts() {
+  const db = await getDb();
+  if (!db) return;
+  const categories = await db.select().from(blogCategories);
+  for (const cat of categories) {
+    const [row] = await db.select({ count: count() }).from(blogPosts)
+      .where(and(eq(blogPosts.categoryId, cat.id), eq(blogPosts.status, "published")));
+    await db.update(blogCategories).set({ postCount: row?.count ?? 0 }).where(eq(blogCategories.id, cat.id));
+  }
 }
 
 // ─── Posts ──────────────────────────────────────────────────────
@@ -336,11 +394,12 @@ export async function getViewStats(days: number = 30) {
 // ─── Enrichment helpers ─────────────────────────────────────────
 
 export async function enrichPostWithRelations(post: BlogPost) {
-  const [author, tags] = await Promise.all([
+  const [author, tags, category] = await Promise.all([
     getAuthorById(post.authorId),
     getPostTags(post.id),
+    post.categoryId ? getCategoryById(post.categoryId) : Promise.resolve(undefined),
   ]);
-  return { ...post, author, tags };
+  return { ...post, author, tags, category };
 }
 
 export async function enrichPostsWithRelations(posts: BlogPost[]) {

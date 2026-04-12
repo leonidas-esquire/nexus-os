@@ -51,6 +51,22 @@ export const blogTags = mysqlTable("blog_tags", {
 export type BlogTag = typeof blogTags.$inferSelect;
 export type InsertBlogTag = typeof blogTags.$inferInsert;
 
+// ─── Blog Categories ───────────────────────────────────────────
+export const blogCategories = mysqlTable("blog_categories", {
+  id: varchar("id", { length: 36 }).primaryKey(),
+  name: varchar("name", { length: 200 }).notNull().unique(),
+  slug: varchar("slug", { length: 200 }).notNull().unique(),
+  description: text("description"),
+  color: varchar("color", { length: 20 }).default("#6366f1").notNull(),
+  icon: varchar("icon", { length: 50 }),
+  position: int("position").default(0).notNull(),
+  postCount: int("postCount").default(0).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type BlogCategory = typeof blogCategories.$inferSelect;
+export type InsertBlogCategory = typeof blogCategories.$inferInsert;
+
 // ─── Blog Posts ─────────────────────────────────────────────────
 export const blogPosts = mysqlTable("blog_posts", {
   id: varchar("id", { length: 36 }).primaryKey(),
@@ -66,6 +82,7 @@ export const blogPosts = mysqlTable("blog_posts", {
   ogTitle: text("ogTitle"),
   ogDescription: text("ogDescription"),
   authorId: varchar("authorId", { length: 36 }).notNull(),
+  categoryId: varchar("categoryId", { length: 36 }),
   status: mysqlEnum("status", ["draft", "published", "scheduled", "archived"]).default("draft").notNull(),
   publishedAt: timestamp("publishedAt"),
   scheduledFor: timestamp("scheduledFor"),

@@ -5,7 +5,7 @@ import { Link, useParams } from "wouter";
 import { useEffect } from "react";
 import {
   ArrowLeft, Calendar, Clock, Eye, Share2, Twitter,
-  Linkedin, Link as LinkIcon, Copy, Check, Rss
+  Linkedin, Link as LinkIcon, Copy, Check, Rss, Folder
 } from "lucide-react";
 import { useState, useCallback } from "react";
 import { toast } from "sonner";
@@ -176,18 +176,21 @@ export default function BlogPost() {
           </div>
         )}
 
-        {/* Tags */}
-        {post.tags && post.tags.length > 0 && (
-          <div className="flex flex-wrap gap-2 mb-4">
-            {post.tags.map(tag => (
-              <Link key={tag.id} href={`/blog/tag/${tag.slug}`}>
-                <Badge variant="outline" className="cursor-pointer hover:border-nexus-indigo/40 text-xs font-mono">
-                  {tag.name}
-                </Badge>
-              </Link>
-            ))}
-          </div>
-        )}
+        {/* Category + Tags */}
+        <div className="flex flex-wrap gap-2 mb-4">
+          {post.category && (
+            <Badge className="bg-nexus-green/10 text-nexus-green border-nexus-green/30 text-xs font-mono">
+              <Folder size={10} className="mr-1" />{post.category.name}
+            </Badge>
+          )}
+          {post.tags?.map(tag => (
+            <Link key={tag.id} href={`/blog/tag/${tag.slug}`}>
+              <Badge variant="outline" className="cursor-pointer hover:border-nexus-indigo/40 text-xs font-mono">
+                {tag.name}
+              </Badge>
+            </Link>
+          ))}
+        </div>
 
         {/* Title */}
         <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight leading-tight mb-4">
