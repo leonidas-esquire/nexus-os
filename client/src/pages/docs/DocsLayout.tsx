@@ -18,6 +18,7 @@ import {
   X,
   History,
   BookOpen,
+  Package,
 } from "lucide-react";
 import { DOC_SECTIONS, getFlatPages, getPageByPath, getAdjacentPages } from "./docsData";
 import DocSearch from "./DocSearch";
@@ -122,12 +123,19 @@ function Sidebar({
       })}
 
       {/* Link to User Manual */}
-      <div className="border-t border-border/50 mt-4 pt-4">
+      <div className="border-t border-border/50 mt-4 pt-4 space-y-1">
         <Link href="/docs/manual">
           <span className="flex items-center gap-2 px-3 py-2 rounded-md text-sm text-nexus-indigo hover:bg-nexus-indigo/10 transition-colors font-medium">
             <BookOpen className="w-4 h-4" />
             User Manual
             <span className="text-[10px] text-muted-foreground/60 ml-auto">101 pages</span>
+          </span>
+        </Link>
+        <Link href="/marketplace">
+          <span className="flex items-center gap-2 px-3 py-2 rounded-md text-sm text-nexus-green hover:bg-nexus-green/10 transition-colors font-medium">
+            <Package className="w-4 h-4" />
+            Skill Marketplace
+            <span className="text-[10px] text-muted-foreground/60 ml-auto">12 skills</span>
           </span>
         </Link>
       </div>

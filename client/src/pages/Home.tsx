@@ -196,6 +196,7 @@ function Nav() {
           <a href="#pricing" className="hover:text-foreground transition-colors">pricing</a>
           <a href="/docs" className="text-nexus-indigo hover:text-nexus-indigo/80 transition-colors font-medium">docs</a>
           <a href="/docs/manual" className="hover:text-foreground transition-colors">manual</a>
+          <a href="/marketplace" className="text-nexus-green hover:text-nexus-green/80 transition-colors font-medium">marketplace</a>
         </div>
 
         <div className="flex items-center gap-3">
@@ -1135,6 +1136,7 @@ function Footer() {
               <li><a href="/docs" className="text-muted-foreground hover:text-foreground transition-colors">API Documentation</a></li>
               <li><a href="/docs/manual" className="text-muted-foreground hover:text-foreground transition-colors">User Manual</a></li>
               <li><a href="#features" className="text-muted-foreground hover:text-foreground transition-colors">Features</a></li>
+              <li><a href="/marketplace" className="text-muted-foreground hover:text-foreground transition-colors">Skill Marketplace</a></li>
             </ul>
           </div>
 

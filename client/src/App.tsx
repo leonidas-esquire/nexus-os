@@ -7,12 +7,18 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
 import DocsLayout from "./pages/docs/DocsLayout";
 import ManualLayout from "./pages/docs/ManualLayout";
+import MarketplacePage from "./pages/marketplace/MarketplacePage";
+import SkillDetailPage from "./pages/marketplace/SkillDetailPage";
+import DeveloperPortal from "./pages/marketplace/DeveloperPortal";
 
 
 function Router() {
   return (
     <Switch>
       <Route path={"/"} component={Home} />
+      <Route path={"/marketplace"} component={MarketplacePage} />
+      <Route path={"/marketplace/developer"} component={DeveloperPortal} />
+      <Route path={"/marketplace/:skillName"} component={SkillDetailPage} />
       <Route path={"/docs/manual"} component={ManualLayout} />
       <Route path={"/docs/manual/:section"} component={ManualLayout} />
       <Route path={"/docs/manual/:section/:page"} component={ManualLayout} />

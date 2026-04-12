@@ -27,6 +27,7 @@ import {
   GitBranch,
   Workflow,
   Download,
+  Package,
 } from "lucide-react";
 import {
   ALL_MANUAL_SECTIONS,
@@ -413,9 +414,15 @@ function ManualSidebar({
 
       {/* Link back to API docs */}
       <Link href="/docs">
-        <span className="flex items-center gap-2 px-3 py-2 rounded-md text-xs text-muted-foreground hover:text-foreground hover:bg-nexus-surface/30 transition-colors mb-2">
+        <span className="flex items-center gap-2 px-3 py-2 rounded-md text-xs text-muted-foreground hover:text-foreground hover:bg-nexus-surface/30 transition-colors">
           <ArrowLeft className="w-3 h-3" />
           Back to API Docs
+        </span>
+      </Link>
+      <Link href="/marketplace">
+        <span className="flex items-center gap-2 px-3 py-2 rounded-md text-xs text-nexus-green hover:bg-nexus-green/10 transition-colors mb-2">
+          <Package className="w-3 h-3" />
+          Skill Marketplace
         </span>
       </Link>
 
