@@ -143,3 +143,11 @@
 - [x] Add footer links to Terms, Privacy, and Contact across site
 - [x] Register routes in App.tsx
 - [x] Push to GitHub repo (leonidas-esquire/nexus-os)
+
+## Open-Source Project Files
+- [x] Create LICENSE file (Apache 2.0)
+- [x] Create README.md (project overview, badges, features, quickstart, CLI reference)
+- [x] Create CONTRIBUTING.md (contributing guide, CoC, development setup, PR process)
+- [x] Update .gitignore (Rust-focused, exclude secrets and private docs)
+- [x] Create SECURITY.md (security vulnerability reporting policy)
+- [ ] Push all files to GitHub (leonidas-esquire/nexus-os)

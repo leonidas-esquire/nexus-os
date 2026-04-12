@@ -1,3 +1,8 @@
+# Rust
+/target/
+**/*.rs.bk
+Cargo.lock
+
 # Dependencies
 **/node_modules
 .pnpm-store/
@@ -6,13 +11,25 @@
 dist/
 build/
 *.dist
+*.wasm
 
-# Environment variables
+# Environment
 .env
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
+.env.*.local
+
+# Secrets (NEVER commit these)
+*.pem
+*.key
+secrets/
+credentials/
+
+# Private docs (NEVER commit)
+*-PRIVATE.md
+MONETIZATION*.md
 
 # IDE and editor files
 .vscode/
@@ -49,6 +66,7 @@ pids
 # Coverage directory used by tools like istanbul
 coverage/
 *.lcov
+*.profraw
 
 # nyc test coverage
 .nyc_output
@@ -100,6 +118,7 @@ jspm_packages/
 # Temporary folders
 tmp/
 temp/
+*.tmp
 
 # Database
 *.db
