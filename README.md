@@ -79,17 +79,27 @@ Nexus OS solves all of this with a single 10MB binary.
 
 ### Install
 
+**Quick install** (recommended — detects OS and architecture automatically):
+
 ```bash
 curl -fsSL https://aiagents.nexus/install.sh | sh
 ```
 
-Or build from source:
+**Via Cargo** (requires Rust toolchain):
+
+```bash
+cargo install naos
+```
+
+**From source:**
 
 ```bash
 git clone https://github.com/leonidas-esquire/nexus-os.git
 cd nexus-os
 cargo build --release
 ```
+
+Prebuilt binaries are available for Linux and macOS (x86_64 and ARM) on the [Releases](https://github.com/leonidas-esquire/nexus-os/releases) page.
 
 ### Create Your First Agent
 
