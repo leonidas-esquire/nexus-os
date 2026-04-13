@@ -79,27 +79,52 @@ Nexus OS solves all of this with a single 10MB binary.
 
 ### Install
 
-**Quick install** (recommended — detects OS and architecture automatically):
+### Quick Install (requires Rust)
 
 ```bash
-curl -fsSL https://aiagents.nexus/install.sh | sh
+cargo install --git https://github.com/leonidas-esquire/nexus-os.git
 ```
 
-**Via Cargo** (requires Rust toolchain):
+Don't have Rust? Install it first:
+```bash
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+```
+
+### Download Binary
+
+Pre-built binaries are available for Linux and macOS:
 
 ```bash
-cargo install naos
+# macOS (Apple Silicon)
+curl -fsSL https://github.com/leonidas-esquire/nexus-os/releases/latest/download/naos-v0.3.1-darwin-aarch64 -o naos
+chmod +x naos
+sudo mv naos /usr/local/bin/
+
+# macOS (Intel)
+curl -fsSL https://github.com/leonidas-esquire/nexus-os/releases/latest/download/naos-v0.3.1-darwin-x86_64 -o naos
+chmod +x naos
+sudo mv naos /usr/local/bin/
+
+# Linux (x86_64)
+curl -fsSL https://github.com/leonidas-esquire/nexus-os/releases/latest/download/naos-v0.3.1-linux-x86_64 -o naos
+chmod +x naos
+sudo mv naos /usr/local/bin/
 ```
 
-**From source:**
+### From Source
 
 ```bash
 git clone https://github.com/leonidas-esquire/nexus-os.git
 cd nexus-os
 cargo build --release
+sudo cp target/release/naos /usr/local/bin/
 ```
 
-Prebuilt binaries are available for Linux and macOS (x86_64 and ARM) on the [Releases](https://github.com/leonidas-esquire/nexus-os/releases) page.
+### Verify Installation
+
+```bash
+naos --version
+```
 
 ### Create Your First Agent
 

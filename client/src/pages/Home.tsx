@@ -44,7 +44,7 @@ function formatStars(n: number): string {
 function CopyInstallButton() {
   const [copied, setCopied] = useState(false);
   const handleCopy = () => {
-    navigator.clipboard.writeText("cargo install naos").then(() => {
+    navigator.clipboard.writeText("cargo install --git https://github.com/leonidas-esquire/nexus-os.git").then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     });
@@ -55,7 +55,7 @@ function CopyInstallButton() {
       className="group inline-flex items-center gap-2 bg-nexus-indigo text-white font-mono text-sm px-6 py-3 rounded-md hover:bg-nexus-indigo/90 transition-all glow-indigo relative"
     >
       <Terminal size={16} />
-      <span>cargo install naos</span>
+      <span>cargo install --git https://github.com/leonidas-esquire/nexus-os.git</span>
       <span className="ml-1 pl-2 border-l border-white/20">
         {copied ? (
           <Check size={14} className="text-nexus-green" />
@@ -1091,7 +1091,7 @@ function GetStarted() {
             </div>
             <div className="p-5 font-mono text-sm leading-loose bg-nexus-deep/80">
               <div className="text-muted-foreground"># Install</div>
-              <div><span className="text-nexus-amber">$</span> cargo install naos</div>
+              <div><span className="text-nexus-amber">$</span> cargo install --git https://github.com/leonidas-esquire/nexus-os.git</div>
               <div className="mt-3 text-muted-foreground"># Initialize a project</div>
               <div><span className="text-nexus-amber">$</span> naos init my-agents</div>
               <div><span className="text-nexus-amber">$</span> cd my-agents</div>
