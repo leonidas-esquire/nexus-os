@@ -6,6 +6,7 @@
 
 pub mod agent;
 pub mod audit;
+pub mod runtime_contract;
 pub mod broker;
 pub mod cli;
 pub mod config;

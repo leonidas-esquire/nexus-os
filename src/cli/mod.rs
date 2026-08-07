@@ -11,6 +11,7 @@ pub mod edge;
 pub mod init;
 pub mod marketplace;
 pub mod pool;
+pub mod runtime;
 pub mod saga;
 pub mod status;
 pub mod supervisor;
