@@ -129,6 +129,63 @@ pub fn migrate(conn: &Connection) -> Result<()> {
             content_hash TEXT
         );
 
+        CREATE TABLE IF NOT EXISTS runtime_registrations (
+            registration_id       TEXT PRIMARY KEY,
+            external_agent_id     TEXT NOT NULL,
+            agent_version         TEXT NOT NULL,
+            manifest_digest       TEXT NOT NULL,
+            registry_record_digest TEXT NOT NULL,
+            configuration_digest  TEXT NOT NULL,
+            state                 TEXT NOT NULL,
+            registered_at         TEXT NOT NULL,
+            suspended_at          TEXT,
+            request_digest        TEXT NOT NULL,
+            UNIQUE (external_agent_id, agent_version)
+        );
+
+        CREATE TABLE IF NOT EXISTS runtime_executions (
+            execution_id          TEXT PRIMARY KEY,
+            request_id            TEXT NOT NULL,
+            idempotency_key       TEXT NOT NULL UNIQUE,
+            registration_id       TEXT NOT NULL,
+            work_package_digest   TEXT NOT NULL,
+            authorization_digest  TEXT NOT NULL,
+            manifest_digest       TEXT NOT NULL,
+            registry_record_digest TEXT NOT NULL,
+            input_digest          TEXT NOT NULL,
+            budget_json           TEXT NOT NULL,
+            submitted_at          TEXT NOT NULL,
+            deadline_at           TEXT NOT NULL,
+            state                 TEXT NOT NULL,
+            terminal              INTEGER NOT NULL DEFAULT 0,
+            created_at            TEXT NOT NULL,
+            updated_at            TEXT NOT NULL,
+            request_digest        TEXT NOT NULL,
+            FOREIGN KEY (registration_id)
+                REFERENCES runtime_registrations(registration_id)
+        );
+
+        CREATE TABLE IF NOT EXISTS runtime_events (
+            execution_id          TEXT NOT NULL,
+            sequence              INTEGER NOT NULL,
+            event_type            TEXT NOT NULL,
+            occurred_at           TEXT NOT NULL,
+            detail_digest         TEXT NOT NULL,
+            content_hash          TEXT NOT NULL,
+            PRIMARY KEY (execution_id, sequence),
+            FOREIGN KEY (execution_id)
+                REFERENCES runtime_executions(execution_id)
+        );
+
+        CREATE TABLE IF NOT EXISTS runtime_control_receipts (
+            receipt_id            TEXT PRIMARY KEY,
+            operation             TEXT NOT NULL,
+            request_id            TEXT NOT NULL,
+            request_digest        TEXT NOT NULL,
+            receipt_json          TEXT NOT NULL,
+            UNIQUE (operation, request_id)
+        );
+
         CREATE TABLE IF NOT EXISTS trust_records (
             agent_name  TEXT PRIMARY KEY,
             auid        TEXT,

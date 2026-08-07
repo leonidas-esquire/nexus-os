@@ -1,5 +1,6 @@
 use clap::{Parser, Subcommand};
 use naos::cli;
+use naos::cli::runtime::RuntimeAction;
 
 #[derive(Parser)]
 #[command(
@@ -41,6 +42,12 @@ enum Commands {
     Stop {
         /// Agent name
         name: String,
+    },
+
+    /// Governed machine-readable runtime contract
+    Runtime {
+        #[command(subcommand)]
+        action: RuntimeAction,
     },
 
     /// Show status of all agents
@@ -309,6 +316,13 @@ async fn main() {
         Commands::Create { name, template } => cli::create::run(&name, &template).await,
         Commands::Run { name } => cli::agent_run::run(&name).await,
         Commands::Stop { name } => cli::agent_stop::run(&name).await,
+        Commands::Runtime { action } => {
+            let exit_code = cli::runtime::dispatch(action).await;
+            if exit_code != 0 {
+                std::process::exit(exit_code);
+            }
+            Ok(())
+        }
         Commands::Status => cli::status::run().await,
         Commands::Delete { name } => cli::delete::run(&name).await,
 
