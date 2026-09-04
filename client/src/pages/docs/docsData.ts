@@ -25,29 +25,49 @@ export const DOC_SECTIONS: DocSection[] = [
         title: "Installation",
         content: `# Installation
 
-## Quick Install (macOS/Linux)
+## Quick Install (Recommended)
 
-The fastest way to install Nexus OS is via the install script:
+The fastest way to install Nexus OS is with Cargo directly from GitHub:
 
 \`\`\`bash
-curl -fsSL https://aiagents.nexus/install.sh | sh
+cargo install --git https://github.com/leonidas-esquire/nexus-os.git
 \`\`\`
 
-This downloads the latest release binary and places it in \`/usr/local/bin/naos\`.
+Don't have Rust? Install it first:
+
+\`\`\`bash
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+\`\`\`
+
+## Download Binary
+
+Pre-built binaries are available for Linux and macOS. No Rust toolchain required:
+
+\`\`\`bash
+# macOS (Apple Silicon)
+curl -fsSL https://github.com/leonidas-esquire/nexus-os/releases/latest/download/naos-v0.3.1-darwin-aarch64 -o naos
+chmod +x naos
+sudo mv naos /usr/local/bin/
+
+# macOS (Intel)
+curl -fsSL https://github.com/leonidas-esquire/nexus-os/releases/latest/download/naos-v0.3.1-darwin-x86_64 -o naos
+chmod +x naos
+sudo mv naos /usr/local/bin/
+
+# Linux (x86_64)
+curl -fsSL https://github.com/leonidas-esquire/nexus-os/releases/latest/download/naos-v0.3.1-linux-x86_64 -o naos
+chmod +x naos
+sudo mv naos /usr/local/bin/
+\`\`\`
 
 ## From Source
 
-If you prefer to build from source, clone the repository and compile with Cargo:
+Clone the repository and build with Cargo for full control:
 
 \`\`\`bash
-git clone https://github.com/leonidas-esquire/nexus-os
+git clone https://github.com/leonidas-esquire/nexus-os.git
 cd nexus-os
 cargo build --release
-\`\`\`
-
-The binary will be at \`target/release/naos\`. Move it to your PATH:
-
-\`\`\`bash
 sudo cp target/release/naos /usr/local/bin/
 \`\`\`
 
@@ -57,7 +77,6 @@ Confirm the installation succeeded:
 
 \`\`\`bash
 naos --version
-# nexus-os 1.0.0
 \`\`\`
 
 ## Requirements
@@ -65,23 +84,26 @@ naos --version
 | Requirement | Details |
 |---|---|
 | Operating System | macOS, Linux, or Windows (WSL) |
+| Architecture | x86_64 (amd64) or aarch64 (arm64) |
 | Disk Space | ~50MB |
 | Runtime Dependencies | None |
-| Build Dependencies | Rust 1.75+ (only for source builds) |
+| Build Dependencies | Rust 1.75+ (only for cargo install / source builds) |
 
 ## Updating
 
 To update to the latest version:
 
 \`\`\`bash
-curl -fsSL https://aiagents.nexus/install.sh | sh
+cargo install --git https://github.com/leonidas-esquire/nexus-os.git --force
 \`\`\`
+
+Or download the latest binary from the [Releases](https://github.com/leonidas-esquire/nexus-os/releases) page.
 
 Or if built from source:
 
 \`\`\`bash
 cd nexus-os
-git pull origin master
+git pull origin main
 cargo build --release
 \`\`\``,
       },

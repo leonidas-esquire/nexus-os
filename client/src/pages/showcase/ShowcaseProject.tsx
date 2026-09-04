@@ -97,7 +97,6 @@ export default function ShowcaseProject() {
     : [];
 
   const featuresUsed = project ? parseJsonArray(project.featuresUsed as any) : [];
-  const tags = project ? parseJsonArray(project.tags as any) : [];
 
   const handleUpvote = useCallback(() => {
     if (!project) return;
@@ -189,11 +188,6 @@ export default function ShowcaseProject() {
                     Featured
                   </Badge>
                 )}
-                {tags.map((tag) => (
-                  <Badge key={tag} variant="outline" className="text-xs">
-                    {tag}
-                  </Badge>
-                ))}
               </div>
               <h1 className="text-3xl sm:text-4xl font-bold tracking-tight mb-3">
                 {project.title}
@@ -317,10 +311,10 @@ export default function ShowcaseProject() {
                     Views
                   </div>
                 </div>
-                {project.githubStars > 0 && (
+                {(project.githubStars ?? 0) > 0 && (
                   <div>
                     <div className="text-2xl font-bold font-mono text-foreground">
-                      {formatNumber(project.githubStars)}
+                      {formatNumber(project.githubStars ?? 0)}
                     </div>
                     <div className="text-xs text-muted-foreground flex items-center justify-center gap-1">
                       <Star size={11} />

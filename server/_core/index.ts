@@ -9,8 +9,10 @@ import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
 import { feedRouter } from "../blogFeedRoutes";
 import { blogUploadRouter } from "../blogUploadRoute";
-import { startScheduledJobs } from "../scheduledJobs";
+import { showcaseUploadRouter } from "../showcaseUploadRoute";
+import { startScheduledJobs, stopScheduledJobs } from "../scheduledJobs";
 import { registerBlogSsrMiddleware } from "../blogSsrMiddleware";
+import { installScriptRouter } from "../installScriptRoute";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -34,15 +36,29 @@ async function findAvailablePort(startPort: number = 3000): Promise<number> {
 async function startServer() {
   const app = express();
   const server = createServer(app);
+  app.set("trust proxy", 1);
+  app.disable("x-powered-by");
   // Configure body parser with larger size limit for file uploads
   app.use(express.json({ limit: "50mb" }));
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
+  // Liveness endpoint used by Railway and external uptime monitors.
+  app.get("/api/health", (_req, res) => {
+    res.status(200).json({
+      status: "ok",
+      service: "nexus-site",
+      timestamp: new Date().toISOString(),
+    });
+  });
   // OAuth callback under /api/oauth/callback
   registerOAuthRoutes(app);
   // Blog image upload (multipart/form-data via multer — must come before tRPC)
   app.use(blogUploadRouter);
+  // Showcase image upload (public, no auth required)
+  app.use(showcaseUploadRouter);
   // Blog Atom feed and sitemap routes
   app.use(feedRouter);
+  // Install script route — serves /install.sh with text/plain content-type
+  app.use(installScriptRouter);
   // tRPC API
   app.use(
     "/api/trpc",
@@ -72,9 +88,19 @@ async function startServer() {
     console.log(`Port ${preferredPort} is busy, using port ${port} instead`);
   }
 
-  server.listen(port, () => {
+  server.listen(port, "0.0.0.0", () => {
     console.log(`Server running on http://localhost:${port}/`);
   });
+
+  const shutdown = (signal: string) => {
+    console.log(`[Server] Received ${signal}; shutting down gracefully`);
+    stopScheduledJobs();
+    server.close(() => process.exit(0));
+    setTimeout(() => process.exit(1), 10_000).unref();
+  };
+
+  process.once("SIGTERM", () => shutdown("SIGTERM"));
+  process.once("SIGINT", () => shutdown("SIGINT"));
 }
 
 startServer().catch(console.error);

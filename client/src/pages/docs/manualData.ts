@@ -395,27 +395,32 @@ git --version
 
 The fastest way to get Nexus OS running.
 
-## One-Line Install (macOS/Linux)
+## Quick Install (Recommended)
+
+Install directly from GitHub with Cargo:
 
 \`\`\`bash
-curl -fsSL https://aiagents.nexus/install.sh | sh
+cargo install --git https://github.com/leonidas-esquire/nexus-os.git
 \`\`\`
 
-This script:
-1. Detects your OS and architecture
-2. Downloads the latest release binary
-3. Places it in \`/usr/local/bin/naos\`
-4. Verifies the installation
-
-## Via Cargo (Rust Package Manager)
-
-If you have Rust installed:
+Don't have Rust? Install it first:
 
 \`\`\`bash
-cargo install naos
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 \`\`\`
 
-This compiles from source and installs to \`~/.cargo/bin/naos\`.
+## Download Binary
+
+Pre-built binaries are available for Linux and macOS:
+
+\`\`\`bash
+# macOS (Apple Silicon)
+curl -fsSL https://github.com/leonidas-esquire/nexus-os/releases/latest/download/naos-v0.3.1-darwin-aarch64 -o naos
+chmod +x naos
+sudo mv naos /usr/local/bin/
+\`\`\`
+
+See the [Releases](https://github.com/leonidas-esquire/nexus-os/releases) page for all platforms.
 
 ## Verify Installation
 
@@ -616,27 +621,23 @@ If all steps completed successfully, Nexus OS is properly installed and ready fo
 
 Keep Nexus OS up to date to get the latest features and bug fixes.
 
-## Update via Install Script
+## Update via Cargo (Recommended)
 
 \`\`\`bash
-curl -fsSL https://aiagents.nexus/install.sh | sh
-\`\`\`
-
-The script detects existing installations and replaces the binary.
-
-## Update via Cargo
-
-\`\`\`bash
-cargo install naos --force
+cargo install --git https://github.com/leonidas-esquire/nexus-os.git --force
 \`\`\`
 
 The \`--force\` flag overwrites the existing installation.
+
+## Update via Binary Download
+
+Download the latest binary from the [Releases](https://github.com/leonidas-esquire/nexus-os/releases) page and replace the existing binary.
 
 ## Update from Source
 
 \`\`\`bash
 cd nexus-os
-git pull origin master
+git pull origin main
 cargo build --release
 sudo cp target/release/naos /usr/local/bin/
 \`\`\`
@@ -666,7 +667,7 @@ If you need to go back to a previous version:
 
 \`\`\`bash
 # If installed via cargo
-cargo install naos --version 0.1.0
+cargo install --git https://github.com/leonidas-esquire/nexus-os.git --tag v0.1.0
 
 # If installed from source
 git checkout v0.1.0

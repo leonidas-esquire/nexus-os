@@ -10,7 +10,7 @@ What Kubernetes did for containers, Nexus does for agents.
 [![GitHub Stars](https://img.shields.io/github/stars/leonidas-esquire/nexus-os.svg)](https://github.com/leonidas-esquire/nexus-os/stargazers)
 [![Discord](https://img.shields.io/discord/XXXXXXXXXX?color=7389D8&label=discord)](https://discord.gg/nexus-os)
 
-[Website](https://aiagents.nexus) · [Documentation](https://aiagents.nexus/docs) · [Discord](https://discord.gg/nexus-os) · [Twitter](https://twitter.com/nexus_os)
+[Website](https://aiagents.nexus) · [Documentation](https://aiagents.nexus/docs) · [Deployment Guide](DEPLOYMENT.md) · [Discussions](https://github.com/leonidas-esquire/nexus-os/discussions)
 
 </div>
 

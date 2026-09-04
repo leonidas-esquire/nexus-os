@@ -2828,7 +2828,7 @@ Starting with v0.1.0, Nexus OS includes automatic database migrations. When you 
 
 \`\`\`bash
 # Upgrade binary
-cargo install naos
+cargo install --git https://github.com/leonidas-esquire/nexus-os.git --force
 
 # Run any command — migrations happen automatically
 naos list

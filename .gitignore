@@ -10,6 +10,7 @@ Cargo.lock
 # Build outputs
 dist/
 build/
+/public/
 *.dist
 *.wasm
 
@@ -58,6 +59,7 @@ lerna-debug.log*
 
 # Runtime data
 pids
+data/
 *.pid
 *.seed
 *.pid.lock
@@ -130,6 +132,4 @@ temp/
 
 # Manus version file (auto-generated, not part of source)
 client/public/__manus__/version.json
-# Build output
-target/
-data/
+.project-config.json

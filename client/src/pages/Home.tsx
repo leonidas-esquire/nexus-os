@@ -194,6 +194,7 @@ function Nav() {
           <a href="#broker" className="hover:text-foreground transition-colors">broker</a>
           <a href="#edge" className="hover:text-foreground transition-colors">edge</a>
           <a href="#pricing" className="hover:text-foreground transition-colors">pricing</a>
+          <a href="#installation" className="hover:text-foreground transition-colors">install</a>
           <a href="/docs" className="text-nexus-indigo hover:text-nexus-indigo/80 transition-colors font-medium">docs</a>
           <a href="/docs/manual" className="hover:text-foreground transition-colors">manual</a>
           <a href="/marketplace" className="text-nexus-green hover:text-nexus-green/80 transition-colors font-medium">marketplace</a>
@@ -1112,6 +1113,133 @@ function GetStarted() {
   );
 }
 
+// ---- Installation Section ----
+function InstallationSection() {
+  const [copiedMethod, setCopiedMethod] = useState<string | null>(null);
+
+  const copyCommand = (method: string, command: string) => {
+    navigator.clipboard.writeText(command).then(() => {
+      setCopiedMethod(method);
+      setTimeout(() => setCopiedMethod(null), 2000);
+    });
+  };
+
+  return (
+    <section id="installation" className="py-24 bg-nexus-surface/30 border-y border-border">
+      <div className="container relative">
+        <AnimatedSection>
+          <div className="max-w-3xl mx-auto text-center mb-14">
+            <span className="font-mono text-xs text-nexus-indigo uppercase tracking-widest">Installation</span>
+            <h2 className="text-3xl sm:text-4xl font-bold mt-3 mb-4">
+              Choose your install method
+            </h2>
+            <p className="text-muted-foreground text-lg">
+              Nexus OS supports macOS and Linux on x86_64 and ARM architectures.
+            </p>
+          </div>
+        </AnimatedSection>
+
+        <div className="max-w-4xl mx-auto grid md:grid-cols-3 gap-6">
+          {/* Quick Install */}
+          <AnimatedSection delay={0.05}>
+            <div className="terminal-border rounded-lg p-6 hover:border-nexus-indigo/40 transition-all duration-300 relative">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-8 h-8 rounded-md bg-nexus-indigo/10 flex items-center justify-center text-nexus-indigo">
+                  <Zap size={16} />
+                </div>
+                <div>
+                  <h3 className="font-mono font-semibold text-foreground text-sm">Via Cargo</h3>
+                  <span className="font-mono text-[10px] text-nexus-green uppercase tracking-wider">Recommended</span>
+                </div>
+              </div>
+              <p className="text-muted-foreground text-xs leading-relaxed mb-4">
+                Install directly from GitHub with Cargo. Requires Rust toolchain.
+              </p>
+              <button
+                onClick={() => copyCommand("curl", "cargo install --git https://github.com/leonidas-esquire/nexus-os.git")}
+                className="w-full group bg-nexus-deep rounded-md px-3 py-2.5 font-mono text-xs text-left flex items-center justify-between gap-2 hover:bg-nexus-deep/60 transition-colors"
+              >
+                <span className="text-nexus-indigo truncate">cargo install --git https://github.com/leonidas-esquire/nexus-os.git</span>
+                {copiedMethod === "curl" ? (
+                  <Check size={12} className="shrink-0 text-nexus-green" />
+                ) : (
+                  <Copy size={12} className="shrink-0 opacity-40 group-hover:opacity-100 transition-opacity" />
+                )}
+              </button>
+            </div>
+          </AnimatedSection>
+
+          {/* Via Cargo */}
+          <AnimatedSection delay={0.15}>
+            <div className="terminal-border rounded-lg p-6 hover:border-nexus-indigo/40 transition-all duration-300">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-8 h-8 rounded-md bg-nexus-indigo/10 flex items-center justify-center text-nexus-indigo">
+                  <Box size={16} />
+                </div>
+                <div>
+                  <h3 className="font-mono font-semibold text-foreground text-sm">Download Binary</h3>
+                  <span className="font-mono text-[10px] text-muted-foreground uppercase tracking-wider">No Rust needed</span>
+                </div>
+              </div>
+              <p className="text-muted-foreground text-xs leading-relaxed mb-4">
+                Download a pre-built binary from GitHub Releases for your platform.
+              </p>
+              <button
+                onClick={() => copyCommand("cargo", "curl -fsSL https://github.com/leonidas-esquire/nexus-os/releases/latest/download/naos-v0.3.1-darwin-aarch64 -o naos")}
+                className="w-full group bg-nexus-deep rounded-md px-3 py-2.5 font-mono text-xs text-left flex items-center justify-between gap-2 hover:bg-nexus-deep/60 transition-colors"
+              >
+                <span className="text-nexus-indigo truncate">curl -fsSL .../naos-v0.3.1-darwin-aarch64 -o naos</span>
+                {copiedMethod === "cargo" ? (
+                  <Check size={12} className="shrink-0 text-nexus-green" />
+                ) : (
+                  <Copy size={12} className="shrink-0 opacity-40 group-hover:opacity-100 transition-opacity" />
+                )}
+              </button>
+            </div>
+          </AnimatedSection>
+
+          {/* From Source */}
+          <AnimatedSection delay={0.25}>
+            <div className="terminal-border rounded-lg p-6 hover:border-nexus-indigo/40 transition-all duration-300">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-8 h-8 rounded-md bg-nexus-indigo/10 flex items-center justify-center text-nexus-indigo">
+                  <GitBranch size={16} />
+                </div>
+                <div>
+                  <h3 className="font-mono font-semibold text-foreground text-sm">From Source</h3>
+                  <span className="font-mono text-[10px] text-muted-foreground uppercase tracking-wider">Build locally</span>
+                </div>
+              </div>
+              <p className="text-muted-foreground text-xs leading-relaxed mb-4">
+                Clone the repository and build with Cargo for full control.
+              </p>
+              <button
+                onClick={() => copyCommand("source", "git clone https://github.com/leonidas-esquire/nexus-os.git && cd nexus-os && cargo build --release")}
+                className="w-full group bg-nexus-deep rounded-md px-3 py-2.5 font-mono text-xs text-left flex items-center justify-between gap-2 hover:bg-nexus-deep/60 transition-colors"
+              >
+                <span className="text-nexus-indigo truncate">git clone ... && cargo build --release</span>
+                {copiedMethod === "source" ? (
+                  <Check size={12} className="shrink-0 text-nexus-green" />
+                ) : (
+                  <Copy size={12} className="shrink-0 opacity-40 group-hover:opacity-100 transition-opacity" />
+                )}
+              </button>
+            </div>
+          </AnimatedSection>
+        </div>
+
+        <AnimatedSection delay={0.3}>
+          <div className="max-w-2xl mx-auto mt-10 text-center">
+            <p className="text-muted-foreground text-sm">
+              Verify your installation: <code className="font-mono text-nexus-indigo bg-nexus-deep px-2 py-0.5 rounded text-xs">naos --version</code>
+            </p>
+          </div>
+        </AnimatedSection>
+      </div>
+    </section>
+  );
+}
+
 // ---- Footer ----
 function Footer() {
   return (
@@ -1192,6 +1320,7 @@ export default function Home() {
       <ConfigSection />
       <PricingSection />
       <GetStarted />
+      <InstallationSection />
       <Footer />
     </div>
   );
