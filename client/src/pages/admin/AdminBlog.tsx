@@ -235,6 +235,7 @@ function PostEditorView({
   postId: number | null;
   onBack: () => void;
 }) {
+  const { getToken } = useAuth();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const utils = trpc.useUtils();
@@ -425,9 +426,11 @@ function PostEditorView({
     try {
       const formData = new FormData();
       formData.append("image", file);
+      const token = await getToken();
       const res = await fetch("/api/blog/upload-image", {
         method: "POST",
         body: formData,
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
         credentials: "include",
       });
       if (!res.ok) {
@@ -873,16 +876,20 @@ function PostEditorView({
 // ─── Main Admin Blog Page ──────────────────────────────────────────
 
 export default function AdminBlog() {
-  const { user, loading } = useAuth();
+  const { user, loading, isAuthenticated } = useAuth();
   const [, navigate] = useLocation();
   const [editingPostId, setEditingPostId] = useState<number | null>(null);
 
   // Redirect non-admin
   useEffect(() => {
-    if (!loading && (!user || user.role !== "admin")) {
+    if (!loading && !isAuthenticated) {
+      navigate("/sign-in?redirect_url=%2Fadmin%2Fblog");
+      return;
+    }
+    if (!loading && user && user.role !== "admin") {
       navigate("/");
     }
-  }, [user, loading, navigate]);
+  }, [user, loading, isAuthenticated, navigate]);
 
   if (loading) {
     return (
