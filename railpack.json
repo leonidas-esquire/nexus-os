@@ -1,0 +1,10 @@
+{
+  "$schema": "https://schema.railpack.com",
+  "provider": "node",
+  "packages": {
+    "node": "22"
+  },
+  "deploy": {
+    "startCommand": "pnpm start"
+  }
+}

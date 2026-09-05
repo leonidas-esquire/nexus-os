@@ -30,4 +30,14 @@ describe("external deployment configuration", () => {
     expect(railwaySource).toContain('healthcheck: "/api/health"');
     expect(railwaySource).toContain('github("leonidas-esquire/nexus-os"');
   });
+
+  it("forces Railpack to build the Node backend in the mixed Rust and Node repository", () => {
+    const railpackConfig = JSON.parse(
+      readFileSync(new URL("../railpack.json", import.meta.url), "utf8")
+    );
+
+    expect(railpackConfig.provider).toBe("node");
+    expect(railpackConfig.packages.node).toBe("22");
+    expect(railpackConfig.deploy.startCommand).toBe("pnpm start");
+  });
 });
