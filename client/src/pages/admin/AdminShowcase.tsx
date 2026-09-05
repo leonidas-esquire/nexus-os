@@ -1,8 +1,10 @@
+import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState, useEffect } from "react";
+import { useLocation } from "wouter";
 import { toast } from "sonner";
 import {
   Check,
@@ -42,6 +44,8 @@ function formatDate(d: Date | string | null): string {
 }
 
 export default function AdminShowcase() {
+  const { user, loading, isAuthenticated } = useAuth();
+  const [, navigate] = useLocation();
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -51,21 +55,37 @@ export default function AdminShowcase() {
   }, []);
 
   useEffect(() => {
+    if (!loading && !isAuthenticated) {
+      navigate("/sign-in?redirect_url=%2Fadmin%2Fshowcase");
+      return;
+    }
+    if (!loading && user && user.role !== "admin") {
+      navigate("/");
+    }
+  }, [user, loading, isAuthenticated, navigate]);
+
+  useEffect(() => {
     const timer = setTimeout(() => setDebouncedSearch(search), 300);
     return () => clearTimeout(timer);
   }, [search]);
 
   const utils = trpc.useUtils();
 
-  const pendingQuery = trpc.adminShowcase.pending.useQuery();
+  const isAdmin = user?.role === "admin";
+  const pendingQuery = trpc.adminShowcase.pending.useQuery(undefined, {
+    enabled: isAdmin,
+  });
   const pendingCount = pendingQuery.data?.length ?? 0;
 
-  const listQuery = trpc.adminShowcase.list.useQuery({
-    status: statusFilter === "all" ? undefined : statusFilter,
-    search: debouncedSearch || undefined,
-    limit: 50,
-    offset: 0,
-  });
+  const listQuery = trpc.adminShowcase.list.useQuery(
+    {
+      status: statusFilter === "all" ? undefined : statusFilter,
+      search: debouncedSearch || undefined,
+      limit: 50,
+      offset: 0,
+    },
+    { enabled: isAdmin }
+  );
 
   const approveMutation = trpc.adminShowcase.approve.useMutation({
     onSuccess: () => {

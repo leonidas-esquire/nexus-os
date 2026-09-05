@@ -28,12 +28,39 @@ import ShowcaseIndex from "./pages/showcase/ShowcaseIndex";
 import ShowcaseSubmit from "./pages/showcase/ShowcaseSubmit";
 import ShowcaseProject from "./pages/showcase/ShowcaseProject";
 import AdminShowcase from "./pages/admin/AdminShowcase";
+import { SignIn, SignUp } from "@clerk/react";
+
+function ClerkAuthPage({ mode }: { mode: "sign-in" | "sign-up" }) {
+  return (
+    <main className="min-h-screen bg-background text-foreground flex items-center justify-center px-4 py-16">
+      {mode === "sign-in" ? (
+        <SignIn
+          routing="path"
+          path="/sign-in"
+          signUpUrl="/sign-up"
+          fallbackRedirectUrl="/"
+        />
+      ) : (
+        <SignUp
+          routing="path"
+          path="/sign-up"
+          signInUrl="/sign-in"
+          fallbackRedirectUrl="/"
+        />
+      )}
+    </main>
+  );
+}
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
   return (
     <Switch>
       <Route path={"/"} component={Home} />
+      <Route path="/sign-in" component={() => <ClerkAuthPage mode="sign-in" />} />
+      <Route path="/sign-in/:rest*" component={() => <ClerkAuthPage mode="sign-in" />} />
+      <Route path="/sign-up" component={() => <ClerkAuthPage mode="sign-up" />} />
+      <Route path="/sign-up/:rest*" component={() => <ClerkAuthPage mode="sign-up" />} />
       <Route path={"/marketplace"} component={MarketplacePage} />
       <Route path={"/marketplace/compare"} component={CompareSkills} />
       <Route path={"/marketplace/developer"} component={DeveloperPortal} />

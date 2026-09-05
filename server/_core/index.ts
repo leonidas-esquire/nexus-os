@@ -1,9 +1,9 @@
 import "dotenv/config";
 import express from "express";
+import { clerkMiddleware } from "@clerk/express";
 import { createServer } from "http";
 import net from "net";
 import { createExpressMiddleware } from "@trpc/server/adapters/express";
-import { registerOAuthRoutes } from "./oauth";
 import { appRouter } from "../routers";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
@@ -13,6 +13,7 @@ import { showcaseUploadRouter } from "../showcaseUploadRoute";
 import { startScheduledJobs, stopScheduledJobs } from "../scheduledJobs";
 import { registerBlogSsrMiddleware } from "../blogSsrMiddleware";
 import { installScriptRouter } from "../installScriptRoute";
+import { ENV } from "./env";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -38,6 +39,15 @@ async function startServer() {
   const server = createServer(app);
   app.set("trust proxy", 1);
   app.disable("x-powered-by");
+  app.use(
+    clerkMiddleware({
+      publishableKey: ENV.clerkPublishableKey,
+      secretKey: ENV.clerkSecretKey,
+      ...(ENV.clerkAuthorizedParties.length > 0
+        ? { authorizedParties: ENV.clerkAuthorizedParties }
+        : {}),
+    })
+  );
   // Configure body parser with larger size limit for file uploads
   app.use(express.json({ limit: "50mb" }));
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
@@ -49,8 +59,6 @@ async function startServer() {
       timestamp: new Date().toISOString(),
     });
   });
-  // OAuth callback under /api/oauth/callback
-  registerOAuthRoutes(app);
   // Blog image upload (multipart/form-data via multer — must come before tRPC)
   app.use(blogUploadRouter);
   // Showcase image upload (public, no auth required)

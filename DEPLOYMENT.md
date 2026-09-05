@@ -9,7 +9,7 @@ This repository remains compatible with Manus hosting. The external-host configu
 | Request | Vercel behavior | Railway behavior |
 |---|---|---|
 | `/`, `/docs`, `/showcase`, and other SPA routes | Serves `public/index.html` and hashed assets | Also serves the complete application when visited directly |
-| `/api/*` | Reverse-proxies the request to Railway | Runs Express, tRPC, OAuth callbacks, feeds, uploads, and database access |
+| `/api/*` | Reverse-proxies the request to Railway, preserving Clerk bearer tokens | Runs Express, Clerk middleware, tRPC, feeds, uploads, and database access |
 | `/blog` and `/blog/*` | Reverse-proxies to preserve server-injected Open Graph metadata | Runs the blog SSR metadata middleware before serving the SPA |
 | `/install.sh` | Reverse-proxies to Railway | Returns the shell installer with `text/plain` content type |
 | Scheduled blog publishing | Not run on Vercel | Runs in the persistent Railway Node process |
@@ -27,11 +27,12 @@ Configure these in the Railway service's **Variables** panel. Do not commit thei
 | Variable | Required | Purpose |
 |---|---:|---|
 | `DATABASE_URL` | Yes | MySQL/TiDB-compatible connection string used by Drizzle. Do **not** attach Railway Postgres without also migrating the schema and driver. |
-| `JWT_SECRET` | Yes | Signs the `app_session_id` session cookie. Use a long random value. |
-| `VITE_APP_ID` | Yes for login | Manus OAuth application identifier; also embedded into the frontend at build time. |
-| `OAUTH_SERVER_URL` | Yes for login | Manus OAuth service origin used by the Express callback and session synchronization. |
-| `VITE_OAUTH_PORTAL_URL` | Yes for login | Browser-facing Manus OAuth portal origin, embedded during the Vite build. |
-| `OWNER_OPEN_ID` | Yes for admin | Assigns the project owner the `admin` role. |
+| `CLERK_PUBLISHABLE_KEY` | Yes | Clerk publishable key used by Express middleware when verifying incoming Clerk sessions. |
+| `CLERK_SECRET_KEY` | Yes | Clerk backend secret used for token verification and first-login user synchronization. Never expose it to the browser. |
+| `VITE_CLERK_PUBLISHABLE_KEY` | Yes | Same Clerk publishable key, embedded into the Vite bundle when Railway builds the complete application. |
+| `CLERK_AUTHORIZED_PARTIES` | Recommended | Comma-separated allowed frontend origins, such as `https://aiagents.nexus,https://www.aiagents.nexus`, used to restrict accepted session-token origins. |
+| `CLERK_ADMIN_EMAILS` | Recommended for initial admin | Comma-separated Clerk email addresses that should receive the local `admin` role. |
+| `CLERK_ADMIN_USER_IDS` | Alternative admin mapping | Comma-separated Clerk user IDs that should receive the local `admin` role. Clerk `publicMetadata.role = "admin"` is also supported. |
 | `BUILT_IN_FORGE_API_URL` | Yes for uploads | Manus storage-proxy origin used by blog and showcase image uploads. |
 | `BUILT_IN_FORGE_API_KEY` | Yes for uploads | Server-side bearer credential for the Manus storage proxy. |
 | `VITE_FRONTEND_FORGE_API_URL` | Only for browser Forge integrations | Browser-facing Forge API origin. |
@@ -41,7 +42,7 @@ Configure these in the Railway service's **Variables** panel. Do not commit thei
 | `NODE_ENV` | Recommended | Set to `production`. |
 | `PORT` | Automatic | Railway injects this variable; the server listens on it. |
 
-The Manus OAuth and storage values are platform-issued credentials. If they are unavailable outside Manus, public pages and read-only API routes can still run, but sign-in, admin operations, and image uploads will not be functional until those services are replaced with portable providers.
+Clerk is the portable identity provider for Vercel and Railway. The React application obtains a Clerk session token, the tRPC client sends it as a bearer token, and Clerk Express middleware verifies it before the local user record is synchronized.[7] [8] File storage remains coupled to the Manus Forge proxy until a portable object-storage integration is configured.
 
 ### Railway deployment steps
 
@@ -73,8 +74,7 @@ Import `leonidas-esquire/nexus-os` into Vercel. The repository's `vercel.ts` con
 | Variable | Required | Purpose |
 |---|---:|---|
 | `RAILWAY_BACKEND_URL` | Yes | Public Railway service origin, with no trailing slash; used by `vercel.ts` for proxy rewrites. |
-| `VITE_APP_ID` | Yes for login | Same OAuth application identifier used on Railway. |
-| `VITE_OAUTH_PORTAL_URL` | Yes for login | Same browser-facing OAuth portal origin used on Railway. |
+| `VITE_CLERK_PUBLISHABLE_KEY` | Yes | Clerk publishable key for `ClerkProvider`; use the production key when cutting over production domains. |
 | `VITE_FRONTEND_FORGE_API_URL` | Only for browser Forge integrations | Browser-facing Forge API origin. |
 | `VITE_FRONTEND_FORGE_API_KEY` | Only for browser Forge integrations | Browser Forge credential injected during the build. |
 | `VITE_ANALYTICS_ENDPOINT` | Optional | Analytics script origin. |
@@ -103,14 +103,14 @@ curl -fsSI https://aiagents.nexus/install.sh
 curl -fsSI https://aiagents.nexus/api/blog/feed.xml
 ```
 
-Then verify the homepage, `/docs`, `/blog`, `/showcase`, OAuth sign-in, an authenticated admin request, and an image upload in the browser.
+Then verify the homepage, `/docs`, `/blog`, `/showcase`, Clerk sign-in, user synchronization, an authenticated admin request, and an image upload in the browser.
 
 ## 4. Compatibility Notes
 
 | Area | Current behavior | External-host action |
 |---|---|---|
 | **Database** | Drizzle uses the MySQL driver | Reuse the current MySQL/TiDB database or provision a compatible MySQL service. |
-| **Authentication** | Coupled to Manus OAuth endpoints | Supply the Manus OAuth variables or replace the auth adapter before relying on admin features. |
+| **Authentication** | Clerk React and Express with bearer-token tRPC requests | Configure matching Clerk keys on Vercel and Railway; restrict `CLERK_AUTHORIZED_PARTIES` to the production frontend origins. |
 | **File storage** | Uses the Manus Forge storage proxy, not direct AWS S3 | Supply Forge credentials or replace `server/storage.ts` with portable S3-compatible storage. |
 | **Scheduled publishing** | A 60-second in-process timer runs inside Express | Supported by a persistent Railway service; not reliable in a Vercel Function that can scale to zero.[6] |
 | **Uploads through Vercel** | Rewritten directly to Railway | Avoids Vercel Function request-body limits because the rewrite targets the Railway origin instead of a function. |
@@ -128,8 +128,8 @@ The production Railway backend is live at `https://nexus-os-production-6fd0.up.r
 |---|---|
 | Express backend | Online and healthy |
 | MySQL | Online, linked through `DATABASE_URL`, and migrated |
-| Session signing | Railway-only `JWT_SECRET` configured |
-| Owner/admin identity | `OWNER_OPEN_ID` configured |
+| Authentication | Clerk migration implemented locally; Railway deployment pending the Clerk code merge and keys |
+| Owner/admin identity | Configure `CLERK_ADMIN_EMAILS`, `CLERK_ADMIN_USER_IDS`, or Clerk `publicMetadata.role` before testing admin pages |
 | Public API, Atom feed, installer | Verified over the Railway domain |
 | Image uploads and owner notifications | Require a portable external storage/API credential or replacement integration |
 
@@ -143,3 +143,5 @@ The former temporary PostgreSQL service and its volume were removed after MySQL 
 [4]: https://docs.railway.com/infrastructure-as-code/reference "Railway — Infrastructure as Code Reference"
 [5]: https://vercel.com/docs/frameworks/backend/express "Vercel — Express on Vercel"
 [6]: https://vercel.com/docs/functions "Vercel — Functions lifecycle"
+[7]: https://clerk.com/docs/react/getting-started/quickstart "Clerk — React Quickstart"
+[8]: https://clerk.com/docs/reference/express/clerk-middleware "Clerk — Express clerkMiddleware"

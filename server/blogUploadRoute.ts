@@ -1,7 +1,7 @@
 import { Router } from "express";
 import multer from "multer";
 import { storagePut } from "./storage";
-import { sdk } from "./_core/sdk";
+import { authenticateClerkRequest } from "./_core/clerkAuth";
 
 const ALLOWED_MIMES = new Set([
   "image/jpeg",
@@ -33,7 +33,7 @@ blogUploadRouter.post(
       // Authenticate admin
       let user;
       try {
-        user = await sdk.authenticateRequest(req);
+        user = await authenticateClerkRequest(req);
       } catch {
         res.status(403).json({ error: "Forbidden" });
         return;
