@@ -120,6 +120,21 @@ Then verify the homepage, `/docs`, `/blog`, `/showcase`, OAuth sign-in, an authe
 
 Vercel and Railway both preserve deployment history. If the external rollout fails, leave the existing Manus-hosted deployment active, remove the external DNS records, and restore the previous DNS target. Do not point production traffic at both hosts simultaneously.
 
+## Current Railway Backend
+
+The production Railway backend is live at `https://nexus-os-production-6fd0.up.railway.app`. Railway builds the Node 22 application through the root `railpack.json`, runs `pnpm exec drizzle-kit migrate` before each deployment, and gates releases on `/api/health`.
+
+| Component | Current status |
+|---|---|
+| Express backend | Online and healthy |
+| MySQL | Online, linked through `DATABASE_URL`, and migrated |
+| Session signing | Railway-only `JWT_SECRET` configured |
+| Owner/admin identity | `OWNER_OPEN_ID` configured |
+| Public API, Atom feed, installer | Verified over the Railway domain |
+| Image uploads and owner notifications | Require a portable external storage/API credential or replacement integration |
+
+The former temporary PostgreSQL service and its volume were removed after MySQL validation. Do not copy the Manus sandbox's injected Forge credential to Railway; configure an independently portable credential or replace the upload/notification integration before relying on those flows externally.
+
 ## References
 
 [1]: https://vercel.com/docs/routing/rewrites "Vercel — Rewrites"
