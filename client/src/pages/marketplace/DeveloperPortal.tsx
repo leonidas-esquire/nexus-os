@@ -553,12 +553,6 @@ export default function DeveloperPortal() {
                         <p className="text-sm font-medium text-nexus-green">{formatMoney(e.yourCut)}</p>
                       </div>
                     </div>
-                    <div className="mt-3">
-                      <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                        <Star className="w-3 h-3 text-nexus-amber fill-nexus-amber" />
-                        4.9 &middot; 1,234 reviews
-                      </div>
-                    </div>
                   </div>
                 </Link>
               ))}

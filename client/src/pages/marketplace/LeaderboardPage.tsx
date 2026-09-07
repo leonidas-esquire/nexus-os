@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "wouter";
 import {
-  Trophy, TrendingUp, Star, Zap, Crown, Medal,
+  Trophy, TrendingUp, Zap, Crown, Medal,
   Award, ArrowUpRight, Sun, Moon, ChevronRight,
 } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
@@ -16,21 +16,19 @@ import NotificationBell from "./NotificationBell";
 
 // Top publishers by total calls
 const topPublishers = (() => {
-  const map = new Map<string, { handle: string; name: string; totalCalls: number; skillCount: number; avgRating: number; trust: string }>();
+  const map = new Map<string, { handle: string; name: string; totalCalls: number; skillCount: number; trust: string }>();
   SKILLS.forEach((s) => {
     const h = s.publisher.handle;
     const existing = map.get(h);
     if (existing) {
       existing.totalCalls += s.stats.totalCalls;
       existing.skillCount += 1;
-      existing.avgRating = (existing.avgRating * (existing.skillCount - 1) + s.stats.rating) / existing.skillCount;
     } else {
       map.set(h, {
         handle: h,
         name: s.publisher.name,
         totalCalls: s.stats.totalCalls,
         skillCount: 1,
-        avgRating: s.stats.rating,
         trust: trustBadge(s.trust),
       });
     }
@@ -38,9 +36,9 @@ const topPublishers = (() => {
   return Array.from(map.values()).sort((a, b) => b.totalCalls - a.totalCalls);
 })();
 
-// Highest rated skills (min 100 reviews)
-const highestRated = [...SKILLS]
-  .sort((a, b) => b.stats.rating - a.stats.rating || b.stats.totalCalls - a.stats.totalCalls)
+// Lowest declared average latency
+const lowestLatency = [...SKILLS]
+  .sort((a, b) => a.stats.avgLatencyMs - b.stats.avgLatencyMs || b.stats.totalCalls - a.stats.totalCalls)
   .slice(0, 10);
 
 // Most installed skills
@@ -62,11 +60,11 @@ function RankBadge({ rank }: { rank: number }) {
 
 /* ─── Tab Types ─────────────────────────────────────────────────────────── */
 
-type LeaderboardTab = "publishers" | "rated" | "installed" | "growing";
+type LeaderboardTab = "publishers" | "performance" | "installed" | "growing";
 
 const TABS: { id: LeaderboardTab; label: string; icon: React.ReactNode }[] = [
   { id: "publishers", label: "Top Publishers", icon: <Trophy className="w-4 h-4" /> },
-  { id: "rated", label: "Highest Rated", icon: <Star className="w-4 h-4" /> },
+  { id: "performance", label: "Lowest Latency", icon: <Zap className="w-4 h-4" /> },
   { id: "installed", label: "Most Used", icon: <Zap className="w-4 h-4" /> },
   { id: "growing", label: "Fastest Growing", icon: <TrendingUp className="w-4 h-4" /> },
 ];
@@ -112,7 +110,7 @@ export default function LeaderboardPage() {
             <h1 className="text-2xl font-bold">Marketplace Leaderboard</h1>
           </div>
           <p className="text-muted-foreground text-sm">
-            Discover the top publishers, highest-rated skills, and fastest-growing tools in the Nexus OS ecosystem.
+            Compare publishers and skills using declared usage, performance, package, and growth signals.
           </p>
         </div>
 
@@ -137,12 +135,11 @@ export default function LeaderboardPage() {
         {/* Top Publishers */}
         {activeTab === "publishers" && (
           <div className="space-y-3">
-            <div className="grid grid-cols-[3rem_1fr_8rem_6rem_6rem_6rem] gap-4 px-4 py-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground border-b border-border">
+            <div className="grid grid-cols-[3rem_1fr_8rem_6rem_6rem] gap-4 px-4 py-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground border-b border-border">
               <span>Rank</span>
               <span>Publisher</span>
               <span className="text-right">Total Calls</span>
               <span className="text-right">Skills</span>
-              <span className="text-right">Avg Rating</span>
               <span className="text-right">Trust</span>
             </div>
             {topPublishers.map((pub, i) => {
@@ -153,7 +150,7 @@ export default function LeaderboardPage() {
                 <Link
                   key={pub.handle}
                   href={`/marketplace/publisher/${pub.handle.replace("@", "")}`}
-                  className={`grid grid-cols-[3rem_1fr_8rem_6rem_6rem_6rem] gap-4 px-4 py-3 rounded-xl border transition-all hover:border-nexus-indigo/30 ${
+                  className={`grid grid-cols-[3rem_1fr_8rem_6rem_6rem] gap-4 px-4 py-3 rounded-xl border transition-all hover:border-nexus-indigo/30 ${
                     i < 3 ? "border-yellow-400/20 bg-yellow-400/5" : "border-border"
                   }`}
                 >
@@ -177,7 +174,6 @@ export default function LeaderboardPage() {
                   </div>
                   <span className="text-right font-mono text-sm self-center">{formatNumber(pub.totalCalls)}</span>
                   <span className="text-right text-sm self-center">{pub.skillCount}</span>
-                  <span className="text-right text-sm self-center">⭐ {pub.avgRating.toFixed(1)}</span>
                   <span className="text-right text-xs font-mono self-center text-muted-foreground">{pub.trust}</span>
                 </Link>
               );
@@ -185,17 +181,17 @@ export default function LeaderboardPage() {
           </div>
         )}
 
-        {/* Highest Rated */}
-        {activeTab === "rated" && (
+        {/* Lowest Latency */}
+        {activeTab === "performance" && (
           <div className="space-y-3">
             <div className="grid grid-cols-[3rem_1fr_6rem_8rem_6rem] gap-4 px-4 py-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground border-b border-border">
               <span>Rank</span>
               <span>Skill</span>
-              <span className="text-right">Rating</span>
+              <span className="text-right">Latency</span>
               <span className="text-right">Total Calls</span>
               <span className="text-right">Category</span>
             </div>
-            {highestRated.map((skill, i) => (
+            {lowestLatency.map((skill, i) => (
               <Link
                 key={skill.name}
                 href={`/marketplace/${skill.name}`}
@@ -216,8 +212,8 @@ export default function LeaderboardPage() {
                   </div>
                 </div>
                 <div className="text-right self-center">
-                  <span className="text-sm font-semibold">⭐ {skill.stats.rating}</span>
-                  <div className="text-[10px] text-muted-foreground">{formatNumber(skill.stats.reviews)} reviews</div>
+                  <span className="text-sm font-semibold">{skill.stats.avgLatencyMs}ms</span>
+                  <div className="text-[10px] text-muted-foreground">declared average</div>
                 </div>
                 <span className="text-right font-mono text-sm self-center">{formatNumber(skill.stats.totalCalls)}</span>
                 <span className="text-right text-xs self-center text-muted-foreground">{skill.category}</span>
@@ -234,7 +230,7 @@ export default function LeaderboardPage() {
               <span>Skill</span>
               <span className="text-right">Total Calls</span>
               <span className="text-right">Latency</span>
-              <span className="text-right">Rating</span>
+              <span className="text-right">WASM Size</span>
               <span className="text-right">Success</span>
             </div>
             {mostInstalled.map((skill, i) => (
@@ -257,7 +253,7 @@ export default function LeaderboardPage() {
                     <span className="text-xs text-muted-foreground ml-2">by {skill.publisher.handle}</span>
                   </div>
                 </div>
-                <span className="text-right font-mono text-sm self-center font-semibold">{formatNumber(skill.stats.totalCalls)}</span>                <span className="text-right font-mono text-sm self-center">{skill.stats.avgLatencyMs}ms</span>        <span className="text-right text-sm self-center">⭐ {skill.stats.rating}</span>
+                <span className="text-right font-mono text-sm self-center font-semibold">{formatNumber(skill.stats.totalCalls)}</span>                <span className="text-right font-mono text-sm self-center">{skill.stats.avgLatencyMs}ms</span>        <span className="text-right text-sm self-center">{skill.wasmSize}</span>
                 <span className="text-right text-sm self-center text-nexus-green">{skill.stats.successRate}</span>
               </Link>
             ))}
@@ -342,11 +338,11 @@ export default function LeaderboardPage() {
             <div className="text-xs text-muted-foreground mt-1">across all skills</div>
           </div>
           <div className="border border-border rounded-xl p-5">
-            <div className="text-xs text-muted-foreground uppercase tracking-wider mb-2">Avg Rating</div>
+            <div className="text-xs text-muted-foreground uppercase tracking-wider mb-2">Avg Latency</div>
             <div className="text-2xl font-bold">
-              {(SKILLS.reduce((sum, s) => sum + s.stats.rating, 0) / SKILLS.length).toFixed(1)}
+              {(SKILLS.reduce((sum, s) => sum + s.stats.avgLatencyMs, 0) / SKILLS.length).toFixed(1)}ms
             </div>
-            <div className="text-xs text-muted-foreground mt-1">marketplace average</div>
+            <div className="text-xs text-muted-foreground mt-1">declared marketplace average</div>
           </div>
           <div className="border border-border rounded-xl p-5">
             <div className="text-xs text-muted-foreground uppercase tracking-wider mb-2">Publishers</div>

@@ -201,7 +201,7 @@ export default function PrivacyPolicy() {
         <li>Publisher name or username</li>
         <li>Publisher profile information</li>
         <li>AXIS Trust verification status</li>
-        <li>Skill ratings and reviews</li>
+        <li>Skill descriptions, declared technical metadata, and package provenance</li>
       </ul>
       <p>If you purchase Skills, publishers may see:</p>
       <ul>
@@ -539,7 +539,7 @@ naos config get telemetry.enabled`}</code></pre>
         <strong>Nexus OS</strong><br />
         Email: <a href="mailto:privacy@aiagents.nexus">privacy@aiagents.nexus</a><br />
         Support: <a href="mailto:support@aiagents.nexus">support@aiagents.nexus</a><br />
-        Website: <a href="https://aiagents.nexus">aiagents.nexus</a>
+        Website: <a href="https://www.aiagents.nexus">www.aiagents.nexus</a>
       </p>
       <p>For data protection inquiries in the EU:<br />
         Email: <a href="mailto:dpo@aiagents.nexus">dpo@aiagents.nexus</a>

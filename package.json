@@ -2,15 +2,19 @@
   "name": "nexus-site",
   "version": "1.0.0",
   "type": "module",
-  "license": "MIT",
+  "license": "Apache-2.0",
   "scripts": {
     "dev": "NODE_ENV=development tsx watch server/_core/index.ts",
-    "build": "vite build && esbuild server/_core/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist",
-    "build:vercel": "vite build --outDir ../public --emptyOutDir",
+    "agent:prepare": "tsx scripts/generate-agent-assets.ts prepare",
+    "agent:prerender": "tsx scripts/generate-agent-assets.ts prerender",
+    "build": "pnpm agent:prepare && vite build && pnpm agent:prerender dist/public && esbuild server/_core/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist",
+    "build:vercel": "pnpm agent:prepare && vite build --outDir ../public --emptyOutDir && pnpm agent:prerender public",
     "start": "NODE_ENV=production node dist/index.js",
     "check": "tsc --noEmit",
     "format": "prettier --write .",
+    "pretest": "pnpm agent:prepare",
     "test": "vitest run",
+    "test:agent": "vitest run server/agentReadability.test.ts",
     "test:deployment": "vitest run server/deploymentConfig.test.ts",
     "db:push": "drizzle-kit generate && drizzle-kit migrate"
   },
@@ -121,6 +125,8 @@
     "autoprefixer": "^10.4.20",
     "drizzle-kit": "^0.31.4",
     "esbuild": "^0.25.0",
+    "gray-matter": "^4.0.3",
+    "marked": "^18.0.11",
     "pnpm": "^10.15.1",
     "postcss": "^8.4.47",
     "prettier": "^3.6.2",
@@ -131,7 +137,8 @@
     "typescript": "5.9.3",
     "vite": "^7.1.7",
     "vite-plugin-manus-runtime": "^0.0.57",
-    "vitest": "^2.1.4"
+    "vitest": "^2.1.4",
+    "yaml": "^2.9.0"
   },
   "packageManager": "pnpm@10.4.1+sha512.c753b6c3ad7afa13af388fa6d808035a008e30ea9993f58c6663e2bc5ff21679aa834db094987129aa4d488b86df57f7b634981b2f827cdcacc698cc0cfb88af",
   "pnpm": {

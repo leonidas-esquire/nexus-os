@@ -323,7 +323,7 @@ export default function TermsOfService() {
       <p>
         <strong>Nexus OS</strong><br />
         Email: <a href="mailto:legal@aiagents.nexus">legal@aiagents.nexus</a><br />
-        Website: <a href="https://aiagents.nexus">aiagents.nexus</a>
+        Website: <a href="https://www.aiagents.nexus">www.aiagents.nexus</a>
       </p>
     </LegalPageLayout>
   );

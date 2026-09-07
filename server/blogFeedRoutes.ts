@@ -25,9 +25,9 @@ feedRouter.get("/api/blog/feed.xml", async (_req, res) => {
         const published = new Date(post.publishedAt).toISOString();
 
         return `  <entry>
-    <id>https://aiagents.nexus/blog/${escapeXml(post.slug)}</id>
+    <id>https://www.aiagents.nexus/blog/${escapeXml(post.slug)}</id>
     <title>${escapeXml(post.title)}</title>
-    <link rel="alternate" href="https://aiagents.nexus/blog/${escapeXml(post.slug)}" />
+    <link rel="alternate" href="https://www.aiagents.nexus/blog/${escapeXml(post.slug)}" />
     <updated>${updated}</updated>
     <published>${published}</published>
     <author><name>${escapeXml(post.author)}</name></author>
@@ -44,11 +44,11 @@ feedRouter.get("/api/blog/feed.xml", async (_req, res) => {
 
     const feed = `<?xml version="1.0" encoding="UTF-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
-  <id>https://aiagents.nexus/blog</id>
+  <id>https://www.aiagents.nexus/blog</id>
   <title>Nexus OS Blog</title>
   <subtitle>News, tutorials, and insights about AI agent orchestration</subtitle>
-  <link rel="self" href="https://aiagents.nexus/api/blog/feed.xml" type="application/atom+xml" />
-  <link rel="alternate" href="https://aiagents.nexus/blog" />
+  <link rel="self" href="https://www.aiagents.nexus/api/blog/feed.xml" type="application/atom+xml" />
+  <link rel="alternate" href="https://www.aiagents.nexus/blog" />
   <updated>${feedUpdated}</updated>
   <author><name>Nexus OS</name></author>
 ${entries}
@@ -67,43 +67,9 @@ ${entries}
   }
 });
 
-// ─── Sitemap (/blog/sitemap.xml) ────────────────────────────────
-feedRouter.get("/api/blog/sitemap.xml", async (_req, res) => {
-  try {
-    const posts = await blogDb.getBlogPosts({ limit: 9999 });
-
-    const postUrls = posts
-      .map(
-        (post) => `  <url>
-    <loc>https://aiagents.nexus/blog/${escapeXml(post.slug)}</loc>
-    <lastmod>${new Date(post.updatedAt).toISOString()}</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>`
-      )
-      .join("\n");
-
-    const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>https://aiagents.nexus/blog</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://aiagents.nexus/api/blog/feed.xml</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.3</priority>
-  </url>
-${postUrls}
-</urlset>`;
-
-    res.setHeader("Content-Type", "application/xml; charset=utf-8");
-    res.send(sitemap);
-  } catch (err) {
-    console.error("[Sitemap] Error:", err);
-    res.status(500).send("Internal Server Error");
-  }
+// Backward-compatible alias for the former blog-only sitemap.
+feedRouter.get("/api/blog/sitemap.xml", (_req, res) => {
+  res.redirect(308, "/api/sitemap.xml");
 });
 
 export { feedRouter };

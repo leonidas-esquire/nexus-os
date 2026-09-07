@@ -1,4 +1,7 @@
 User-agent: *
-Allow: /blog/
-Allow: /api/blog/feed.xml
-Sitemap: https://aiagents.nexus/api/blog/sitemap.xml
+Allow: /
+Disallow: /admin/
+Disallow: /sign-in
+Disallow: /sign-up
+
+Sitemap: https://www.aiagents.nexus/sitemap.xml

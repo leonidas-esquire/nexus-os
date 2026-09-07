@@ -33,8 +33,6 @@ export interface SkillStats {
   totalRevenue: number;
   avgLatencyMs: number;
   successRate: number;
-  rating: number;
-  reviews: number;
 }
 
 export interface Skill {
@@ -138,8 +136,6 @@ export const SKILLS: Skill[] = [
       totalRevenue: 240.0,
       avgLatencyMs: 3,
       successRate: 99.97,
-      rating: 4.9,
-      reviews: 1234,
     },
     wasmHash: "sha256:a1b2c3d4e5f6...",
     wasmSize: "124 KB",
@@ -179,8 +175,6 @@ export const SKILLS: Skill[] = [
       totalRevenue: 178.0,
       avgLatencyMs: 8,
       successRate: 99.85,
-      rating: 4.7,
-      reviews: 567,
     },
     wasmHash: "sha256:b2c3d4e5f6a7...",
     wasmSize: "98 KB",
@@ -220,8 +214,6 @@ export const SKILLS: Skill[] = [
       totalRevenue: 0,
       avgLatencyMs: 5,
       successRate: 99.92,
-      rating: 4.5,
-      reviews: 234,
     },
     wasmHash: "sha256:c3d4e5f6a7b8...",
     wasmSize: "156 KB",
@@ -254,8 +246,6 @@ export const SKILLS: Skill[] = [
       totalRevenue: 134.0,
       avgLatencyMs: 4,
       successRate: 99.99,
-      rating: 4.7,
-      reviews: 567,
     },
     wasmHash: "sha256:d4e5f6a7b8c9...",
     wasmSize: "112 KB",
@@ -287,8 +277,6 @@ export const SKILLS: Skill[] = [
       totalRevenue: 0,
       avgLatencyMs: 6,
       successRate: 99.88,
-      rating: 4.2,
-      reviews: 89,
     },
     wasmHash: "sha256:e5f6a7b8c9d0...",
     wasmSize: "88 KB",
@@ -320,8 +308,6 @@ export const SKILLS: Skill[] = [
       totalRevenue: 45.0,
       avgLatencyMs: 12,
       successRate: 99.95,
-      rating: 4.6,
-      reviews: 178,
     },
     wasmHash: "sha256:f6a7b8c9d0e1...",
     wasmSize: "210 KB",
@@ -353,8 +339,6 @@ export const SKILLS: Skill[] = [
       totalRevenue: 0,
       avgLatencyMs: 2,
       successRate: 99.99,
-      rating: 4.8,
-      reviews: 345,
     },
     wasmHash: "sha256:a7b8c9d0e1f2...",
     wasmSize: "76 KB",
@@ -386,8 +370,6 @@ export const SKILLS: Skill[] = [
       totalRevenue: 26.0,
       avgLatencyMs: 4,
       successRate: 99.7,
-      rating: 4.4,
-      reviews: 156,
     },
     wasmHash: "sha256:b8c9d0e1f2a3...",
     wasmSize: "340 KB",
@@ -426,8 +408,6 @@ export const SKILLS: Skill[] = [
       totalRevenue: 1600.0,
       avgLatencyMs: 45,
       successRate: 99.6,
-      rating: 4.8,
-      reviews: 892,
     },
     wasmHash: "sha256:c9d0e1f2a3b4...",
     wasmSize: "4.2 MB",
@@ -460,8 +440,6 @@ export const SKILLS: Skill[] = [
       totalRevenue: 330.0,
       avgLatencyMs: 25,
       successRate: 99.8,
-      rating: 4.6,
-      reviews: 412,
     },
     wasmHash: "sha256:d0e1f2a3b4c5...",
     wasmSize: "890 KB",
@@ -493,8 +471,6 @@ export const SKILLS: Skill[] = [
       totalRevenue: 92.0,
       avgLatencyMs: 15,
       successRate: 99.95,
-      rating: 4.7,
-      reviews: 298,
     },
     wasmHash: "sha256:e1f2a3b4c5d6...",
     wasmSize: "145 KB",
@@ -526,8 +502,6 @@ export const SKILLS: Skill[] = [
       totalRevenue: 204.0,
       avgLatencyMs: 18,
       successRate: 99.7,
-      rating: 4.5,
-      reviews: 234,
     },
     wasmHash: "sha256:f2a3b4c5d6e7...",
     wasmSize: "520 KB",
@@ -586,10 +560,6 @@ export function timeAgo(dateStr: string): string {
   return `${Math.floor(diffDays / 365)} years ago`;
 }
 
-export function getStarDisplay(rating: number): string {
-  return "★".repeat(Math.round(rating)) + "☆".repeat(5 - Math.round(rating));
-}
-
 export const FEATURED_SKILLS = SKILLS.filter((s) => s.featured);
 export const RECENTLY_ADDED = [...SKILLS].sort(
   (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
@@ -620,97 +590,6 @@ export const INSTALLED_SKILLS: InstalledSkill[] = [
   { name: "json-parser", version: "1.2.0", publisher: "@verified-dev", installedAt: "2026-02-10", calls: 1245, spend: 0.12 },
   { name: "email-extractor", version: "2.0.1", publisher: "@data-tools", installedAt: "2026-01-20", calls: 892, spend: 0.18 },
 ];
-
-// ─── Reviews ─────────────────────────────────────────────────────────────────
-
-export interface Review {
-  id: string;
-  author: string;
-  authorHandle: string;
-  rating: number;
-  title: string;
-  body: string;
-  date: string;
-  helpful: number;
-  verified: boolean;
-}
-
-const REVIEW_POOL: Review[] = [
-  {
-    id: "r1", author: "Alice Chen", authorHandle: "@alice-ml", rating: 5,
-    title: "Blazing fast and reliable",
-    body: "We've been using this in production for 6 months. Handles 50K calls/day without a single failure. The JQ-like query syntax is a huge time saver for our data pipeline agents.",
-    date: "2026-03-28", helpful: 42, verified: true,
-  },
-  {
-    id: "r2", author: "Marcus Webb", authorHandle: "@mwebb", rating: 5,
-    title: "Best in class for the price",
-    body: "Switched from a custom solution and cut our latency by 60%. The WASM sandbox gives us confidence that untrusted payloads won't cause issues. Highly recommend.",
-    date: "2026-03-15", helpful: 31, verified: true,
-  },
-  {
-    id: "r3", author: "Priya Sharma", authorHandle: "@priya-dev", rating: 4,
-    title: "Great skill, minor docs gap",
-    body: "The core functionality is excellent — fast, accurate, and well-tested. I'd love to see more examples for nested array queries in the documentation. Otherwise perfect.",
-    date: "2026-02-20", helpful: 18, verified: true,
-  },
-  {
-    id: "r4", author: "James O'Brien", authorHandle: "@jobrien", rating: 5,
-    title: "Exactly what our agents needed",
-    body: "Integrated this into our multi-agent workflow and it just works. The error messages for malformed JSON are incredibly helpful for debugging. 10/10.",
-    date: "2026-02-05", helpful: 27, verified: false,
-  },
-  {
-    id: "r5", author: "Yuki Tanaka", authorHandle: "@yuki-t", rating: 4,
-    title: "Solid performance, good value",
-    body: "At $0.0001/call this is a steal. We process millions of JSON documents monthly and the cost is negligible. Would give 5 stars if streaming support was added.",
-    date: "2026-01-18", helpful: 15, verified: true,
-  },
-  {
-    id: "r6", author: "Sarah Kim", authorHandle: "@skim-ai", rating: 5,
-    title: "Transformed our NLP pipeline",
-    body: "The sentiment analysis is remarkably accurate across English, Spanish, and Korean. Emotion detection adds a layer our previous solution didn't have. Worth every cent.",
-    date: "2026-03-22", helpful: 38, verified: true,
-  },
-  {
-    id: "r7", author: "Dev Patel", authorHandle: "@devp", rating: 3,
-    title: "Good but could be faster",
-    body: "Works well for most use cases but latency spikes on very large inputs. The 200ms timeout is tight for documents over 2MB. Hope to see optimizations in the next version.",
-    date: "2026-02-10", helpful: 12, verified: true,
-  },
-  {
-    id: "r8", author: "Emma Wilson", authorHandle: "@ewilson", rating: 5,
-    title: "Clean API, great results",
-    body: "The structured output with confidence scores makes it easy to build reliable downstream logic. We use this for email validation in our onboarding flow and it catches 99% of bad addresses.",
-    date: "2026-03-05", helpful: 22, verified: true,
-  },
-  {
-    id: "r9", author: "Carlos Ruiz", authorHandle: "@cruiz", rating: 4,
-    title: "Reliable CSV handling",
-    body: "Handles edge cases that broke our previous parser — quoted fields, embedded newlines, mixed encodings. The schema detection is a nice bonus. Free tier is generous.",
-    date: "2026-01-25", helpful: 19, verified: false,
-  },
-  {
-    id: "r10", author: "Lena Müller", authorHandle: "@lena-m", rating: 5,
-    title: "Essential for data pipelines",
-    body: "We parse hundreds of CSV files daily and this skill handles them all flawlessly. Type inference saves us hours of manual schema definition. Highly recommend for any data-heavy workflow.",
-    date: "2026-02-28", helpful: 25, verified: true,
-  },
-];
-
-// Map skill names to their reviews (deterministic based on skill index)
-export function getReviewsForSkill(skillName: string): Review[] {
-  const idx = SKILLS.findIndex((s) => s.name === skillName);
-  if (idx === -1) return [];
-  // Each skill gets 3-5 reviews, cycling through the pool
-  const count = 3 + (idx % 3);
-  const reviews: Review[] = [];
-  for (let i = 0; i < count; i++) {
-    const r = REVIEW_POOL[(idx * 3 + i) % REVIEW_POOL.length];
-    reviews.push({ ...r, id: `${skillName}-${r.id}` });
-  }
-  return reviews;
-}
 
 // ─── Analytics Data (Developer Portal) ───────────────────────────────────────
 
@@ -761,8 +640,6 @@ export const COMPARE_FIELDS: CompareField[] = [
   { label: "Price", key: "price", getValue: (s) => formatPrice(s.pricing) },
   { label: "Trust", key: "trust", getValue: (s) => s.trust.verified ? trustBadge(s.trust) : "Unverified" },
   { label: "T-Score", key: "tscore", getValue: (s) => s.trust.tScore?.toString() ?? "—", highlight: "higher-better" },
-  { label: "Rating", key: "rating", getValue: (s) => `${s.stats.rating} / 5`, highlight: "higher-better" },
-  { label: "Reviews", key: "reviews", getValue: (s) => formatNumber(s.stats.reviews), highlight: "higher-better" },
   { label: "Total Calls", key: "calls", getValue: (s) => formatNumber(s.stats.totalCalls), highlight: "higher-better" },
   { label: "Avg Latency", key: "latency", getValue: (s) => `${s.stats.avgLatencyMs}ms`, highlight: "lower-better" },
   { label: "Success Rate", key: "success", getValue: (s) => `${s.stats.successRate}%`, highlight: "higher-better" },
@@ -1399,7 +1276,6 @@ export interface PublisherProfile {
   totalSkills: number;
   totalCalls: number;
   totalRevenue: number;
-  avgRating: number;
   trustHistory: { date: string; tier: string; rating: string; tScore: number; event: string }[];
   badges: string[];
 }
@@ -1409,7 +1285,7 @@ export const PUBLISHER_PROFILES: PublisherProfile[] = [
     handle: "verified-dev",
     displayName: "Verified Dev",
     email: "dev@example.com",
-    bio: "Building high-performance WASM skills for the Nexus ecosystem. Specializing in data parsing, transformation, and validation tools. All skills are MIT-licensed and thoroughly benchmarked.",
+    bio: "Building high-performance WASM skills for the Nexus ecosystem. Package licenses and benchmark claims are declared separately on each listing.",
     website: "https://verified-dev.io",
     github: "verified-dev",
     verified: true,
@@ -1421,7 +1297,6 @@ export const PUBLISHER_PROFILES: PublisherProfile[] = [
     totalSkills: 3,
     totalCalls: 4930000,
     totalRevenue: 717.70,
-    avgRating: 4.7,
     trustHistory: [
       { date: "2025-09-15", tier: "T5", rating: "B", tScore: 20, event: "Account created, initial assessment" },
       { date: "2025-11-01", tier: "T4", rating: "BB", tScore: 45, event: "First skill published (json-parser v1.0.0)" },
@@ -1447,7 +1322,6 @@ export const PUBLISHER_PROFILES: PublisherProfile[] = [
     totalSkills: 2,
     totalCalls: 1890000,
     totalRevenue: 378.00,
-    avgRating: 4.6,
     trustHistory: [
       { date: "2025-10-01", tier: "T5", rating: "B", tScore: 18, event: "Account created" },
       { date: "2025-12-15", tier: "T4", rating: "BB", tScore: 42, event: "email-extractor v1.0.0 published" },
@@ -1471,7 +1345,6 @@ export const PUBLISHER_PROFILES: PublisherProfile[] = [
     totalSkills: 3,
     totalCalls: 2780000,
     totalRevenue: 139.00,
-    avgRating: 4.4,
     trustHistory: [
       { date: "2025-11-10", tier: "T5", rating: "B", tScore: 15, event: "Account created" },
       { date: "2026-01-05", tier: "T4", rating: "BB", tScore: 38, event: "csv-parser v1.0.0 published" },
@@ -1496,14 +1369,13 @@ export const PUBLISHER_PROFILES: PublisherProfile[] = [
     totalSkills: 1,
     totalCalls: 3200000,
     totalRevenue: 1600.00,
-    avgRating: 4.8,
     trustHistory: [
       { date: "2025-10-20", tier: "T5", rating: "B", tScore: 22, event: "Account created" },
       { date: "2025-12-01", tier: "T4", rating: "A", tScore: 55, event: "sentiment-analyzer v1.0.0 published" },
-      { date: "2026-01-15", tier: "T3", rating: "AA", tScore: 72, event: "500K calls, top-rated skill" },
+      { date: "2026-01-15", tier: "T3", rating: "AA", tScore: 72, event: "Trust assessment updated" },
       { date: "2026-02-28", tier: "T2", rating: "AAA", tScore: 91, event: "2M calls, zero incidents, v3.0.0 released" },
     ],
-    badges: ["AI Pioneer", "Top Rated", "2M Calls Club", "Research Lab"],
+    badges: ["AI Pioneer", "2M Calls Club", "Research Lab"],
   },
   {
     handle: "converter",
@@ -1520,7 +1392,6 @@ export const PUBLISHER_PROFILES: PublisherProfile[] = [
     totalSkills: 1,
     totalCalls: 450000,
     totalRevenue: 45.00,
-    avgRating: 4.2,
     trustHistory: [
       { date: "2026-01-05", tier: "T5", rating: "B", tScore: 12, event: "Account created" },
       { date: "2026-02-15", tier: "T4", rating: "BB", tScore: 42, event: "markdown-to-html v1.0.0 published" },
@@ -1543,7 +1414,6 @@ export const PUBLISHER_PROFILES: PublisherProfile[] = [
     totalSkills: 1,
     totalCalls: 1100000,
     totalRevenue: 0,
-    avgRating: 4.5,
     trustHistory: [
       { date: "2025-12-01", tier: "T5", rating: "B", tScore: 16, event: "Account created" },
       { date: "2026-01-20", tier: "T4", rating: "BB", tScore: 48, event: "regex-matcher v1.0.0 published" },
@@ -1567,7 +1437,6 @@ export const PUBLISHER_PROFILES: PublisherProfile[] = [
     totalSkills: 2,
     totalCalls: 1750000,
     totalRevenue: 175.00,
-    avgRating: 4.6,
     trustHistory: [
       { date: "2025-11-15", tier: "T5", rating: "B", tScore: 20, event: "Account created" },
       { date: "2026-01-10", tier: "T4", rating: "A", tScore: 55, event: "json-validator v1.0.0 published" },
@@ -1591,7 +1460,6 @@ export const PUBLISHER_PROFILES: PublisherProfile[] = [
     totalSkills: 1,
     totalCalls: 950000,
     totalRevenue: 285.00,
-    avgRating: 4.3,
     trustHistory: [
       { date: "2026-01-15", tier: "T5", rating: "B", tScore: 15, event: "Account created" },
       { date: "2026-02-20", tier: "T4", rating: "BB", tScore: 38, event: "image-resizer v1.0.0 published" },
@@ -1615,7 +1483,6 @@ export const PUBLISHER_PROFILES: PublisherProfile[] = [
     totalSkills: 1,
     totalCalls: 780000,
     totalRevenue: 234.00,
-    avgRating: 4.4,
     trustHistory: [
       { date: "2026-02-01", tier: "T5", rating: "B", tScore: 12, event: "Account created" },
       { date: "2026-03-10", tier: "T4", rating: "BB", tScore: 48, event: "sql-builder v1.0.0 published" },
@@ -1776,7 +1643,6 @@ export interface FilterState {
   priceMin: number | null;
   priceMax: number | null;
   minTrustTier: TrustTier | null;
-  minRating: number | null;
   maxWasmSize: number | null;
   pricingModel: PricingModel | "all";
 }
@@ -1806,9 +1672,6 @@ export function filterSkills(skills: Skill[], filters: FilterState): Skill[] {
       const filterIdx = TRUST_TIER_ORDER.indexOf(filters.minTrustTier);
       if (skillIdx > filterIdx) return false;
     }
-
-    // Rating
-    if (filters.minRating !== null && s.stats.rating < filters.minRating) return false;
 
     // WASM size
     if (filters.maxWasmSize !== null) {
@@ -1857,7 +1720,7 @@ export function getPublisherBadge(trust: TrustInfo): PublisherBadgeInfo {
 
 /* ─── Activity Feed ─────────────────────────────────────────────────────── */
 
-export type ActivityType = "install" | "review" | "publish" | "update" | "milestone";
+export type ActivityType = "install" | "publish" | "update" | "milestone";
 
 export interface ActivityEvent {
   id: string;
@@ -1870,18 +1733,15 @@ export interface ActivityEvent {
 
 export const ACTIVITY_FEED: ActivityEvent[] = [
   { id: "a1", type: "install", skillName: "json-parser", actor: "@ml-pipeline", message: "installed json-parser v1.2.0", timestamp: "2 min ago" },
-  { id: "a2", type: "review", skillName: "sentiment-analyzer", actor: "@alice-ml", message: "left a 5-star review on sentiment-analyzer", timestamp: "8 min ago" },
   { id: "a3", type: "publish", skillName: "xml-transform", actor: "@converter", message: "published xml-transform v3.1.0", timestamp: "15 min ago" },
   { id: "a4", type: "install", skillName: "email-extractor", actor: "@data-bot", message: "installed email-extractor v2.0.1", timestamp: "22 min ago" },
   { id: "a5", type: "milestone", skillName: "json-parser", actor: "system", message: "json-parser reached 2.5M total calls", timestamp: "34 min ago" },
   { id: "a6", type: "update", skillName: "csv-parser", actor: "@data-tools", message: "updated csv-parser to v2.1.0", timestamp: "41 min ago" },
-  { id: "a7", type: "review", skillName: "json-parser", actor: "@mwebb", message: "left a 5-star review on json-parser", timestamp: "55 min ago" },
   { id: "a8", type: "install", skillName: "regex-matcher", actor: "@scraper-agent", message: "installed regex-matcher v1.0.2", timestamp: "1 hr ago" },
   { id: "a9", type: "publish", skillName: "sql-builder", actor: "@db-forge", message: "published sql-builder v1.0.0", timestamp: "1.5 hr ago" },
   { id: "a10", type: "install", skillName: "sentiment-analyzer", actor: "@review-bot", message: "installed sentiment-analyzer v3.0.0", timestamp: "2 hr ago" },
   { id: "a11", type: "milestone", skillName: "email-extractor", actor: "system", message: "email-extractor reached 1M total calls", timestamp: "2.5 hr ago" },
   { id: "a12", type: "update", skillName: "image-resizer", actor: "@media-tools", message: "updated image-resizer to v2.0.0", timestamp: "3 hr ago" },
-  { id: "a13", type: "review", skillName: "csv-parser", actor: "@priya-dev", message: "left a 4-star review on csv-parser", timestamp: "3.5 hr ago" },
   { id: "a14", type: "install", skillName: "date-parser", actor: "@calendar-agent", message: "installed date-parser v1.1.0", timestamp: "4 hr ago" },
   { id: "a15", type: "publish", skillName: "markdown-render", actor: "@utils", message: "published markdown-render v1.3.0", timestamp: "5 hr ago" },
 ];

@@ -1,16 +1,16 @@
 /**
  * NotificationBell — Marketplace notification dropdown.
- * Shows alerts for new skill versions, review replies, and payout events.
+ * Shows alerts for new skill versions, trust changes, publications, and payout events.
  */
 import { useState, useRef, useEffect } from "react";
 import { Link } from "wouter";
 import {
-  Bell, GitBranch, MessageSquare, DollarSign, Package,
-  Check, CheckCheck, Star, Shield, X, ChevronRight,
+  Bell, GitBranch, DollarSign, Package,
+  Check, CheckCheck, Shield, X, ChevronRight,
 } from "lucide-react";
 
 /* ─── Types ──────────────────────────────────────────────────────────────── */
-type NotificationType = "version" | "review" | "payout" | "publish" | "trust";
+type NotificationType = "version" | "payout" | "publish" | "trust";
 
 interface Notification {
   id: string;
@@ -32,15 +32,6 @@ const INITIAL_NOTIFICATIONS: Notification[] = [
     time: "2 hours ago",
     read: false,
     link: "/marketplace/json-parser",
-  },
-  {
-    id: "n2",
-    type: "review",
-    title: "New review on csv-parser",
-    message: "DataEngineer42 left a 5-star review: \"Handles edge cases beautifully\"",
-    time: "5 hours ago",
-    read: false,
-    link: "/marketplace/csv-parser",
   },
   {
     id: "n3",
@@ -70,15 +61,6 @@ const INITIAL_NOTIFICATIONS: Notification[] = [
     link: "/marketplace/csv-parser",
   },
   {
-    id: "n6",
-    type: "review",
-    title: "Review reply",
-    message: "You received a reply to your review on regex-matcher from @PatternSystems",
-    time: "4 days ago",
-    read: true,
-    link: "/marketplace/regex-matcher",
-  },
-  {
     id: "n7",
     type: "version",
     title: "Dependency updated",
@@ -103,8 +85,6 @@ function NotifIcon({ type }: { type: NotificationType }) {
   switch (type) {
     case "version":
       return <GitBranch className={`${base} text-nexus-cyan`} />;
-    case "review":
-      return <MessageSquare className={`${base} text-nexus-amber`} />;
     case "payout":
       return <DollarSign className={`${base} text-nexus-green`} />;
     case "publish":
@@ -117,7 +97,6 @@ function NotifIcon({ type }: { type: NotificationType }) {
 function NotifBadgeColor(type: NotificationType): string {
   switch (type) {
     case "version": return "bg-nexus-cyan/10 border-nexus-cyan/20";
-    case "review": return "bg-nexus-amber/10 border-nexus-amber/20";
     case "payout": return "bg-nexus-green/10 border-nexus-green/20";
     case "publish": return "bg-nexus-indigo/10 border-nexus-indigo/20";
     case "trust": return "bg-purple-400/10 border-purple-400/20";
@@ -161,7 +140,6 @@ export default function NotificationBell() {
   const FILTERS: { key: "all" | NotificationType; label: string }[] = [
     { key: "all", label: "All" },
     { key: "version", label: "Versions" },
-    { key: "review", label: "Reviews" },
     { key: "payout", label: "Payouts" },
     { key: "publish", label: "Published" },
     { key: "trust", label: "Trust" },

@@ -12,7 +12,9 @@ import { blogUploadRouter } from "../blogUploadRoute";
 import { showcaseUploadRouter } from "../showcaseUploadRoute";
 import { startScheduledJobs, stopScheduledJobs } from "../scheduledJobs";
 import { registerBlogSsrMiddleware } from "../blogSsrMiddleware";
+import { registerShowcaseSsrMiddleware } from "../showcaseSsrMiddleware";
 import { installScriptRouter } from "../installScriptRoute";
+import { agentDiscoveryRouter } from "../agentDiscoveryRoutes";
 import { ENV } from "./env";
 
 function isPortAvailable(port: number): Promise<boolean> {
@@ -65,6 +67,8 @@ async function startServer() {
   app.use(showcaseUploadRouter);
   // Blog Atom feed and sitemap routes
   app.use(feedRouter);
+  // AI-agent discovery, canonical sitemap, and API description routes
+  app.use(agentDiscoveryRouter);
   // Install script route — serves /install.sh with text/plain content-type
   app.use(installScriptRouter);
   // tRPC API
@@ -78,6 +82,7 @@ async function startServer() {
   // Blog SSR middleware — injects OG/Twitter meta tags for crawlers
   // Must come BEFORE Vite/static catch-all
   registerBlogSsrMiddleware(app);
+  registerShowcaseSsrMiddleware(app);
 
   // development mode uses Vite, production mode uses static files
   if (process.env.NODE_ENV === "development") {

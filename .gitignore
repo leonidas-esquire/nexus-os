@@ -11,6 +11,14 @@ Cargo.lock
 dist/
 build/
 /public/
+/client/public/agent-routes.json
+/client/public/api-reference/
+/client/public/docs-markdown/
+/client/public/knowledge/
+/client/public/llms.txt
+/client/public/llms-full.txt
+/client/public/openapi.json
+/client/public/sitemap-static.xml
 *.dist
 *.wasm
 
@@ -59,7 +67,6 @@ lerna-debug.log*
 
 # Runtime data
 pids
-data/
 *.pid
 *.seed
 *.pid.lock

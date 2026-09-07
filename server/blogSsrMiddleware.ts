@@ -13,9 +13,19 @@ import { type Express, type Request, type Response, type NextFunction } from "ex
 import * as blogDb from "./blogDb";
 
 const SITE_NAME = "Nexus OS";
-const CANONICAL_BASE = "https://aiagents.nexus";
+const CANONICAL_BASE = "https://www.aiagents.nexus";
 const DEFAULT_OG_IMAGE =
   "https://d2xsxph8kpxj0f.cloudfront.net/310419663030909471/NRmiWdZq2JgxyAQQ5B7Zs7/nexus-og-image-o46qyMzfRYT4aVx7XCV5ub.png";
+
+function markdownToPlainText(markdown: string): string {
+  return markdown
+    .replace(/```[\s\S]*?```/g, " ")
+    .replace(/\[([^\]]+)\]\([^\)]+\)/g, "$1")
+    .replace(/^#{1,6}\s+/gm, "")
+    .replace(/[>*_`~\-]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
 
 function escapeHtml(str: string): string {
   return str
@@ -34,6 +44,9 @@ function buildMetaTags(meta: {
   type?: string;
   publishedTime?: string;
   author?: string;
+  markdownPath?: string;
+  robots?: string;
+  jsonLd?: object | object[];
 }): string {
   const tags: string[] = [];
   const e = escapeHtml;
@@ -64,6 +77,19 @@ function buildMetaTags(meta: {
 
   // Description
   tags.push(`<meta name="description" content="${e(meta.description)}" />`);
+  tags.push(`<meta name="robots" content="${e(meta.robots ?? "index,follow")}" />`);
+  tags.push(`<link rel="canonical" href="${e(meta.url)}" />`);
+  tags.push(
+    `<link rel="alternate" type="text/markdown" href="${e(CANONICAL_BASE + (meta.markdownPath ?? "/docs-markdown/site/blog.md"))}" />`
+  );
+  tags.push(
+    `<link rel="describedby" type="text/markdown" href="${CANONICAL_BASE}/llms.txt" />`
+  );
+  if (meta.jsonLd) {
+    tags.push(
+      `<script type="application/ld+json">${JSON.stringify(meta.jsonLd).replace(/</g, "\\u003c")}</script>`
+    );
+  }
 
   // Title
   tags.push(`<title>${e(meta.title)}</title>`);
@@ -103,10 +129,19 @@ export function registerBlogSsrMiddleware(app: Express) {
         url: `${CANONICAL_BASE}/blog`,
         image: DEFAULT_OG_IMAGE,
         type: "website",
+        markdownPath: "/docs-markdown/site/blog.md",
+        jsonLd: {
+          "@context": "https://schema.org",
+          "@type": "CollectionPage",
+          name: "Nexus OS Blog",
+          description: "News, tutorials, deep dives, and engineering insights about AI agent orchestration.",
+          url: `${CANONICAL_BASE}/blog`,
+        },
       });
 
       // Store meta in res.locals so the Vite/static handler can inject it
       res.locals.blogMeta = meta;
+      res.locals.agentBody = `<main id="agent-readable-content" data-server-rendered="true"><article><h1>Nexus OS Blog</h1><p>News, tutorials, deep dives, and engineering insights about AI agent orchestration.</p><p><a href="/api/blog/feed.xml">Atom feed</a> · <a href="/docs-markdown/site/blog.md">Markdown overview</a></p></article></main>`;
       next();
     } catch {
       next();
@@ -139,9 +174,34 @@ export function registerBlogSsrMiddleware(app: Express) {
           ? new Date(post.publishedAt).toISOString()
           : undefined,
         author: post.author,
+        markdownPath: `/api/blog/${post.slug}.md`,
+        jsonLd: [
+          {
+            "@context": "https://schema.org",
+            "@type": "TechArticle",
+            headline: post.title,
+            description: post.excerpt,
+            url: `${CANONICAL_BASE}/blog/${post.slug}`,
+            image: ogImage,
+            author: { "@type": "Person", name: post.author },
+            datePublished: post.publishedAt ? new Date(post.publishedAt).toISOString() : undefined,
+            dateModified: post.updatedAt ? new Date(post.updatedAt).toISOString() : undefined,
+            isPartOf: { "@type": "Blog", name: "Nexus OS Blog", url: `${CANONICAL_BASE}/blog` },
+          },
+          {
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            itemListElement: [
+              { "@type": "ListItem", position: 1, name: "Home", item: `${CANONICAL_BASE}/` },
+              { "@type": "ListItem", position: 2, name: "Blog", item: `${CANONICAL_BASE}/blog` },
+              { "@type": "ListItem", position: 3, name: post.title, item: `${CANONICAL_BASE}/blog/${post.slug}` },
+            ],
+          },
+        ],
       });
 
       res.locals.blogMeta = meta;
+      res.locals.agentBody = `<main id="agent-readable-content" data-server-rendered="true"><article><h1>${escapeHtml(post.title)}</h1><p>${escapeHtml(post.excerpt)}</p><p><strong>Author:</strong> ${escapeHtml(post.author)}</p><p>${escapeHtml(markdownToPlainText(post.content))}</p><p><a href="/api/blog/${escapeHtml(post.slug)}.md">Markdown version</a></p></article></main>`;
       next();
     } catch {
       next();
@@ -164,6 +224,7 @@ export function registerBlogSsrMiddleware(app: Express) {
           url: `${CANONICAL_BASE}/blog/preview/${req.params.token}`,
           image: data.featuredImageUrl || DEFAULT_OG_IMAGE,
           type: "article",
+          robots: "noindex,nofollow",
         });
 
         res.locals.blogMeta = meta;

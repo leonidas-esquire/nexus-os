@@ -262,7 +262,7 @@ function Hero() {
               className="inline-flex items-center gap-2 bg-nexus-indigo/10 border border-nexus-indigo/20 rounded-full px-4 py-1.5 mb-6"
             >
               <span className="w-2 h-2 rounded-full bg-nexus-green animate-pulse" />
-              <span className="font-mono text-xs text-nexus-indigo">v0.1.0 — Phase 1 Release</span>
+              <span className="font-mono text-xs text-nexus-indigo">v0.3.1 — Current Stable Release</span>
             </motion.div>
 
             <motion.h1
@@ -1021,7 +1021,7 @@ function PricingSection() {
               Open source. Free forever.
             </h2>
             <p className="text-muted-foreground text-lg">
-              Nexus OS is MIT licensed. The CLI, dashboard, and all orchestration primitives
+              Nexus OS is Apache-2.0 licensed. The CLI, dashboard, and all orchestration primitives
               are free. You only pay for the LLM tokens your agents consume.
             </p>
           </div>
@@ -1262,7 +1262,7 @@ function Footer() {
               <span className="font-mono font-bold tracking-tight">nexus<span className="text-nexus-indigo">.</span>os</span>
             </div>
             <p className="text-muted-foreground text-sm leading-relaxed max-w-sm">
-              The orchestration layer for AI agents. Open source, MIT licensed.
+              The orchestration layer for AI agents. Open source, Apache-2.0 licensed.
               Built with Rust for reliability and performance.
             </p>
           </div>
