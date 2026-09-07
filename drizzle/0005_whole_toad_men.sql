@@ -1,0 +1,41 @@
+CREATE TABLE `showcase_projects` (
+	`id` varchar(36) NOT NULL,
+	`slug` varchar(256) NOT NULL,
+	`title` varchar(256) NOT NULL,
+	`tagline` varchar(512) NOT NULL,
+	`description` text NOT NULL,
+	`screenshotUrl` varchar(2048) NOT NULL,
+	`screenshots` json,
+	`demoUrl` varchar(2048),
+	`repoUrl` varchar(2048),
+	`websiteUrl` varchar(2048),
+	`videoUrl` varchar(2048),
+	`authorName` varchar(256) NOT NULL,
+	`authorHandle` varchar(128),
+	`authorEmail` varchar(320) NOT NULL,
+	`authorAvatar` varchar(2048),
+	`authorTwitter` varchar(128),
+	`authorGithub` varchar(128),
+	`featuresUsed` json,
+	`showcase_category` enum('ai-agents','automation','devops','research','trading','other') NOT NULL DEFAULT 'other',
+	`showcase_status` enum('pending','approved','featured','rejected') NOT NULL DEFAULT 'pending',
+	`featured` boolean NOT NULL DEFAULT false,
+	`featuredOrder` int DEFAULT 0,
+	`githubStars` int DEFAULT 0,
+	`upvotes` int NOT NULL DEFAULT 0,
+	`views` int NOT NULL DEFAULT 0,
+	`submittedAt` timestamp NOT NULL DEFAULT (now()),
+	`approvedAt` timestamp,
+	`createdAt` timestamp NOT NULL DEFAULT (now()),
+	`updatedAt` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,
+	CONSTRAINT `showcase_projects_id` PRIMARY KEY(`id`),
+	CONSTRAINT `showcase_projects_slug_unique` UNIQUE(`slug`)
+);
+--> statement-breakpoint
+CREATE TABLE `showcase_upvotes` (
+	`id` int AUTO_INCREMENT NOT NULL,
+	`projectId` varchar(36) NOT NULL,
+	`userIpHash` varchar(128) NOT NULL,
+	`createdAt` timestamp NOT NULL DEFAULT (now()),
+	CONSTRAINT `showcase_upvotes_id` PRIMARY KEY(`id`)
+);
