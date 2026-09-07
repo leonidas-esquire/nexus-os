@@ -86,7 +86,7 @@ export default function BlogPost() {
       "og:image",
       post.ogImageOverride || post.featuredImageUrl || ""
     );
-    setMeta("og:url", `https://aiagents.nexus/blog/${post.slug}`);
+    setMeta("og:url", `https://www.aiagents.nexus/blog/${post.slug}`);
     setMeta("og:type", "article");
     setMeta("twitter:card", "summary_large_image");
     setMeta("twitter:title", post.title);
@@ -99,7 +99,7 @@ export default function BlogPost() {
       "article:published_time",
       post.publishedAt ? new Date(post.publishedAt).toISOString() : ""
     );
-    setCanonical(`https://aiagents.nexus/blog/${post.slug}`);
+    setCanonical(`https://www.aiagents.nexus/blog/${post.slug}`);
   }, [post]);
 
   if (postQuery.isLoading) {

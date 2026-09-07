@@ -43,7 +43,7 @@ const author = {
   twitter: 'LeonidasEsquire',
   github: 'leonidas-esquire',
   linkedin: 'https://linkedin.com/in/leonidas-esquire-williamson',
-  website: 'https://aiagents.nexus',
+  website: 'https://www.aiagents.nexus',
   authorRole: 'admin',
 };
 
@@ -73,17 +73,17 @@ const posts = [
 <h2>Core Principles</h2>
 <p>Nexus OS is built on three foundational principles that guide every design decision:</p>
 <p><strong>Fault Tolerance First.</strong> Inspired by Erlang/OTP, every agent runs under a supervisor with configurable restart strategies. When an agent crashes — and they will crash — the supervisor automatically restarts it within a defined window. One-for-one, one-for-all, and rest-for-one strategies are supported out of the box.</p>
-<p><strong>Cost Awareness.</strong> LLM API calls are expensive. Nexus OS includes a broker routing engine that evaluates every task against registered skills, WASM modules, and LLM providers. It picks the fastest, cheapest handler that meets the confidence threshold — saving up to 90% on token costs in real workloads.</p>
+<p><strong>Cost Awareness.</strong> Nexus OS includes a broker routing engine that evaluates tasks against registered skills, WASM modules, and LLM providers. It can select a lower-cost handler when that handler meets the configured confidence threshold.</p>
 <p><strong>Security by Default.</strong> Agents run in WASM sandboxes with explicit capability grants. No agent can access the filesystem, network, or other agents without declared permissions in the configuration file.</p>
 
 <h2>Architecture Overview</h2>
 <p>Nexus OS organizes agent systems into three distinct layers:</p>
 <p>The <strong>Execution Layer</strong> runs code in WASM sandboxes, containers, and edge runtimes. The <strong>Orchestration Layer</strong> manages supervisors, sagas, workflows, and agent pools. The <strong>Intelligence Layer</strong> handles broker routing, cost control, and model selection.</p>
-<p>All three layers are compiled into a single binary. No microservices, no Docker dependencies, no complex deployment pipelines. Just <code>cargo install naos</code> and you are ready to go.</p>
+<p>The Rust CLI can be installed directly from the public source repository with <code>cargo install --git https://github.com/leonidas-esquire/nexus-os.git</code>.</p>
 
 <h2>Getting Started</h2>
 <p>Getting started with Nexus OS takes less than five minutes:</p>
-<pre><code>$ cargo install naos
+<pre><code>$ cargo install --git https://github.com/leonidas-esquire/nexus-os.git
 $ naos init my-project
 $ cd my-project
 $ naos create researcher --template research
@@ -92,8 +92,8 @@ $ naos dashboard</code></pre>
 <p>The <code>naos init</code> command scaffolds a project with a <code>nexus.config.yaml</code> file, an example agent, and a SQLite database for local state. The <code>naos dashboard</code> command launches a built-in web dashboard at <code>localhost:4200</code> with real-time monitoring of all agents, supervisors, costs, and audit trails.</p>
 
 <h2>What Comes Next</h2>
-<p>This v0.1.0 release is Phase 1 of our roadmap. We are shipping the core CLI, supervisor strategies, the broker routing engine, and the web dashboard. Phase 2 will bring the WASM skill marketplace, edge deployment to Cloudflare Workers, and CRDT-based state management for distributed agent memory.</p>
-<p>We are building Nexus OS in the open. The entire codebase is MIT licensed and available on GitHub. We welcome contributions, feedback, and bug reports.</p>`,
+<p>The current stable release is v0.3.1. Current implementation status and future milestones are maintained in the public repository roadmap and release history.</p>
+<p>We are building Nexus OS in the open under the Apache License 2.0. The source, issue tracker, releases, and contribution workflow are available on GitHub.</p>`,
     coverImage: null,
     coverImageAlt: 'Nexus OS architecture diagram',
     authorId,

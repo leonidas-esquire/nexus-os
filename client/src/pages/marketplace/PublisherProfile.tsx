@@ -5,7 +5,7 @@
 import { useMemo, useState } from "react";
 import { Link, useParams } from "wouter";
 import {
-  ArrowLeft, Star, Shield, ShieldCheck, Download, ExternalLink,
+  ArrowLeft, Shield, ShieldCheck, Download, ExternalLink,
   Package, Clock, Zap, Activity, Globe, Github, Mail,
   Sun, Moon, Code2, BookOpen, LayoutDashboard, Menu, X,
   Award, TrendingUp, Calendar, CheckCircle2, AlertCircle,
@@ -75,10 +75,6 @@ function SkillCard({ skill }: { skill: Skill }) {
         <div className="flex items-center justify-between text-xs">
           <div className="flex items-center gap-3">
             <span className="flex items-center gap-1">
-              <Star className="w-3 h-3 text-nexus-amber fill-nexus-amber" />
-              {skill.stats.rating}
-            </span>
-            <span className="flex items-center gap-1">
               <Download className="w-3 h-3 text-muted-foreground" />
               {formatNumber(skill.stats.totalCalls)}
             </span>
@@ -121,8 +117,8 @@ export default function PublisherProfile() {
   }
 
   const totalCalls = skills.reduce((sum, s) => sum + s.stats.totalCalls, 0);
-  const avgRating = skills.length > 0
-    ? skills.reduce((sum, s) => sum + s.stats.rating, 0) / skills.length
+  const avgLatency = skills.length > 0
+    ? skills.reduce((sum, s) => sum + s.stats.avgLatencyMs, 0) / skills.length
     : 0;
   const badge = trustBadge({ trustTier: publisher.trustTier, creditRating: publisher.creditRating, verified: publisher.verified });
   const badgeColor = publisher.trustTier <= "T2" ? "bg-nexus-green/10 text-nexus-green" : publisher.trustTier <= "T3" ? "bg-nexus-amber/10 text-nexus-amber" : "bg-muted text-muted-foreground";
@@ -242,7 +238,7 @@ export default function PublisherProfile() {
             { label: "Skills", value: String(skills.length), icon: <Package className="w-4 h-4 text-nexus-indigo" /> },
             { label: "Total Calls", value: formatNumber(publisher.totalCalls), icon: <Activity className="w-4 h-4 text-nexus-cyan" /> },
             { label: "Revenue", value: `$${publisher.totalRevenue.toFixed(2)}`, icon: <TrendingUp className="w-4 h-4 text-nexus-green" /> },
-            { label: "Avg Rating", value: avgRating.toFixed(1), icon: <Star className="w-4 h-4 text-nexus-amber" /> },
+            { label: "Avg Latency", value: `${avgLatency.toFixed(1)}ms`, icon: <Zap className="w-4 h-4 text-nexus-amber" /> },
             { label: "T-Score", value: String(publisher.tScore), icon: <Shield className="w-4 h-4 text-purple-400" /> },
           ].map((stat) => (
             <div key={stat.label} className="bg-card/60 border border-border/30 rounded-xl p-4">

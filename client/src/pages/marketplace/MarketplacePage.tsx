@@ -95,11 +95,8 @@ function SkillCard({ skill }: { skill: Skill }) {
             {formatPrice(skill.pricing)}
           </span>
           <div className="flex items-center gap-3 text-xs text-muted-foreground">
-            <span className="flex items-center gap-1">
-              <Star className="w-3.5 h-3.5 text-nexus-amber fill-nexus-amber" />
-              {skill.stats.rating}
-            </span>
             <span>{formatNumber(skill.stats.totalCalls)} calls</span>
+            <span>{skill.stats.avgLatencyMs}ms avg</span>
           </div>
         </div>
       </div>
@@ -117,13 +114,13 @@ export default function MarketplacePage() {
 
   const defaultFilters: FilterState = {
     priceMin: null, priceMax: null,
-    minTrustTier: null, minRating: null,
+    minTrustTier: null,
     maxWasmSize: null, pricingModel: "all",
   };
   const [filters, setFilters] = useState<FilterState>(defaultFilters);
 
   const hasActiveFilters = filters.priceMin !== null || filters.priceMax !== null ||
-    filters.minTrustTier !== null || filters.minRating !== null ||
+    filters.minTrustTier !== null ||
     filters.maxWasmSize !== null || filters.pricingModel !== "all";
 
   const filteredSkills = useMemo(() => {
@@ -323,7 +320,7 @@ export default function MarketplacePage() {
                   )}
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                   {/* Pricing Model */}
                   <div>
                     <label className="text-[11px] text-muted-foreground uppercase tracking-wider mb-1.5 block">Pricing</label>
@@ -369,22 +366,6 @@ export default function MarketplacePage() {
                       <option value="T2">T2 or better</option>
                       <option value="T3">T3 or better</option>
                       <option value="T4">T4 or better</option>
-                    </select>
-                  </div>
-
-                  {/* Min Rating */}
-                  <div>
-                    <label className="text-[11px] text-muted-foreground uppercase tracking-wider mb-1.5 block">Min Rating</label>
-                    <select
-                      value={filters.minRating === null ? "" : String(filters.minRating)}
-                      onChange={(e) => setFilters({ ...filters, minRating: e.target.value ? Number(e.target.value) : null })}
-                      className="w-full px-3 py-2 bg-background border border-border/50 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-nexus-indigo/40"
-                    >
-                      <option value="">Any</option>
-                      <option value="4.5">★ 4.5+</option>
-                      <option value="4.0">★ 4.0+</option>
-                      <option value="3.5">★ 3.5+</option>
-                      <option value="3.0">★ 3.0+</option>
                     </select>
                   </div>
 
@@ -596,7 +577,7 @@ export default function MarketplacePage() {
                       <th className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wider px-5 py-3">Publisher</th>
                       <th className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wider px-5 py-3">Price</th>
                       <th className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wider px-5 py-3">Trust</th>
-                      <th className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wider px-5 py-3">Rating</th>
+                      <th className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wider px-5 py-3">Latency</th>
                       <th className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wider px-5 py-3">Calls</th>
                       <th className="text-right text-xs font-medium text-muted-foreground uppercase tracking-wider px-5 py-3"></th>
                     </tr>
@@ -639,11 +620,7 @@ export default function MarketplacePage() {
                           </div>
                         </td>
                         <td className="px-5 py-3.5">
-                          <span className="flex items-center gap-1 text-sm">
-                            <Star className="w-3.5 h-3.5 text-nexus-amber fill-nexus-amber" />
-                            {skill.stats.rating}
-                            <span className="text-muted-foreground text-xs">({formatNumber(skill.stats.reviews)})</span>
-                          </span>
+                          <span className="text-sm text-muted-foreground">{skill.stats.avgLatencyMs}ms</span>
                         </td>
                         <td className="px-5 py-3.5 text-sm text-muted-foreground">{formatNumber(skill.stats.totalCalls)}</td>
                         <td className="px-5 py-3.5 text-right">
@@ -729,13 +706,11 @@ export default function MarketplacePage() {
               <div key={event.id} className="flex items-center gap-4 px-5 py-3 hover:bg-card/60 transition-colors group">
                 <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${
                   event.type === "install" ? "bg-nexus-indigo/15 text-nexus-indigo" :
-                  event.type === "review" ? "bg-nexus-amber/15 text-nexus-amber" :
                   event.type === "publish" ? "bg-nexus-green/15 text-nexus-green" :
                   event.type === "update" ? "bg-nexus-cyan/15 text-nexus-cyan" :
                   "bg-purple-500/15 text-purple-400"
                 }`}>
                   {event.type === "install" && <Download className="w-3.5 h-3.5" />}
-                  {event.type === "review" && <Star className="w-3.5 h-3.5" />}
                   {event.type === "publish" && <Package className="w-3.5 h-3.5" />}
                   {event.type === "update" && <TrendingUp className="w-3.5 h-3.5" />}
                   {event.type === "milestone" && <Zap className="w-3.5 h-3.5" />}

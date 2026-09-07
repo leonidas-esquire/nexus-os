@@ -130,7 +130,7 @@ export default function WatchlistPage() {
                       </p>
                       <div className="flex items-center gap-4 text-xs text-muted-foreground">
                         <span>{formatNumber(skill.stats.totalCalls)} calls</span>
-                        <span>⭐ {skill.stats.rating}</span>
+                        <span>{skill.stats.avgLatencyMs}ms avg</span>
                         <span>{skill.wasmSize}</span>
                         <span>Added {addedAt}</span>
                       </div>

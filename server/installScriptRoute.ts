@@ -6,7 +6,7 @@ const INSTALL_SCRIPT = `#!/bin/sh
 set -e
 
 # Nexus OS Installer
-# Usage: curl -fsSL https://aiagents.nexus/install.sh | sh
+# Usage: curl -fsSL https://www.aiagents.nexus/install.sh | sh
 
 REPO="leonidas-esquire/nexus-os"
 INSTALL_DIR="/usr/local/bin"
@@ -109,7 +109,7 @@ print_success() {
     echo "    \${GREEN}naos create hello\${NC}"
     echo "    \${GREEN}naos run hello\${NC}"
     echo ""
-    echo "Docs: \${BLUE}https://aiagents.nexus/docs\${NC}"
+    echo "Docs: \${BLUE}https://www.aiagents.nexus/docs\${NC}"
     echo ""
 }
 
