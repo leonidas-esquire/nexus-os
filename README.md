@@ -1,5 +1,7 @@
 <div align="center">
 
+<img src="https://files.manuscdn.com/user_upload_by_module/session_file/310419663030909471/jCAOeglRIAmKomRx.png" alt="AI Agents Nexus — open-source agent network for developers" width="760" />
+
 # Nexus OS
 
 **The orchestration layer for AI agents**

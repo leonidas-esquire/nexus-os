@@ -16,7 +16,7 @@ import {
 // ---- Constants ----
 const HERO_BG = "https://d2xsxph8kpxj0f.cloudfront.net/310419663030909471/NRmiWdZq2JgxyAQQ5B7Zs7/nexus-hero-bg-KZaygkzLoQetYLpJYVsvWt.webp";
 const ARCH_IMG = "https://d2xsxph8kpxj0f.cloudfront.net/310419663030909471/NRmiWdZq2JgxyAQQ5B7Zs7/nexus-architecture-4DiwhY8q9MGbukEE9PinuU.webp";
-const TERMINAL_IMG = "https://d2xsxph8kpxj0f.cloudfront.net/310419663030909471/NRmiWdZq2JgxyAQQ5B7Zs7/nexus-terminal-4Hd335zah89fxbMfUwEoUh.webp";
+const NEXUS_OVERVIEW_IMG = "https://files.manuscdn.com/user_upload_by_module/session_file/310419663030909471/HJuWfRmQbCUUDufd.png";
 const DASHBOARD_IMG = "https://d2xsxph8kpxj0f.cloudfront.net/310419663030909471/NRmiWdZq2JgxyAQQ5B7Zs7/nexus-dashboard-fwAdGqtnxNA3pFiqWHe6iD.webp";
 
 const GITHUB_URL = "https://github.com/leonidas-esquire/nexus-os";
@@ -509,8 +509,8 @@ function CliSection() {
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div className="order-2 lg:order-1 rounded-lg overflow-hidden glow-indigo border border-border">
               <img
-                src={TERMINAL_IMG}
-                alt="naos CLI in action — init, create, status commands"
+                src={NEXUS_OVERVIEW_IMG}
+                alt="AI Agents Nexus overview: agents are free, developers make money, and agents keep working when an LLM disconnects"
                 className="w-full h-auto"
               />
             </div>
@@ -544,6 +544,42 @@ function CliSection() {
                     <span className="text-muted-foreground text-sm">{item.desc}</span>
                   </div>
                 ))}
+              </div>
+            </div>
+          </div>
+        </AnimatedSection>
+
+        <AnimatedSection delay={0.12}>
+          <div className="mt-14 max-w-5xl mx-auto terminal-border rounded-lg overflow-hidden glow-indigo">
+            <div className="flex items-center justify-between gap-4 px-4 py-3 border-b border-border bg-nexus-deep">
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-full bg-red-500/60" />
+                <div className="w-3 h-3 rounded-full bg-yellow-500/60" />
+                <div className="w-3 h-3 rounded-full bg-green-500/60" />
+                <span className="ml-2 font-mono text-xs text-muted-foreground">your first minute with naos</span>
+              </div>
+              <span className="hidden sm:block font-mono text-[10px] uppercase tracking-widest text-nexus-indigo">init · create · status</span>
+            </div>
+            <div className="grid lg:grid-cols-[1.15fr_0.85fr] bg-nexus-deep/80">
+              <div className="p-5 sm:p-6 font-mono text-xs sm:text-sm leading-relaxed overflow-x-auto">
+                <div className="text-muted-foreground">$ <span className="text-foreground">naos init my-project</span></div>
+                <div className="mt-2 text-nexus-green">✓ Created project structure</div>
+                <div className="text-nexus-green">✓ Generated nexus.config.yaml</div>
+                <div className="text-nexus-green">✓ Initialized SQLite database</div>
+                <div className="text-nexus-green">✓ Created example agent</div>
+                <div className="mt-5 text-muted-foreground">$ <span className="text-foreground">naos create researcher --template research</span></div>
+                <div className="mt-2 text-nexus-green">✓ Agent ID: <span className="text-nexus-indigo">e79ce380adcb</span></div>
+              </div>
+              <div className="border-t lg:border-t-0 lg:border-l border-border p-5 sm:p-6 font-mono text-xs sm:text-sm leading-relaxed overflow-x-auto">
+                <div className="text-muted-foreground">$ <span className="text-foreground">naos status</span></div>
+                <div className="mt-4 grid grid-cols-[minmax(7rem,1fr)_minmax(5rem,0.8fr)_minmax(7rem,1fr)] gap-3 text-[10px] uppercase tracking-wider text-muted-foreground">
+                  <span>Name</span><span>Status</span><span>ID</span>
+                </div>
+                <div className="my-2 h-px bg-border" />
+                <div className="grid grid-cols-[minmax(7rem,1fr)_minmax(5rem,0.8fr)_minmax(7rem,1fr)] gap-3 text-foreground">
+                  <span>researcher</span><span className="text-nexus-green">● running</span><span>e79ce380adcb</span>
+                  <span>data-bot</span><span className="text-muted-foreground">○ stopped</span><span>a1b2c3d4e5f6</span>
+                </div>
               </div>
             </div>
           </div>
