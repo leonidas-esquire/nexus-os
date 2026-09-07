@@ -29,7 +29,10 @@ Place `manifest.json` and `skill.wasm` in a directory. Set `NEXUS_REGISTRY_TOKEN
   "name": "record-total",
   "version": "1.0.0",
   "description": "Validate records and total integer amounts without an LLM.",
-  "readme": "Input: JSON with a records array. Each record requires a unique nonempty id and nonnegative integer amount_cents. Output: count and total_amount_cents. Invalid records produce a nonzero exit.",
+  "readme": "Input: JSON with a records array. Each record requires a unique nonempty id and nonnegative integer amount_cents. Output: valid, record_count, and total_cents. Invalid records produce a nonzero exit.",
+  "inputs": "JSON containing records with unique ids and nonnegative integer amount_cents.",
+  "outputs": "JSON totals, or a nonzero exit code for invalid records.",
+  "examples": [{"input":"{\"records\":[]}","output":"{\"valid\":true,\"record_count\":0,\"total_cents\":0}"}],
   "license": "MIT",
   "category": "Validators",
   "runtime": "wasip1-command",
@@ -74,3 +77,5 @@ The web release and rebuilt CLI must both ship. Existing downloadable CLI releas
 `pnpm check`, `pnpm build`, `pnpm exec vitest run server/marketplace` cover type/build checks, package validation, storage, and HTTP access controls. Set `TEST_MARKETPLACE_DATABASE_URL` to a **disposable empty MySQL database** to include migration, ownership, concurrent submission, review, rollback and quota tests. Tests must never point at production. The marketplace CI workflow supplies MySQL 8 and runs these integration cases.
 
 `cargo test --all-targets` includes a registry HTTP fixture that installs a hash-verified package, creates an agent from it, executes it with model credentials removed, and rejects tampered, unapproved and unsafe-path packages.
+
+Release descriptions must now include inputs, outputs, and at least one example. The marketplace is not yet deployed, so this required manifest expansion does not rewrite any published release. The CLI defaults to the canonical API origin to avoid the apex-to-www redirect. See AI_AGENT_READABILITY.md for live documentation paths and freshness automation.

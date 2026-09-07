@@ -61,6 +61,7 @@ function Router() {
       <Route path={"/marketplace/leaderboard"} component={RegistryUpcoming} />
       <Route path={"/marketplace/admin"} component={RegistryAdmin} />
       <Route path={"/marketplace/publisher/:handle"} component={RegistryUpcoming} />
+      <Route path="/marketplace/:skillName/versions/:releaseVersion" component={RegistryDetail} />
       <Route path={"/marketplace/:skillName"} component={RegistryDetail} />
       <Route path={"/docs/manual"} component={ManualLayout} />
       <Route path={"/docs/manual/:section"} component={ManualLayout} />

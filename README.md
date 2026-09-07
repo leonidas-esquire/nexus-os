@@ -14,7 +14,7 @@
 [![Deployment Tests](https://github.com/leonidas-esquire/nexus-os/actions/workflows/deployment-tests.yml/badge.svg?branch=main)](https://github.com/leonidas-esquire/nexus-os/actions/workflows/deployment-tests.yml)
 [![GitHub Stars](https://img.shields.io/github/stars/leonidas-esquire/nexus-os.svg?style=flat)](https://github.com/leonidas-esquire/nexus-os/stargazers)
 
-[**Live Platform**](https://aiagents.nexus) · [**Documentation**](https://aiagents.nexus/docs) · [**Showcase**](https://aiagents.nexus/showcase) · [**Deployment Guide**](DEPLOYMENT.md) · [**Discussions**](https://github.com/leonidas-esquire/nexus-os/discussions)
+[**Live Platform**](https://www.aiagents.nexus) · [**Documentation**](https://www.aiagents.nexus/docs) · [**Showcase**](https://www.aiagents.nexus/showcase) · [**Deployment Guide**](DEPLOYMENT.md) · [**Discussions**](https://github.com/leonidas-esquire/nexus-os/discussions)
 
 </div>
 
@@ -316,7 +316,7 @@ broker:
 | `naos edge deploy <agent>` | Deploy to Cloudflare |
 | `naos edge status <agent>` | Check edge deployment |
 
-[Full CLI Reference →](https://aiagents.nexus/docs/cli-reference)
+[Full CLI Reference →](https://www.aiagents.nexus/docs/cli-reference)
 
 ---
 
@@ -390,6 +390,6 @@ Built with ❤️ using:
 
 <div align="center">
 
-[Get Started](https://aiagents.nexus/docs) · [Documentation](https://aiagents.nexus/docs) · [GitHub](https://github.com/leonidas-esquire/nexus-os)
+[Get Started](https://www.aiagents.nexus/docs) · [Documentation](https://www.aiagents.nexus/docs) · [GitHub](https://github.com/leonidas-esquire/nexus-os)
 
 </div>

@@ -16,6 +16,16 @@ export const manifestSchema = z
     version: skillVersion,
     description: z.string().trim().min(10).max(500),
     readme: z.string().trim().min(20).max(20000),
+    inputs: z.string().trim().min(10).max(2000),
+    outputs: z.string().trim().min(10).max(2000),
+    examples: z
+      .array(
+        z
+          .object({ input: z.string().max(2000), output: z.string().max(2000) })
+          .strict()
+      )
+      .min(1)
+      .max(3),
     license: z.string().trim().min(1).max(100),
     category: z.enum([
       "Validators",
@@ -44,3 +54,37 @@ export type RegistryVersion = {
   createdAt: string;
   reviewReason: string | null;
 };
+
+export const registryVersionSchema = z.object({
+  id: z.number().int().positive(),
+  name: skillName,
+  version: skillVersion,
+  manifest: manifestSchema,
+  sha256: z.string().regex(/^[a-f0-9]{64}$/),
+  size: z.number().int().min(8).max(MAX_PACKAGE_BYTES),
+  status: z.enum(["pending", "approved", "rejected", "revoked"]),
+  ownerId: z.number().int(),
+  publisher: z.string(),
+  createdAt: z.iso.datetime(),
+  reviewReason: z.string().nullable(),
+});
+export const registryQuerySchema = z.object({
+  q: z.string().max(100).default(""),
+  offset: z.coerce.number().int().min(0).max(100000).default(0),
+});
+export const registryReviewSchema = z
+  .object({
+    action: z.enum(["approved", "rejected", "revoked"]),
+    reason: z.string().trim().min(10).max(2000),
+  })
+  .strict();
+export const registryListSchema = z.object({
+  items: z.array(registryVersionSchema),
+});
+export const registrySubmissionSchema = z.object({
+  id: z.number().int().positive(),
+  status: z.literal("pending"),
+  name: skillName,
+  version: skillVersion,
+  sha256: z.string().regex(/^[a-f0-9]{64}$/),
+});

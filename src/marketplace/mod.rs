@@ -40,7 +40,7 @@ fn client() -> Result<reqwest::Client> {
 }
 fn registry() -> Result<reqwest::Url> {
     let value =
-        std::env::var("NEXUS_REGISTRY_URL").unwrap_or_else(|_| "https://aiagents.nexus".into());
+        std::env::var("NEXUS_REGISTRY_URL").unwrap_or_else(|_| "https://api.aiagents.nexus".into());
     let url =
         reqwest::Url::parse(&value).map_err(|_| registry_error("Invalid NEXUS_REGISTRY_URL"))?;
     let loopback = matches!(url.host_str(), Some("localhost" | "127.0.0.1" | "[::1]"));

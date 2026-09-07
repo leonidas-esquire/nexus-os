@@ -1,4 +1,4 @@
-import express, { type Express, type Response } from "express";
+import express, { type Express, type Request, type Response } from "express";
 import fs from "fs";
 import { type Server } from "http";
 import { nanoid } from "nanoid";
@@ -15,12 +15,58 @@ function injectBlogMeta(html: string, metaTags: string): string {
   result = result.replace(/<title>[^<]*<\/title>/, "");
   // Remove existing og: and twitter: meta tags and description
   result = result.replace(
-    /<meta\s+(?:property="og:|name="twitter:|name="description")[^>]*\/?>\s*/g,
+    /<meta\s+(?:property="og:|name="twitter:|name="description"|name="robots")[^>]*\/?>\s*/g,
+    ""
+  );
+  result = result.replace(
+    /<link\s+rel="(?:canonical|alternate|describedby)"[^>]*\/?>\s*/g,
+    ""
+  );
+  result = result.replace(
+    /<script\s+type="application\/ld\+json">[\s\S]*?<\/script>\s*/g,
     ""
   );
   // Insert new meta tags after <head>
   result = result.replace(/<head>/, `<head>\n    ${metaTags}`);
   return result;
+}
+
+export function injectAgentBody(html: string, body?: string): string {
+  if (!body) return html;
+  return html.replace(
+    /<div id="root">[\s\S]*<\/div>\s*(?=<script)/,
+    `<div id="root">${body}</div>\n    `
+  );
+}
+
+export function isAgentResourceRequest(url: string): boolean {
+  const pathname = new URL(url, "http://localhost").pathname;
+  return (
+    pathname.startsWith("/.well-known/") ||
+    /\.(?:md|txt|json|ya?ml|xml)$/i.test(pathname) ||
+    /^\/(?:ai-plugin|openapi|swagger|asyncapi|manifest)(?:\.|$)/i.test(pathname)
+  );
+}
+
+function sendAgentResourceNotFound(req: Request, res: Response): void {
+  res
+    .status(404)
+    .set({
+      "Content-Type": "application/problem+json; charset=utf-8",
+      "Cache-Control": "public, max-age=60",
+      "X-Content-Type-Options": "nosniff",
+    })
+    .send({
+      type: "https://www.aiagents.nexus/knowledge/governance/content-provenance.md",
+      title: "Machine-readable resource not found",
+      status: 404,
+      detail: `No agent resource is published at ${req.path}`,
+      alternatives: [
+        "https://www.aiagents.nexus/llms.txt",
+        "https://www.aiagents.nexus/knowledge/index.md",
+        "https://api.aiagents.nexus/openapi.json",
+      ],
+    });
 }
 
 export async function setupVite(app: Express, server: Server) {
@@ -41,6 +87,11 @@ export async function setupVite(app: Express, server: Server) {
   app.use("*", async (req, res, next) => {
     const url = req.originalUrl;
 
+    if (isAgentResourceRequest(url)) {
+      sendAgentResourceNotFound(req, res);
+      return;
+    }
+
     try {
       const clientTemplate = path.resolve(
         import.meta.dirname,
@@ -59,6 +110,7 @@ export async function setupVite(app: Express, server: Server) {
       if (res.locals.blogMeta) {
         template = injectBlogMeta(template, res.locals.blogMeta);
       }
+      template = injectAgentBody(template, res.locals.agentBody);
       const page = await vite.transformIndexHtml(url, template);
       res.status(200).set({ "Content-Type": "text/html" }).end(page);
     } catch (e) {
@@ -79,15 +131,52 @@ export function serveStatic(app: Express) {
     );
   }
 
-  app.use(express.static(distPath));
+  app.use((req, res, next) => {
+    if (req.method !== "GET" && req.method !== "HEAD") {
+      next();
+      return;
+    }
+    const pathname = new URL(req.originalUrl, "http://localhost").pathname;
+    if (path.extname(pathname)) {
+      next();
+      return;
+    }
+    const routeIndex = path.resolve(distPath, `.${pathname}`, "index.html");
+    if (
+      !routeIndex.startsWith(`${distPath}${path.sep}`) ||
+      !fs.existsSync(routeIndex)
+    ) {
+      next();
+      return;
+    }
+
+    if (res.locals.blogMeta || res.locals.agentBody) {
+      let html = fs.readFileSync(routeIndex, "utf-8");
+      if (res.locals.blogMeta) {
+        html = injectBlogMeta(html, res.locals.blogMeta);
+      }
+      html = injectAgentBody(html, res.locals.agentBody);
+      res.status(200).set({ "Content-Type": "text/html" }).end(html);
+      return;
+    }
+
+    res.sendFile(routeIndex);
+  });
+
+  app.use(express.static(distPath, { redirect: false }));
 
   // fall through to index.html if the file doesn't exist
-  app.use("*", (_req, res) => {
+  app.use("*", (req, res) => {
+    if (isAgentResourceRequest(req.originalUrl)) {
+      sendAgentResourceNotFound(req, res);
+      return;
+    }
     const indexPath = path.resolve(distPath, "index.html");
     // Inject SSR meta tags if set by blog middleware
     if (res.locals.blogMeta) {
       let html = fs.readFileSync(indexPath, "utf-8");
       html = injectBlogMeta(html, res.locals.blogMeta);
+      html = injectAgentBody(html, res.locals.agentBody);
       res.status(200).set({ "Content-Type": "text/html" }).end(html);
     } else {
       res.sendFile(indexPath);

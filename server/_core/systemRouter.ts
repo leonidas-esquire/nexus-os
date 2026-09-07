@@ -1,9 +1,10 @@
+import { apiOutputs } from "../../shared/apiOutputs";
 import { z } from "zod";
 import { notifyOwner } from "./notification";
 import { adminProcedure, publicProcedure, router } from "./trpc";
 
 export const systemRouter = router({
-  health: publicProcedure
+  health: publicProcedure.output(apiOutputs["system.health"])
     .input(
       z.object({
         timestamp: z.number().min(0, "timestamp cannot be negative"),
@@ -13,7 +14,7 @@ export const systemRouter = router({
       ok: true,
     })),
 
-  notifyOwner: adminProcedure
+  notifyOwner: adminProcedure.output(apiOutputs["system.notifyOwner"])
     .input(
       z.object({
         title: z.string().min(1, "title is required"),

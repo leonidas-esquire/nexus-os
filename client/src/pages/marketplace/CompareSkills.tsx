@@ -6,7 +6,7 @@
 import { useState, useMemo } from "react";
 import { Link, useSearch } from "wouter";
 import {
-  ArrowLeft, Package, ChevronDown, X, Star, Shield,
+  ArrowLeft, Package, ChevronDown, X, Shield,
   Zap, Activity, Clock, Check, Minus, Plus,
   Sun, Moon, Code2, BookOpen, LayoutDashboard, Menu,
 } from "lucide-react";
@@ -72,8 +72,7 @@ function SkillSelector({
                 <span className="text-xs text-muted-foreground">v{skill.version}</span>
               </span>
               <span className="flex items-center gap-2 text-xs text-muted-foreground">
-                <Star className="w-3 h-3 text-nexus-amber fill-nexus-amber" />
-                {skill.stats.rating}
+                {skill.stats.avgLatencyMs}ms avg
               </span>
             </button>
           ))}
@@ -244,10 +243,7 @@ export default function CompareSkills() {
               />
               {skill && (
                 <div className="mt-2 flex items-center gap-3 text-xs text-muted-foreground">
-                  <span className="flex items-center gap-1">
-                    <Star className="w-3 h-3 text-nexus-amber fill-nexus-amber" />
-                    {skill.stats.rating}
-                  </span>
+                  <span>{skill.stats.avgLatencyMs}ms avg</span>
                   <span>{formatNumber(skill.stats.totalCalls)} calls</span>
                   <span className={skill.pricing.model === "free" ? "text-nexus-green" : ""}>
                     {formatPrice(skill.pricing)}

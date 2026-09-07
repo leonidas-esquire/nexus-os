@@ -211,3 +211,8 @@ export async function reviewRelease(
       .values({ versionId: id, actorId: user.id, action, reason });
   });
 }
+
+export async function listApprovedReleaseIdentities() {
+ const db=await database();
+ return db.select({name:versions.skillName,version:versions.version,createdAt:versions.createdAt}).from(versions).where(eq(versions.status,'approved')).orderBy(desc(versions.id));
+}

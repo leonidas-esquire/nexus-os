@@ -178,8 +178,13 @@ export function RegistryCatalog() {
   );
 }
 export function RegistryDetail() {
-  const { skillName } = useParams<{ skillName: string }>();
-  const version = new URLSearchParams(window.location.search).get("version");
+  const { skillName, releaseVersion } = useParams<{
+    skillName: string;
+    releaseVersion?: string;
+  }>();
+  const version =
+    releaseVersion ||
+    new URLSearchParams(window.location.search).get("version");
   const result = useQuery({
     queryKey: ["registry-detail", skillName, version],
     queryFn: () =>
@@ -210,7 +215,7 @@ export function RegistryDetail() {
           </p>
           <div className="mt-8 grid gap-8 lg:grid-cols-[1fr_340px]">
             <article className="whitespace-pre-wrap rounded-xl border border-white/10 p-6 leading-relaxed text-slate-300">
-              {v.manifest.readme}
+              {`Inputs\n${v.manifest.inputs}\n\nOutputs\n${v.manifest.outputs}\n\nExamples\n${v.manifest.examples.map(e => `Input: ${e.input}\nOutput: ${e.output}`).join("\n\n")}\n\n${v.manifest.readme}`}
             </article>
             <aside className="space-y-5 rounded-xl border border-indigo-400/25 bg-indigo-500/5 p-6">
               <h2 className="flex items-center gap-2 font-semibold">
@@ -271,6 +276,9 @@ const initial: SkillManifest = {
   version: "1.0.0",
   description: "",
   readme: "",
+  inputs: "",
+  outputs: "",
+  examples: [{ input: "", output: "" }],
   license: "MIT",
   category: "Other",
   runtime: "wasip1-command",
@@ -399,6 +407,53 @@ export function RegistryDeveloper() {
                   value={manifest.readme}
                   onChange={e =>
                     setManifest({ ...manifest, readme: e.target.value })
+                  }
+                />
+              </label>
+              {(["inputs", "outputs"] as const).map(key => (
+                <label key={key} className="block text-sm text-slate-300">
+                  {key === "inputs"
+                    ? "Input format and constraints"
+                    : "Output format and errors"}
+                  <textarea
+                    required
+                    minLength={10}
+                    maxLength={2000}
+                    className={`${field} mt-2`}
+                    value={manifest[key]}
+                    onChange={e =>
+                      setManifest({ ...manifest, [key]: e.target.value })
+                    }
+                  />
+                </label>
+              ))}
+              <label className="block text-sm text-slate-300">
+                Example input
+                <textarea
+                  className={`${field} mt-2`}
+                  value={manifest.examples[0].input}
+                  onChange={e =>
+                    setManifest({
+                      ...manifest,
+                      examples: [
+                        { ...manifest.examples[0], input: e.target.value },
+                      ],
+                    })
+                  }
+                />
+              </label>
+              <label className="block text-sm text-slate-300">
+                Expected example output
+                <textarea
+                  className={`${field} mt-2`}
+                  value={manifest.examples[0].output}
+                  onChange={e =>
+                    setManifest({
+                      ...manifest,
+                      examples: [
+                        { ...manifest.examples[0], output: e.target.value },
+                      ],
+                    })
                   }
                 />
               </label>

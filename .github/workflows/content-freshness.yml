@@ -1,0 +1,56 @@
+name: Content contracts and freshness
+on:
+  pull_request:
+  push:
+    branches: [main]
+  release:
+    types: [published]
+  schedule:
+    - cron: "0 15 * * 1"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  content:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: registry-test
+          MYSQL_DATABASE: nexus_content_test
+        ports: ["3306:3306"]
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost -pregistry-test"
+          --health-interval=10s --health-timeout=5s --health-retries=10
+    env:
+      DATABASE_URL: mysql://root:registry-test@127.0.0.1:3306/nexus_content_test
+      TEST_MARKETPLACE_DATABASE_URL: mysql://root:registry-test@127.0.0.1:3306/nexus_content_test
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event_name == 'release' && 'main' || github.sha }}
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm agent:prepare
+      - run: pnpm check
+      - run: pnpm exec drizzle-kit migrate
+      - run: pnpm test
+      - run: pnpm exec tsx scripts/check-freshness.ts --remote
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: content-freshness-evidence
+          path: |
+            freshness-report.json
+            client/public/content-provenance.json
+            client/public/api-reference/trpc-procedures.json
+          retention-days: 90

@@ -9,6 +9,9 @@ import { z } from "zod";
 import { authenticateClerkRequest } from "../_core/clerkAuth";
 import type { User } from "../../drizzle/schema";
 import {
+  registryQuerySchema,
+  registryReviewSchema,
+  registryVersionSchema,
   MAX_PACKAGE_BYTES,
   skillName,
   skillVersion,
@@ -85,10 +88,7 @@ export function createMarketplaceRouter(
         : res.status(403).json({ error: "Administrator access required" })
     );
   };
-  const query = z.object({
-    q: z.string().max(100).default(""),
-    offset: z.coerce.number().int().min(0).max(100000).default(0),
-  });
+  const query = registryQuerySchema;
   router.get(
     "/api/marketplace/skills",
     wrap(async (req, res) => {
@@ -101,14 +101,12 @@ export function createMarketplaceRouter(
     requireUser,
     wrap(async (req, res) => {
       const { offset } = query.parse(req.query);
-      res
-        .set("Cache-Control", "no-store")
-        .json({
-          items: await repo.listReleases({
-            ownerId: res.locals.user.id,
-            offset,
-          }),
-        });
+      res.set("Cache-Control", "no-store").json({
+        items: await repo.listReleases({
+          ownerId: res.locals.user.id,
+          offset,
+        }),
+      });
     })
   );
   router.get(
@@ -142,14 +140,12 @@ export function createMarketplaceRouter(
         pkg,
         () => storage().put(pkg.sha256, bytes)
       );
-      res
-        .status(201)
-        .json({
-          ...release,
-          name: pkg.manifest.name,
-          version: pkg.manifest.version,
-          sha256: pkg.sha256,
-        });
+      res.status(201).json({
+        ...release,
+        name: pkg.manifest.name,
+        version: pkg.manifest.version,
+        sha256: pkg.sha256,
+      });
     })
   );
   router.post(
@@ -157,13 +153,7 @@ export function createMarketplaceRouter(
     requireAdmin,
     wrap(async (req, res) => {
       const id = z.coerce.number().int().positive().parse(req.params.id);
-      const input = z
-        .object({
-          action: z.enum(["approved", "rejected", "revoked"]),
-          reason: z.string().trim().min(10).max(2000),
-        })
-        .strict()
-        .parse(req.body);
+      const input = registryReviewSchema.parse(req.body);
       await repo.reviewRelease(res.locals.user, id, input.action, input.reason);
       res.json({ success: true });
     })
@@ -216,13 +206,25 @@ export function createMarketplaceRouter(
     })
   );
   router.get(
+    "/api/marketplace/skills/:name/:version/manifest",
+    wrap(async (req, res) => {
+      const release = await repo.getRelease(
+        skillName.parse(req.params.name),
+        skillVersion.parse(req.params.version)
+      );
+      res.set("Cache-Control", "no-store").json(release.manifest);
+    })
+  );
+  router.get(
     "/api/marketplace/skills/:name/:version?",
     wrap(async (req, res) => {
       const release = await repo.getRelease(
         skillName.parse(req.params.name),
         req.params.version ? skillVersion.parse(req.params.version) : undefined
       );
-      res.set("Cache-Control", "no-store").json(release);
+      res
+        .set("Cache-Control", "no-store")
+        .json(registryVersionSchema.parse(release));
     })
   );
   router.use(

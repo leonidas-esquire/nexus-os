@@ -11,6 +11,7 @@ import {
   listReleases,
   getRelease,
   reviewRelease,
+  listApprovedReleaseIdentities,
 } from "./repository";
 import { wasm, manifest } from "./testFixtures";
 
@@ -87,7 +88,9 @@ describe.skipIf(!process.env.TEST_MARKETPLACE_DATABASE_URL)(
       await expect(
         reviewRelease(admin, release.id, "approved", "Duplicate decision")
       ).rejects.toThrow("transition");
-      await reviewRelease(admin, release.id, "revoked", "Removed after review");
+      expect(await listApprovedReleaseIdentities()).toEqual(expect.arrayContaining([expect.objectContaining({name:manifest.name,version:manifest.version})]));
+    await reviewRelease(admin, release.id, "revoked", "Removed after review");
+    expect(await listApprovedReleaseIdentities()).toEqual([]);
       await expect(getRelease(manifest.name, manifest.version)).rejects.toThrow(
         "not found"
       );

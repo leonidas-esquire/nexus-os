@@ -1,0 +1,7 @@
+{
+  "owner": "human:leonidas-esquire",
+  "intervalDays": 90,
+  "initialReviewDue": "2026-12-06T00:00:00Z",
+  "reviews": [],
+  "note": "No completed human review is inferred from builds or automated tests. Add a signed-off review record with reviewer, reviewedAt, sourceDigest, and evidenceUrl only after actual human review."
+}

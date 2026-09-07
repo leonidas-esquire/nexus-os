@@ -1,3 +1,4 @@
+import { apiOutputs } from "../shared/apiOutputs";
 import { z } from "zod";
 import { router, publicProcedure, adminProcedure } from "./_core/trpc";
 import * as blogDb from "./blogDb";
@@ -22,7 +23,10 @@ function slugify(text: string): string {
 }
 
 function estimateReadingTime(markdown: string): number {
-  const text = markdown.replace(/[#*`>\[\]()!_~-]/g, "").replace(/\s+/g, " ").trim();
+  const text = markdown
+    .replace(/[#*`>\[\]()!_~-]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
   const words = text.split(" ").filter(Boolean).length;
   return Math.max(1, Math.ceil(words / 250));
 }
@@ -30,16 +34,19 @@ function estimateReadingTime(markdown: string): number {
 // ─── Public blog router ────────────────────────────────────────────
 
 export const blogPublicRouter = router({
-  list: publicProcedure.query(async () => {
+  list: publicProcedure.output(apiOutputs["blog.list"]).query(async () => {
     return blogDb.getBlogPosts({ limit: 50 });
   }),
 
-  featured: publicProcedure.query(async () => {
-    const posts = await blogDb.getBlogPosts({ featured: true, limit: 1 });
-    return posts[0] ?? null;
-  }),
+  featured: publicProcedure
+    .output(apiOutputs["blog.featured"])
+    .query(async () => {
+      const posts = await blogDb.getBlogPosts({ featured: true, limit: 1 });
+      return posts[0] ?? null;
+    }),
 
   getBySlug: publicProcedure
+    .output(apiOutputs["blog.getBySlug"])
     .input(z.object({ slug: z.string() }))
     .query(async ({ input }) => {
       const post = await blogDb.getBlogPostBySlug(input.slug);
@@ -54,6 +61,7 @@ export const blogPublicRouter = router({
 
 export const adminBlogRouter = router({
   list: adminProcedure
+    .output(apiOutputs["adminBlog.list"])
     .input(
       z.object({
         limit: z.number().min(1).max(100).default(20),
@@ -65,6 +73,7 @@ export const adminBlogRouter = router({
     }),
 
   getById: adminProcedure
+    .output(apiOutputs["adminBlog.getById"])
     .input(z.object({ id: z.number() }))
     .query(async ({ input }) => {
       const post = await blogDb.getAdminBlogPostById(input.id);
@@ -75,6 +84,7 @@ export const adminBlogRouter = router({
     }),
 
   upsert: adminProcedure
+    .output(apiOutputs["adminBlog.upsert"])
     .input(
       z.object({
         id: z.number().optional(),
@@ -116,6 +126,7 @@ export const adminBlogRouter = router({
     }),
 
   delete: adminProcedure
+    .output(apiOutputs["adminBlog.delete"])
     .input(
       z.object({
         id: z.number(),
@@ -131,6 +142,7 @@ export const adminBlogRouter = router({
     }),
 
   previewToken: adminProcedure
+    .output(apiOutputs["adminBlog.previewToken"])
     .input(
       z.object({
         title: z.string(),
@@ -150,6 +162,8 @@ export const adminBlogRouter = router({
     }),
 
   getPreview: publicProcedure
+    .meta({ access: "public-token" })
+    .output(apiOutputs["adminBlog.getPreview"])
     .input(z.object({ token: z.string() }))
     .query(async ({ input }) => {
       const draft = await blogDb.getBlogPreviewDraft(input.token);
@@ -159,6 +173,6 @@ export const adminBlogRouter = router({
           message: "Preview not found or expired",
         });
       }
-      return draft.data as Record<string, unknown>;
+      return apiOutputs["adminBlog.getPreview"].parse(draft.data);
     }),
 });
