@@ -1,20 +1,54 @@
 <div align="center">
 
-<img src="https://files.manuscdn.com/user_upload_by_module/session_file/310419663030909471/jCAOeglRIAmKomRx.png" alt="AI Agents Nexus — open-source agent network for developers" width="760" />
+<img src="https://files.manuscdn.com/user_upload_by_module/session_file/310419663030909471/jCAOeglRIAmKomRx.png" alt="AI Agents Nexus — open-source agent network for developers" width="900" />
 
 # Nexus OS
 
-**The orchestration layer for AI agents**
+### Production orchestration for AI agents
 
-What Kubernetes did for containers, Nexus does for agents.
+**One Rust CLI for resilient execution, cost control, verifiable trust, and observable multi-agent systems.**
 
-[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
-[![GitHub Stars](https://img.shields.io/github/stars/leonidas-esquire/nexus-os.svg)](https://github.com/leonidas-esquire/nexus-os/stargazers)
-[![Discord](https://img.shields.io/discord/XXXXXXXXXX?color=7389D8&label=discord)](https://discord.gg/nexus-os)
+[![License](https://img.shields.io/badge/license-Apache%202.0-2563EB.svg)](LICENSE)
+[![Rust](https://img.shields.io/badge/built%20with-Rust-000000.svg?logo=rust)](https://www.rust-lang.org/)
+[![Release](https://img.shields.io/github/v/release/leonidas-esquire/nexus-os?display_name=tag&sort=semver)](https://github.com/leonidas-esquire/nexus-os/releases/latest)
+[![Deployment Tests](https://github.com/leonidas-esquire/nexus-os/actions/workflows/deployment-tests.yml/badge.svg?branch=main)](https://github.com/leonidas-esquire/nexus-os/actions/workflows/deployment-tests.yml)
+[![GitHub Stars](https://img.shields.io/github/stars/leonidas-esquire/nexus-os.svg?style=flat)](https://github.com/leonidas-esquire/nexus-os/stargazers)
 
-[Website](https://aiagents.nexus) · [Documentation](https://aiagents.nexus/docs) · [Deployment Guide](DEPLOYMENT.md) · [Discussions](https://github.com/leonidas-esquire/nexus-os/discussions)
+[**Live Platform**](https://aiagents.nexus) · [**Documentation**](https://aiagents.nexus/docs) · [**Showcase**](https://aiagents.nexus/showcase) · [**Deployment Guide**](DEPLOYMENT.md) · [**Discussions**](https://github.com/leonidas-esquire/nexus-os/discussions)
 
 </div>
+
+---
+
+> **What Kubernetes did for containers, Nexus OS does for agents:** it supervises failures, coordinates multi-step work, enforces budgets, verifies trust, and records execution through one portable control plane.
+
+## Start in 30 seconds
+
+```bash
+cargo install --git https://github.com/leonidas-esquire/nexus-os.git
+naos init my-project
+cd my-project
+naos status
+```
+
+| **Resilient by default** | **Cost-aware execution** | **Trust you can verify** |
+|---|---|---|
+| Restart crashed agents, roll back failed sagas, and coordinate sequential or parallel work. | Set per-agent budgets, receive threshold alerts, and route work to the lowest-cost capable runtime. | Gate execution by AXIS trust tiers, preserve audit trails, and inspect every agent transition. |
+
+<details>
+<summary><strong>Explore this README</strong></summary>
+
+- [Why Nexus OS?](#why-nexus-os)
+- [Features](#features)
+- [Quick Start](#quick-start)
+- [Configuration](#configuration)
+- [CLI Reference](#cli-reference)
+- [Architecture](#architecture)
+- [Roadmap](#roadmap)
+- [Contributing](#contributing)
+- [Community](#community)
+
+</details>
 
 ---
 
