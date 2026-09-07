@@ -13,6 +13,7 @@ import { showcaseUploadRouter } from "../showcaseUploadRoute";
 import { startScheduledJobs, stopScheduledJobs } from "../scheduledJobs";
 import { registerBlogSsrMiddleware } from "../blogSsrMiddleware";
 import { installScriptRouter } from "../installScriptRoute";
+import { marketplaceRouter } from "../marketplace/routes";
 import { ENV } from "./env";
 
 function isPortAvailable(port: number): Promise<boolean> {
@@ -60,6 +61,7 @@ async function startServer() {
     });
   });
   // Blog image upload (multipart/form-data via multer — must come before tRPC)
+  app.use(marketplaceRouter);
   app.use(blogUploadRouter);
   // Showcase image upload (public, no auth required)
   app.use(showcaseUploadRouter);

@@ -1,3 +1,4 @@
+import { RegistryCatalog, RegistryDetail, RegistryDeveloper, RegistryAdmin, RegistryUpcoming } from "./pages/marketplace/Registry";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/NotFound";
@@ -8,15 +9,6 @@ import { FavoritesProvider } from "./contexts/FavoritesContext";
 import Home from "./pages/Home";
 import DocsLayout from "./pages/docs/DocsLayout";
 import ManualLayout from "./pages/docs/ManualLayout";
-import MarketplacePage from "./pages/marketplace/MarketplacePage";
-import SkillDetailPage from "./pages/marketplace/SkillDetailPage";
-import DeveloperPortal from "./pages/marketplace/DeveloperPortal";
-import CompareSkills from "./pages/marketplace/CompareSkills";
-import DependencyGraph from "./pages/marketplace/DependencyGraph";
-import PublisherProfile from "./pages/marketplace/PublisherProfile";
-import WatchlistPage from "./pages/marketplace/WatchlistPage";
-import LeaderboardPage from "./pages/marketplace/LeaderboardPage";
-import AdminDashboard from "./pages/marketplace/AdminDashboard";
 import BlogIndex from "./pages/blog/BlogIndex";
 import BlogPost from "./pages/blog/BlogPost";
 import BlogPostPreview from "./pages/blog/BlogPostPreview";
@@ -61,15 +53,15 @@ function Router() {
       <Route path="/sign-in/:rest*" component={() => <ClerkAuthPage mode="sign-in" />} />
       <Route path="/sign-up" component={() => <ClerkAuthPage mode="sign-up" />} />
       <Route path="/sign-up/:rest*" component={() => <ClerkAuthPage mode="sign-up" />} />
-      <Route path={"/marketplace"} component={MarketplacePage} />
-      <Route path={"/marketplace/compare"} component={CompareSkills} />
-      <Route path={"/marketplace/developer"} component={DeveloperPortal} />
-      <Route path={"/marketplace/dependencies"} component={DependencyGraph} />
-      <Route path={"/marketplace/watchlist"} component={WatchlistPage} />
-      <Route path={"/marketplace/leaderboard"} component={LeaderboardPage} />
-      <Route path={"/marketplace/admin"} component={AdminDashboard} />
-      <Route path={"/marketplace/publisher/:handle"} component={PublisherProfile} />
-      <Route path={"/marketplace/:skillName"} component={SkillDetailPage} />
+      <Route path={"/marketplace"} component={RegistryCatalog} />
+      <Route path={"/marketplace/compare"} component={RegistryUpcoming} />
+      <Route path={"/marketplace/developer"} component={RegistryDeveloper} />
+      <Route path={"/marketplace/dependencies"} component={RegistryUpcoming} />
+      <Route path={"/marketplace/watchlist"} component={RegistryUpcoming} />
+      <Route path={"/marketplace/leaderboard"} component={RegistryUpcoming} />
+      <Route path={"/marketplace/admin"} component={RegistryAdmin} />
+      <Route path={"/marketplace/publisher/:handle"} component={RegistryUpcoming} />
+      <Route path={"/marketplace/:skillName"} component={RegistryDetail} />
       <Route path={"/docs/manual"} component={ManualLayout} />
       <Route path={"/docs/manual/:section"} component={ManualLayout} />
       <Route path={"/docs/manual/:section/:page"} component={ManualLayout} />

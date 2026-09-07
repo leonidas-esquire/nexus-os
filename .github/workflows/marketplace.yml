@@ -1,0 +1,54 @@
+name: Marketplace registry
+on:
+  pull_request:
+    paths:
+      [
+        "server/**",
+        "shared/**",
+        "client/**",
+        "drizzle/**",
+        "package.json",
+        "pnpm-lock.yaml",
+        ".github/workflows/marketplace.yml",
+      ]
+  push:
+    branches: [main]
+    paths:
+      [
+        "server/**",
+        "shared/**",
+        "client/**",
+        "drizzle/**",
+        ".github/workflows/marketplace.yml",
+      ]
+permissions:
+  contents: read
+jobs:
+  registry:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: registry-test
+          MYSQL_DATABASE: nexus_registry_test
+        ports: ["3306:3306"]
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost -pregistry-test"
+          --health-interval=10s --health-timeout=5s --health-retries=10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.4.1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm check
+      - run: pnpm exec vitest run server/marketplace
+        env:
+          TEST_MARKETPLACE_DATABASE_URL: mysql://root:registry-test@127.0.0.1:3306/nexus_registry_test
+      - run: pnpm build

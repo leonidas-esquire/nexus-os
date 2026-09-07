@@ -1,4 +1,4 @@
-import { boolean, int, json, mysqlEnum, mysqlTable, text, timestamp, varchar } from "drizzle-orm/mysql-core";
+import { index, uniqueIndex, boolean, int, json, mysqlEnum, mysqlTable, text, timestamp, varchar } from "drizzle-orm/mysql-core";
 
 /**
  * Core user table backing auth flow.
@@ -119,3 +119,31 @@ export const showcaseUpvotes = mysqlTable("showcase_upvotes", {
 
 export type ShowcaseUpvote = typeof showcaseUpvotes.$inferSelect;
 export type InsertShowcaseUpvote = typeof showcaseUpvotes.$inferInsert;
+
+// Marketplace identities and releases are separate: ownership cannot be changed by upload.
+export const marketplaceSkills = mysqlTable("marketplace_skills", {
+  name: varchar("name", { length: 64 }).primaryKey(),
+  ownerId: int("ownerId").notNull().references(() => users.id),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export const marketplaceVersions = mysqlTable("marketplace_versions", {
+  id: int("id").autoincrement().primaryKey(),
+  skillName: varchar("skillName", { length: 64 }).notNull().references(() => marketplaceSkills.name),
+  version: varchar("version", { length: 32 }).notNull(),
+  manifest: json("manifest").$type<import("../shared/marketplace").SkillManifest>().notNull(),
+  sha256: varchar("sha256", { length: 64 }).notNull(),
+  size: int("size").notNull(),
+  status: mysqlEnum("status", ["pending", "approved", "rejected", "revoked"]).default("pending").notNull(),
+  reviewReason: text("reviewReason"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+}, table => [uniqueIndex("marketplace_release_unique").on(table.skillName, table.version), index("marketplace_status").on(table.status)]);
+
+export const marketplaceReviews = mysqlTable("marketplace_reviews", {
+  id: int("id").autoincrement().primaryKey(),
+  versionId: int("versionId").notNull().references(() => marketplaceVersions.id),
+  actorId: int("actorId").notNull().references(() => users.id),
+  action: mysqlEnum("action", ["submitted", "approved", "rejected", "revoked"]).notNull(),
+  reason: text("reason"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
