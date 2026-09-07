@@ -1,0 +1,17 @@
+{
+  "owner": "human:leonidas-esquire",
+  "intervalDays": 90,
+  "initialReviewDue": "2026-12-06T00:00:00Z",
+  "reviews": [
+    {
+      "reviewer": "human:leonidas-esquire",
+      "reviewedAt": "2026-09-07T23:22:56.039Z",
+      "sourceDigest": "230dd53a901cbed8cd2dd287f12a23443c5f7aa558ba54297fa452c89e3a62a9",
+      "sourceCommit": "4d9733d5b8224bb77da5bd6fa736ca0cc9bf5802",
+      "evidenceUrl": "https://github.com/leonidas-esquire/nexus-os/pull/18",
+      "evidence": "User attestation in the associated ChatGPT conversation: \"I have reviewed and approve.\" Recorded by the assistant at the user's direction.",
+      "scope": "Documentation and public product claims in PR #18 at the recorded source commit. This records human content sign-off; it does not approve individual marketplace submissions or authorize merge, migration, or deployment."
+    }
+  ],
+  "note": "No completed human review is inferred from builds or automated tests. Add a signed-off review record with reviewer, reviewedAt, sourceDigest, and evidenceUrl only after actual human review."
+}

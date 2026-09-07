@@ -6,8 +6,8 @@ resource: https://www.aiagents.nexus/legal
 tags: [legal, apache-2.0, terms, privacy]
 owner: "human:leonidas-esquire"
 generated: { by: "process:nexus-okf-generator", at: 2026-09-07T09:13:03Z }
-verified: { by: "process:github-license-and-site-check", at: 2026-09-07T09:13:03Z }
-status: stable
+historical_process_check: { by: "process:github-license-and-site-check", at: 2026-09-07T09:13:03Z }
+status: maintained
 stale_after: 2027-03-06T09:13:03Z
 sources:
   - id: license

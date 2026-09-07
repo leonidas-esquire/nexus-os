@@ -14,6 +14,9 @@ import { startScheduledJobs, stopScheduledJobs } from "../scheduledJobs";
 import { registerBlogSsrMiddleware } from "../blogSsrMiddleware";
 import { registerShowcaseSsrMiddleware } from "../showcaseSsrMiddleware";
 import { installScriptRouter } from "../installScriptRoute";
+import { communityDocuments } from "../communityDocuments";
+import { createMarketplaceDocuments } from "../marketplace/documents";
+import { marketplaceRouter } from "../marketplace/routes";
 import { agentDiscoveryRouter } from "../agentDiscoveryRoutes";
 import { ENV } from "./env";
 
@@ -62,6 +65,7 @@ async function startServer() {
     });
   });
   // Blog image upload (multipart/form-data via multer — must come before tRPC)
+  app.use(marketplaceRouter);
   app.use(blogUploadRouter);
   // Showcase image upload (public, no auth required)
   app.use(showcaseUploadRouter);
@@ -81,6 +85,8 @@ async function startServer() {
   );
   // Blog SSR middleware — injects OG/Twitter meta tags for crawlers
   // Must come BEFORE Vite/static catch-all
+  app.use(communityDocuments);
+  app.use(createMarketplaceDocuments());
   registerBlogSsrMiddleware(app);
   registerShowcaseSsrMiddleware(app);
 

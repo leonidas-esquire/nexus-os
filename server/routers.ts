@@ -1,3 +1,4 @@
+import { apiOutputs } from "../shared/apiOutputs";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, router } from "./_core/trpc";
 import { blogPublicRouter, adminBlogRouter } from "./blogRouter";
@@ -6,8 +7,8 @@ import { showcasePublicRouter, showcaseSubmitRouter, adminShowcaseRouter } from 
 export const appRouter = router({
   system: systemRouter,
   auth: router({
-    me: publicProcedure.query(opts => opts.ctx.user),
-    logout: publicProcedure.mutation(() => {
+    me: publicProcedure.output(apiOutputs["auth.me"]).query(opts => opts.ctx.user),
+    logout: publicProcedure.output(apiOutputs["auth.logout"]).mutation(() => {
       return {
         success: true,
       } as const;

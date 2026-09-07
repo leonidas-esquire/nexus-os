@@ -2,6 +2,7 @@ import { Router } from "express";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import * as blogDb from "./blogDb";
+import { listApprovedReleaseIdentities } from "./marketplace/repository";
 import * as showcaseDb from "./showcaseDb";
 
 const CANONICAL_ORIGIN = "https://www.aiagents.nexus";
@@ -60,10 +61,12 @@ export const agentDiscoveryRouter = Router();
 
 agentDiscoveryRouter.get("/api/sitemap.xml", async (_req, res) => {
   try {
-    const [manifest, blogResult, showcaseResult] = await Promise.all([
+    const [manifest, blogResult, showcaseResult, releases, provenance] = await Promise.all([
       readRouteManifest(),
       blogDb.getBlogPosts({ limit: 9999 }),
       showcaseDb.getShowcaseProjects({ limit: 9999, sort: "newest" }),
+      listApprovedReleaseIdentities(),
+      readFile(publicAssetPath("content-provenance.json"),"utf8").then(JSON.parse),
     ]);
 
     const entries = new Map<string, string>();
@@ -72,13 +75,17 @@ agentDiscoveryRouter.get("/api/sitemap.xml", async (_req, res) => {
         page.route,
         sitemapEntry({
           route: page.route,
-          lastModified: "2026-09-07T09:13:03Z",
+          lastModified: provenance.sourceModifiedAt,
           changeFrequency: page.route.startsWith("/docs") ? "weekly" : "monthly",
           priority: page.route === "/" ? 1 : page.route.startsWith("/docs") ? 0.8 : 0.6,
         })
       );
     }
 
+    for (const release of releases) {
+      const route=`/marketplace/${release.name}/versions/${release.version}`;
+      entries.set(route,sitemapEntry({route,lastModified:release.createdAt,priority:0.6}));
+    }
     for (const post of blogResult) {
       const route = `/blog/${post.slug}`;
       entries.set(
@@ -110,7 +117,7 @@ agentDiscoveryRouter.get("/api/sitemap.xml", async (_req, res) => {
       .status(200)
       .set({
         "Content-Type": "application/xml; charset=utf-8",
-        "Cache-Control": "public, max-age=300, stale-while-revalidate=900",
+        "Cache-Control": "no-store",
         "X-Content-Type-Options": "nosniff",
       })
       .send(xml);

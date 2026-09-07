@@ -6,8 +6,8 @@ resource: https://github.com/leonidas-esquire/nexus-os/releases/latest
 tags: [release, version, binaries, cargo]
 owner: "human:leonidas-esquire"
 generated: { by: "process:nexus-okf-generator", at: 2026-09-07T09:13:03Z }
-verified: { by: "process:github-release-api", at: 2026-09-07T09:13:03Z }
-status: stable
+historical_process_check: { by: "process:github-release-api", at: 2026-09-07T09:13:03Z }
+status: maintained
 stale_after: 2026-12-06T09:13:03Z
 sources:
   - id: latest-release

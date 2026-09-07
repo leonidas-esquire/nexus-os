@@ -36,3 +36,5 @@ This directory is the canonical Open Knowledge Format bundle for AI Agents Nexus
 * [Blog](community/blog.md) - Public articles, feed, and publication metadata.
 * [Showcase](community/showcase.md) - Community project discovery and submission.
 * [Marketplace](community/marketplace.md) - WASM skill discovery and publishing resources.
+
+- [Capability status](product/capability-status.md) — supported execution, planned features, and release boundaries.

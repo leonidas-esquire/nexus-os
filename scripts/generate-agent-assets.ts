@@ -1,3 +1,4 @@
+import { legalMarkdown } from "./legal-markdown";
 import { cp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
@@ -5,8 +6,12 @@ import { pathToFileURL } from "node:url";
 import matter from "gray-matter";
 import { marked } from "marked";
 import { DOC_SECTIONS, getFlatPages } from "../client/src/pages/docs/docsData";
-import { ALL_MANUAL_SECTIONS, getFlatManualPages } from "../client/src/pages/docs/manualData";
-import { SKILLS } from "../client/src/pages/marketplace/marketplaceData";
+import {
+  ALL_MANUAL_SECTIONS,
+  getFlatManualPages,
+} from "../client/src/pages/docs/manualData";
+import { contentProvenance, artifactDigests } from "./content-provenance";
+import { readFileSync } from "node:fs";
 import {
   buildOpenApiDocument,
   buildTrpcProceduresDocument,
@@ -17,7 +22,12 @@ const ROOT = process.cwd();
 const CLIENT_PUBLIC = path.join(ROOT, "client", "public");
 const CANONICAL_ORIGIN = "https://www.aiagents.nexus";
 const API_ORIGIN = "https://api.aiagents.nexus";
-const GENERATED_AT = "2026-09-07T09:13:03Z";
+const PROVENANCE = contentProvenance();
+const GENERATED_AT = PROVENANCE.sourceModifiedAt;
+const RELEASE_VERSION = readFileSync("knowledge/product/release.md", "utf8")
+  .match(/\*\*(v[\d.]+)\*\*/)?.[1]
+  ?.slice(1);
+if (!RELEASE_VERSION) throw new Error("Missing release version");
 const DEFAULT_OG_IMAGE =
   "https://d2xsxph8kpxj0f.cloudfront.net/310419663030909471/NRmiWdZq2JgxyAQQ5B7Zs7/nexus-og-image-o46qyMzfRYT4aVx7XCV5ub.png";
 
@@ -35,6 +45,7 @@ export type AgentRoute = {
   markdown: string;
   schemaType: SchemaType;
   noindex?: boolean;
+  dynamic?: boolean;
 };
 
 function yamlString(value: string): string {
@@ -77,11 +88,11 @@ const homeMarkdown = markdownDocument({
   canonicalRoute: "/",
   body: `# Nexus OS
 
-Nexus OS is the orchestration layer for AI agents. It provides a Rust CLI for agent lifecycle management, supervisors, sagas, workflows, pools, cost controls, trust verification, broker routing, audit trails, dashboards, and edge-deployment workflows.
+Nexus OS includes a working deterministic WASIp1 command runner with bounded execution and audit records. The current source also includes a reviewed free-skill registry. Broader orchestration, payment, and hosted execution capabilities have differing implementation status; command availability alone does not prove operational support. See the capability-status document before relying on a feature.
 
 ## Current release
 
-The current stable release is **v0.3.1**. Nexus OS is licensed under the **Apache License 2.0**.
+The current stable release is **v${RELEASE_VERSION}**. Nexus OS is licensed under the **Apache License 2.0**.
 
 ## Install
 
@@ -121,26 +132,24 @@ Nexus OS is licensed under the Apache License 2.0. The public website provides s
 
 const termsMarkdown = markdownDocument({
   title: "Terms of Service — Nexus OS",
-  description: "Terms governing use of the Nexus OS website and related services.",
+  description:
+    "Terms governing use of the Nexus OS website and related services.",
   canonicalRoute: "/legal/terms",
-  body: `# Terms of Service
-
-The authoritative Terms of Service are presented on the corresponding public HTML page. This Markdown representation provides a stable agent-discovery endpoint and links to that canonical resource.
-
-[Read the Terms of Service](${CANONICAL_ORIGIN}/legal/terms)
-`,
+  body: legalMarkdown(
+    "client/src/pages/legal/TermsOfService.tsx",
+    "Terms of Service"
+  ),
 });
 
 const privacyMarkdown = markdownDocument({
   title: "Privacy Policy — Nexus OS",
-  description: "Privacy practices for the Nexus OS website and related services.",
+  description:
+    "Privacy practices for the Nexus OS website and related services.",
   canonicalRoute: "/legal/privacy",
-  body: `# Privacy Policy
-
-The authoritative Privacy Policy is presented on the corresponding public HTML page. This Markdown representation provides a stable agent-discovery endpoint and links to that canonical resource.
-
-[Read the Privacy Policy](${CANONICAL_ORIGIN}/legal/privacy)
-`,
+  body: legalMarkdown(
+    "client/src/pages/legal/PrivacyPolicy.tsx",
+    "Privacy Policy"
+  ),
 });
 
 const marketplaceMarkdown = markdownDocument({
@@ -149,11 +158,11 @@ const marketplaceMarkdown = markdownDocument({
   canonicalRoute: "/marketplace",
   body: `# Nexus OS Skill Marketplace
 
-The marketplace provides skill discovery and developer publishing workflows for Nexus OS WASM skills. Publisher-supplied descriptions and metrics are claims from the corresponding publisher and should not be interpreted as independent verification by AI Agents Nexus.
+The registry supports free WASIp1 packages with developer ownership, immutable versions, administrator review, and hash-verified downloads. Paid sales, commissions, payouts, ratings, and hosted execution billing are not enabled. Only approved releases appear in the live catalog. Each release has a version-specific Markdown document generated directly from its database record.
 
 * [Marketplace](${CANONICAL_ORIGIN}/marketplace)
 * [Developer portal](${CANONICAL_ORIGIN}/marketplace/developer)
-* [Dependency explorer](${CANONICAL_ORIGIN}/marketplace/dependencies)
+* [Approved-release documentation](${CANONICAL_ORIGIN}/docs-markdown/site/marketplace.md)
 `,
 });
 
@@ -172,7 +181,8 @@ The showcase presents approved projects submitted by the Nexus OS community. Pro
 
 const blogMarkdown = markdownDocument({
   title: "Nexus OS Blog",
-  description: "Articles, tutorials, announcements, and engineering updates from AI Agents Nexus.",
+  description:
+    "Articles, tutorials, announcements, and engineering updates from AI Agents Nexus.",
   canonicalRoute: "/blog",
   body: `# Nexus OS Blog
 
@@ -199,7 +209,10 @@ export function createRoutes(): AgentRoute[] {
   const docs = getFlatPages();
   const defaultDoc = docs[0];
   if (defaultDoc) {
-    const description = cleanDescription(defaultDoc.content, defaultDoc.pageTitle);
+    const description = cleanDescription(
+      defaultDoc.content,
+      defaultDoc.pageTitle
+    );
     const markdownPath = `/docs-markdown/docs/${defaultDoc.sectionSlug}/${defaultDoc.pageSlug}.md`;
     routes.push({
       route: "/docs",
@@ -237,7 +250,10 @@ export function createRoutes(): AgentRoute[] {
   const manual = getFlatManualPages();
   const defaultManual = manual[0];
   if (defaultManual) {
-    const description = cleanDescription(defaultManual.content, defaultManual.pageTitle);
+    const description = cleanDescription(
+      defaultManual.content,
+      defaultManual.pageTitle
+    );
     const markdownPath = `/docs-markdown/manual/${defaultManual.sectionSlug}/${defaultManual.pageSlug}.md`;
     routes.push({
       route: "/docs/manual",
@@ -272,11 +288,15 @@ export function createRoutes(): AgentRoute[] {
     });
   }
 
-  const staticPages: Array<Omit<AgentRoute, "markdownPath"> & { markdownPath: string }> = [
+  const staticPages: Array<
+    Omit<AgentRoute, "markdownPath"> & { markdownPath: string }
+  > = [
     {
       route: "/marketplace",
+      dynamic: true,
       title: "Nexus OS Skill Marketplace",
-      description: "Discover and publish WASM skills for Nexus OS agent workflows.",
+      description:
+        "Discover and publish WASM skills for Nexus OS agent workflows.",
       markdownPath: "/docs-markdown/site/marketplace.md",
       markdown: marketplaceMarkdown,
       schemaType: "CollectionPage",
@@ -300,7 +320,8 @@ export function createRoutes(): AgentRoute[] {
     {
       route: "/blog",
       title: "Nexus OS Blog",
-      description: "Articles, tutorials, announcements, and engineering updates from AI Agents Nexus.",
+      description:
+        "Articles, tutorials, announcements, and engineering updates from AI Agents Nexus.",
       markdownPath: "/docs-markdown/site/blog.md",
       markdown: blogMarkdown,
       schemaType: "CollectionPage",
@@ -308,7 +329,8 @@ export function createRoutes(): AgentRoute[] {
     {
       route: "/legal",
       title: "Legal — Nexus OS",
-      description: "Legal documents and policies for Nexus OS and AI Agents Nexus.",
+      description:
+        "Legal documents and policies for Nexus OS and AI Agents Nexus.",
       markdownPath: "/docs-markdown/site/legal.md",
       markdown: legalIndexMarkdown,
       schemaType: "WebPage",
@@ -317,7 +339,8 @@ export function createRoutes(): AgentRoute[] {
     {
       route: "/legal/terms",
       title: "Terms of Service — Nexus OS",
-      description: "Terms governing use of the Nexus OS website and related services.",
+      description:
+        "Terms governing use of the Nexus OS website and related services.",
       markdownPath: "/docs-markdown/site/terms.md",
       markdown: termsMarkdown,
       schemaType: "WebPage",
@@ -326,7 +349,8 @@ export function createRoutes(): AgentRoute[] {
     {
       route: "/legal/privacy",
       title: "Privacy Policy — Nexus OS",
-      description: "Privacy practices for the Nexus OS website and related services.",
+      description:
+        "Privacy practices for the Nexus OS website and related services.",
       markdownPath: "/docs-markdown/site/privacy.md",
       markdown: privacyMarkdown,
       schemaType: "WebPage",
@@ -336,62 +360,6 @@ export function createRoutes(): AgentRoute[] {
 
   routes.push(...staticPages);
 
-  const marketplaceUtilityPages: Array<Pick<AgentRoute, "route" | "title" | "description">> = [
-    {
-      route: "/marketplace/compare",
-      title: "Compare Nexus OS Skills",
-      description: "Compare declared capabilities and package metadata for Nexus OS WASM skills.",
-    },
-    {
-      route: "/marketplace/developer",
-      title: "Nexus OS Marketplace Developer Portal",
-      description: "Developer publishing guidance and tooling for Nexus OS WASM skills.",
-    },
-    {
-      route: "/marketplace/dependencies",
-      title: "Nexus OS Skill Dependencies",
-      description: "Explore declared dependency relationships among Nexus OS skills.",
-    },
-    {
-      route: "/marketplace/leaderboard",
-      title: "Nexus OS Marketplace Directory",
-      description: "Browse the public Nexus OS skill directory without unverified review claims.",
-    },
-  ];
-
-  for (const utility of marketplaceUtilityPages) {
-    routes.push({
-      ...utility,
-      markdownPath: "/docs-markdown/site/marketplace.md",
-      markdown: marketplaceMarkdown,
-      schemaType: "WebPage",
-    });
-  }
-
-  for (const skill of SKILLS) {
-    routes.push({
-      route: `/marketplace/${skill.name}`,
-      title: `${skill.name} — Nexus OS Skill`,
-      description: skill.description,
-      markdownPath: "/docs-markdown/site/marketplace.md",
-      markdown: marketplaceMarkdown,
-      schemaType: "WebPage",
-    });
-  }
-
-  const publisherHandles = Array.from(
-    new Set(SKILLS.map(skill => skill.publisher.handle.replace(/^@/, "")))
-  );
-  for (const handle of publisherHandles) {
-    routes.push({
-      route: `/marketplace/publisher/${handle}`,
-      title: `${handle} — Nexus OS Marketplace Publisher`,
-      description: "Publisher profile and declared Nexus OS skill packages.",
-      markdownPath: "/docs-markdown/site/marketplace.md",
-      markdown: marketplaceMarkdown,
-      schemaType: "WebPage",
-    });
-  }
   return routes;
 }
 
@@ -435,6 +403,7 @@ Use the OKF bundle for structured knowledge and provenance. Use the Markdown doc
 
 ## Product
 
+* [Capability status](${CANONICAL_ORIGIN}/knowledge/product/capability-status.md) : Implemented behavior, planned features, and source/release boundaries.
 * [Product concept](${CANONICAL_ORIGIN}/knowledge/product/nexus-os.md) : Identity, capabilities, license, and canonical resources.
 * [Architecture concept](${CANONICAL_ORIGIN}/knowledge/product/architecture.md) : Architectural layers and deployment boundaries.
 * [Current release](${CANONICAL_ORIGIN}/knowledge/product/release.md) : Stable release and binary channel.
@@ -483,7 +452,10 @@ ${included
 `;
 }
 
-async function writePublic(relativePath: string, content: string): Promise<void> {
+async function writePublic(
+  relativePath: string,
+  content: string
+): Promise<void> {
   const destination = path.join(CLIENT_PUBLIC, relativePath);
   await mkdir(path.dirname(destination), { recursive: true });
   await writeFile(destination, content, "utf8");
@@ -495,7 +467,7 @@ function sitemapXml(routes: AgentRoute[]): string {
     .map(
       route => `  <url>
     <loc>${CANONICAL_ORIGIN}${route}</loc>
-    <lastmod>2026-09-07</lastmod>
+    <lastmod>${GENERATED_AT}</lastmod>
   </url>`
     )
     .join("\n");
@@ -508,17 +480,45 @@ ${entries}
 
 async function prepare(): Promise<void> {
   const routes = createRoutes();
-  await rm(path.join(CLIENT_PUBLIC, "knowledge"), { recursive: true, force: true });
-  await rm(path.join(CLIENT_PUBLIC, "docs-markdown"), { recursive: true, force: true });
-  await cp(path.join(ROOT, "knowledge"), path.join(CLIENT_PUBLIC, "knowledge"), {
+  await rm(path.join(CLIENT_PUBLIC, "knowledge"), {
     recursive: true,
+    force: true,
   });
+  await rm(path.join(CLIENT_PUBLIC, "docs-markdown"), {
+    recursive: true,
+    force: true,
+  });
+  await cp(
+    path.join(ROOT, "knowledge"),
+    path.join(CLIENT_PUBLIC, "knowledge"),
+    {
+      recursive: true,
+    }
+  );
 
-  for (const page of routes) {
+  for (const page of routes.filter(p => !p.route.startsWith("/marketplace"))) {
     await writePublic(page.markdownPath.replace(/^\//, ""), page.markdown);
   }
 
+  const bundleFiles = PROVENANCE.sources.filter(
+    p => p.startsWith("knowledge/") && p.endsWith(".md")
+  );
+  for (const file of bundleFiles) {
+    const document = matter(readFileSync(file, "utf8"));
+    document.data.generated = {
+      by: "process:source-document-generation",
+      at: GENERATED_AT,
+    };
+    document.data.source_digest = PROVENANCE.sourceDigest;
+    document.data.source_commit = PROVENANCE.sourceCommit;
+    delete document.data.verified;
+    await writePublic(file, matter.stringify(document.content, document.data));
+  }
   await writePublic("docs-markdown/index.md", docsIndexMarkdown());
+  await writePublic(
+    "content-provenance.json",
+    JSON.stringify(PROVENANCE, null, 2)
+  );
   await writePublic("llms.txt", llmsText());
   await writePublic("llms-full.txt", llmsFullText(routes));
   await writePublic("sitemap-static.xml", sitemapXml(routes));
@@ -543,6 +543,10 @@ async function prepare(): Promise<void> {
       null,
       2
     )}\n`
+  );
+  await writePublic(
+    "content-provenance.json",
+    JSON.stringify({ ...PROVENANCE, artifacts: artifactDigests() }, null, 2)
   );
 }
 
@@ -574,7 +578,11 @@ function breadcrumbJsonLd(page: AgentRoute) {
       item: `${CANONICAL_ORIGIN}${route}`,
     });
   });
-  return { "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: items };
+  return {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: items,
+  };
 }
 
 function pageJsonLd(page: AgentRoute) {
@@ -593,7 +601,7 @@ function pageJsonLd(page: AgentRoute) {
         name: "Nexus OS",
         applicationCategory: "DeveloperApplication",
         operatingSystem: "macOS, Linux, Windows via WSL",
-        softwareVersion: "0.3.1",
+        softwareVersion: RELEASE_VERSION,
         license: "https://www.apache.org/licenses/LICENSE-2.0",
         url: CANONICAL_ORIGIN,
         codeRepository: "https://github.com/leonidas-esquire/nexus-os",
@@ -618,7 +626,7 @@ function pageJsonLd(page: AgentRoute) {
       about: {
         "@type": "SoftwareApplication",
         name: "Nexus OS",
-        softwareVersion: "0.3.1",
+        softwareVersion: RELEASE_VERSION,
       },
     },
     breadcrumbJsonLd(page),
@@ -629,8 +637,14 @@ export function injectHead(template: string, page: AgentRoute): string {
   const canonical = `${CANONICAL_ORIGIN}${page.route}`;
   let html = template
     .replace(/<title>[^<]*<\/title>/, "")
-    .replace(/<meta\s+(?:property="og:|name="twitter:|name="description"|name="robots")[^>]*\/?\s*>/g, "")
-    .replace(/<link\s+rel="(?:canonical|alternate|describedby)"[^>]*\/?\s*>/g, "")
+    .replace(
+      /<meta\s+(?:property="og:|name="twitter:|name="description"|name="robots")[^>]*\/?\s*>/g,
+      ""
+    )
+    .replace(
+      /<link\s+rel="(?:canonical|alternate|describedby)"[^>]*\/?\s*>/g,
+      ""
+    )
     .replace(/<script\s+type="application\/ld\+json">[\s\S]*?<\/script>/g, "");
 
   const tags = [
@@ -640,8 +654,8 @@ export function injectHead(template: string, page: AgentRoute): string {
     `<meta name="author" content="AI Agents Nexus" />`,
     `<meta name="dcterms.modified" content="${GENERATED_AT}" />`,
     `<meta name="dcterms.source" content="https://github.com/leonidas-esquire/nexus-os" />`,
-    `<meta name="nexus:verified-by" content="process:documentation-regression-tests" />`,
-    `<meta name="nexus:freshness-date" content="2026-12-06T09:13:03Z" />`,
+    `<meta name="nexus:source-digest" content="${PROVENANCE.sourceDigest}" />`,
+    `<meta name="nexus:verification" content="Generated from source; see CI evidence and human review policy" />`,
     `<link rel="canonical" href="${canonical}" />`,
     `<link rel="author" href="https://github.com/leonidas-esquire" />`,
     `<link rel="alternate" type="text/markdown" href="${CANONICAL_ORIGIN}${page.markdownPath}" />`,
@@ -676,14 +690,24 @@ export async function semanticBody(page: AgentRoute): Promise<string> {
 
 export async function prerender(outputDirectory: string): Promise<void> {
   const routes = createRoutes();
-  const baseTemplate = await readFile(path.join(outputDirectory, "index.html"), "utf8");
-  for (const page of routes) {
+  const baseTemplate = await readFile(
+    path.join(outputDirectory, "index.html"),
+    "utf8"
+  );
+  for (const page of routes.filter(p => !p.route.startsWith("/marketplace"))) {
     let html = injectHead(baseTemplate, page);
-    html = html.replace('<div id="root"></div>', `<div id="root">${await semanticBody(page)}</div>`);
+    html = html.replace(
+      '<div id="root"></div>',
+      `<div id="root">${await semanticBody(page)}</div>`
+    );
     const destination =
       page.route === "/"
         ? path.join(outputDirectory, "index.html")
-        : path.join(outputDirectory, page.route.replace(/^\//, ""), "index.html");
+        : path.join(
+            outputDirectory,
+            page.route.replace(/^\//, ""),
+            "index.html"
+          );
     await mkdir(path.dirname(destination), { recursive: true });
     await writeFile(destination, html, "utf8");
   }
@@ -696,7 +720,8 @@ async function main() {
     return;
   }
   if (mode === "prerender") {
-    const outputArg = process.argv.slice(3).find(arg => arg !== "--") ?? "dist/public";
+    const outputArg =
+      process.argv.slice(3).find(arg => arg !== "--") ?? "dist/public";
     const outputDirectory = path.resolve(ROOT, outputArg);
     await prerender(outputDirectory);
     return;
@@ -704,6 +729,9 @@ async function main() {
   throw new Error(`Unknown generator mode: ${mode}`);
 }
 
-if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+if (
+  process.argv[1] &&
+  import.meta.url === pathToFileURL(process.argv[1]).href
+) {
   await main();
 }

@@ -43,6 +43,13 @@
       "when": 1776032981727,
       "tag": "0005_whole_toad_men",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1788772112758,
+      "tag": "0006_marketplace_registry",
+      "breakpoints": true
     }
   ]
 }

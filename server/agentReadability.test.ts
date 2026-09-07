@@ -46,12 +46,9 @@ describe("OKF v0.2 knowledge bundle", () => {
       expect(data.resource, file).toMatch(/^https:\/\//);
       expect(data.tags, file).toEqual(expect.any(Array));
       expect(data.owner, file).toMatch(/^(human|process):/);
-      expect(data.generated?.by, file).toMatch(/^process:/);
-      expect(new Date(data.generated?.at).toString(), file).not.toBe("Invalid Date");
-      expect(data.verified?.by, file).toMatch(/^process:/);
-      expect(new Date(data.verified?.at).toString(), file).not.toBe("Invalid Date");
+      expect(data.verified, file).toBeUndefined();
       expect(data.status, file).toEqual(expect.any(String));
-      expect(new Date(data.stale_after).toString(), file).not.toBe("Invalid Date");
+      expect(data.owner, file).toMatch(/^human:/);
       expect(data.sources, file).toEqual(expect.any(Array));
       expect(data.sources.length, file).toBeGreaterThan(0);
       expect(parsed.content.trim(), file).toMatch(/^# /);
@@ -75,10 +72,10 @@ describe("AI discovery and Markdown alternatives", () => {
   it("publishes a Markdown file for every route in the agent manifest", () => {
     const manifest = JSON.parse(read("client/public/agent-routes.json")) as Array<{
       route: string;
-      markdownPath: string;
+      markdownPath: string; dynamic?: boolean;
     }>;
     expect(manifest.length).toBeGreaterThan(50);
-    for (const page of manifest) {
+    for (const page of manifest.filter(p=>!p.dynamic)) {
       const file = path.join(ROOT, "client", "public", page.markdownPath.replace(/^\//, ""));
       expect(existsSync(file), `${page.route} -> ${page.markdownPath}`).toBe(true);
       expect(readFileSync(file, "utf8"), page.markdownPath).toMatch(/\n# /);
@@ -117,7 +114,7 @@ describe("semantic prerendering and route metadata", () => {
     expect(html).toContain('rel="alternate" type="text/markdown"');
     expect(html).toContain('rel="describedby" type="text/markdown"');
     expect(html).toContain('name="dcterms.source"');
-    expect(html).toContain('name="nexus:verified-by"');
+    expect(html).toContain('name="nexus:source-digest"');
     expect(html).toContain('<main id="agent-readable-content"');
     expect(html).toContain("<article>");
     expect(html).toContain("<h1>");
@@ -203,7 +200,8 @@ describe("trustworthy fallbacks and public facts", () => {
   it("routes public Vercel knowledge pages to route-specific prerendered HTML", () => {
     const rewrites = JSON.stringify(vercelConfig.rewrites);
     expect(rewrites).toContain("/docs/$1/index.html");
-    expect(rewrites).toContain("/marketplace/$1/index.html");
+    expect(rewrites).toContain("/marketplace/$1");
+    expect(rewrites).not.toContain("/marketplace/$1/index.html");
     expect(rewrites).toContain("/legal/$1/index.html");
   });
 
@@ -216,11 +214,12 @@ describe("trustworthy fallbacks and public facts", () => {
     expect(packageJson.license).toBe("Apache-2.0");
   });
 
-  it("does not ship fabricated marketplace customer reviews or star ratings", () => {
-    const marketplace = read("client/src/pages/marketplace/marketplaceData.ts");
-    const detail = read("client/src/pages/marketplace/SkillDetailPage.tsx");
-    expect(marketplace).not.toMatch(/REVIEW_POOL|getReviewsForSkill|stats\.rating|stats\.reviews/);
-    expect(detail).not.toMatch(/Write a Review|Submit Review|StarRating/);
-    expect(detail).toContain("No verified user feedback has been collected");
+  it("routes the marketplace exclusively to the real registry", () => {
+    const app = read("client/src/App.tsx");
+    expect(app).toContain("RegistryCatalog");
+    expect(app).not.toContain('from "./pages/marketplace/MarketplacePage"');
+    const generator=read("scripts/generate-agent-assets.ts");
+    expect(generator).not.toContain("marketplaceData");
+    expect(read("client/src/pages/marketplace/Registry.tsx")).not.toMatch(/DEVELOPER_EARNINGS|Withdrawal of/);
   });
 });

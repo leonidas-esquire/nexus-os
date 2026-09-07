@@ -6,8 +6,8 @@ resource: https://www.aiagents.nexus/docs/getting-started/installation
 tags: [installation, cargo, binary, source]
 owner: "human:leonidas-esquire"
 generated: { by: "process:nexus-okf-generator", at: 2026-09-07T09:13:03Z }
-verified: { by: "process:documentation-regression-tests", at: 2026-09-07T09:13:03Z }
-status: stable
+historical_process_check: { by: "process:documentation-regression-tests", at: 2026-09-07T09:13:03Z }
+status: maintained
 stale_after: 2026-12-06T09:13:03Z
 sources:
   - id: install-docs

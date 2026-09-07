@@ -1,8 +1,8 @@
 # AI-Agent Readability Architecture
 
-**Status:** implemented and validated locally  
-**Canonical public origin:** `https://www.aiagents.nexus`  
-**API origin:** `https://api.aiagents.nexus`  
+**Status:** implemented and validated locally
+**Canonical public origin:** `https://www.aiagents.nexus`
+**API origin:** `https://api.aiagents.nexus`
 **Knowledge format:** Open Knowledge Format v0.2
 
 ## Objectives
@@ -45,5 +45,32 @@ Automated tests validate OKF v0.2 minimum conformance, generated Markdown availa
 
 ## References
 
-[Open Knowledge Format v0.2 specification](https://github.com/GoogleCloudPlatform/knowledge-catalog/blob/main/okf/SPEC.md)  
+[Open Knowledge Format v0.2 specification](https://github.com/GoogleCloudPlatform/knowledge-catalog/blob/main/okf/SPEC.md)
 [The llms.txt proposal](https://llmstxt.org/)
+
+## Integrated registry and content contracts
+
+PR #18 incorporates the PR #19 readability work. The authoritative marketplace routes now query approved database releases at request time. No build imports `marketplaceData.ts`. Public release HTML, Markdown, JSON metadata and manifests share the same version record. Revocation returns 404 for release documents and manifests and removes the release from the live catalog/sitemap. Responses disable caching. A migration/storage outage is a 503, not an empty success claim.
+
+Public paths:
+
+- `/marketplace/NAME/versions/VERSION`: version-specific HTML, canonical URL and JSON-LD.
+- `/docs-markdown/marketplace/NAME/VERSION.md`: complete manifest description, inputs, outputs, examples, README, runtime limits, download links and trust boundaries.
+- `/docs-markdown/site/marketplace.md?offset=0`: live approved catalog, 50 results per page.
+- `/api/marketplace/skills/NAME/VERSION/manifest`: original immutable manifest as JSON.
+- `/docs-markdown/showcase/SLUG.md`: full approved showcase description.
+- `/docs-markdown/blog/SLUG.md`: full published blog content; the existing `/api/blog/SLUG.md` is also available.
+
+Legal Markdown is generated from the complete static legal page text. This does not constitute a new legal review or approval of existing policy language.
+
+All 28 tRPC procedures now have runtime output validators. JSON Schemas are extracted from each actual procedure's input and output schemas, with coverage checks that fail for unlisted procedures. Date schemas explicitly document SuperJSON Date semantics. Read-only client examples are exercised against a real HTTP tRPC server. REST OpenAPI includes marketplace paths, ownership/admin permissions, multipart upload shape, pagination, version selection, and error statuses. The manifest's IO descriptions and examples are required publisher disclosures; approval does not silently upgrade them to independently proven behavior.
+
+### Freshness and evidence
+
+`content-provenance.json` records the source SHA-256 digest, Git commit, source modification time, and whether the source tree was dirty. It explicitly states that it describes generation only. Historical process-check timestamps in the knowledge sources are not presented as current human verification.
+
+`pnpm agent:freshness` detects stale generated source digests and overdue human review. Add `--remote` to compare the documented release with the GitHub release API. Failed remote lookup fails the check; it does not silently report freshness. CI runs on PRs, main changes, published releases, Mondays, and manual dispatch. The full contract/test suite runs against disposable MySQL. Reports and provenance are retained as CI artifacts for 90 days. Release publication causes a checkout of main so a tagged source snapshot cannot hide stale current documentation.
+
+Human review is supplemental. `docs/reviews/content-policy.json` records a 90-day interval and an initial deadline of December 6, 2026. Its empty review list deliberately claims no completed human review. After a real review, add an append-only record containing `reviewer: human:...`, `reviewedAt`, the reviewed content's `sourceDigest`, and a durable `evidenceUrl`. A rebuild never advances this deadline. Review records are excluded from the content hash to avoid a self-referential digest. Changed content is explicitly reported as outside the last review's coverage, even before its calendar deadline.
+
+To update a release: verify the release artifacts and notes, change the documented release in `knowledge/product/release.md`, regenerate and run the full checks. Do not automatically claim all source features exist in that release's binaries. The capability-status document preserves this distinction.

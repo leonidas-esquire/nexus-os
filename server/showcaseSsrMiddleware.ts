@@ -71,7 +71,7 @@ export function registerShowcaseSsrMiddleware(app: Express) {
         title: `${project.title} — Nexus OS Showcase`,
         description,
         route,
-        markdownPath: "/docs-markdown/site/showcase.md",
+        markdownPath: `/docs-markdown/showcase/${project.slug}.md`,
         image: project.screenshotUrl,
         jsonLd: [
           {

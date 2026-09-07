@@ -1,5 +1,11 @@
+import { apiOutputs } from "../shared/apiOutputs";
 import { z } from "zod";
-import { router, publicProcedure, protectedProcedure, adminProcedure } from "./_core/trpc";
+import {
+  router,
+  publicProcedure,
+  protectedProcedure,
+  adminProcedure,
+} from "./_core/trpc";
 import * as showcaseDb from "./showcaseDb";
 import { TRPCError } from "@trpc/server";
 
@@ -28,6 +34,7 @@ const NEXUS_FEATURES = [
 
 export const showcasePublicRouter = router({
   list: publicProcedure
+    .output(apiOutputs["showcase.list"])
     .input(
       z.object({
         category: z.string().optional(),
@@ -41,37 +48,51 @@ export const showcasePublicRouter = router({
       return showcaseDb.getShowcaseProjects(input);
     }),
 
-  featured: publicProcedure.query(async () => {
-    return showcaseDb.getFeaturedProjects();
-  }),
+  featured: publicProcedure
+    .output(apiOutputs["showcase.featured"])
+    .query(async () => {
+      return showcaseDb.getFeaturedProjects();
+    }),
 
   getBySlug: publicProcedure
+    .output(apiOutputs["showcase.getBySlug"])
     .input(z.object({ slug: z.string() }))
     .query(async ({ input }) => {
       const project = await showcaseDb.getShowcaseProjectBySlug(input.slug);
       if (!project) {
-        throw new TRPCError({ code: "NOT_FOUND", message: "Project not found" });
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Project not found",
+        });
       }
       // Only show approved/featured projects publicly
       if (project.status !== "approved" && project.status !== "featured") {
-        throw new TRPCError({ code: "NOT_FOUND", message: "Project not found" });
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Project not found",
+        });
       }
       // Increment views asynchronously
       showcaseDb.incrementViews(project.id).catch(() => {});
       return project;
     }),
 
-  categoryCounts: publicProcedure.query(async () => {
-    return showcaseDb.getCategoryCounts();
-  }),
+  categoryCounts: publicProcedure
+    .output(apiOutputs["showcase.categoryCounts"])
+    .query(async () => {
+      return showcaseDb.getCategoryCounts();
+    }),
 
   related: publicProcedure
+    .output(apiOutputs["showcase.related"])
     .input(z.object({ projectId: z.string(), category: z.string() }))
     .query(async ({ input }) => {
       return showcaseDb.getRelatedProjects(input.projectId, input.category);
     }),
 
   upvote: publicProcedure
+    .meta({ access: "public-origin-scoped" })
+    .output(apiOutputs["showcase.upvote"])
     .input(z.object({ projectId: z.string() }))
     .mutation(async ({ input, ctx }) => {
       const ip =
@@ -82,6 +103,7 @@ export const showcasePublicRouter = router({
     }),
 
   hasUpvoted: publicProcedure
+    .output(apiOutputs["showcase.hasUpvoted"])
     .input(z.object({ projectId: z.string() }))
     .query(async ({ input, ctx }) => {
       const ip =
@@ -96,6 +118,7 @@ export const showcasePublicRouter = router({
 
 export const showcaseSubmitRouter = router({
   submit: publicProcedure
+    .output(apiOutputs["showcaseSubmit.submit"])
     .input(
       z.object({
         title: z.string().min(3).max(100),
@@ -142,6 +165,7 @@ export const showcaseSubmitRouter = router({
 
 export const adminShowcaseRouter = router({
   list: adminProcedure
+    .output(apiOutputs["adminShowcase.list"])
     .input(
       z.object({
         status: z.string().optional(),
@@ -154,11 +178,14 @@ export const adminShowcaseRouter = router({
       return showcaseDb.getAdminShowcaseProjects(input);
     }),
 
-  pending: adminProcedure.query(async () => {
-    return showcaseDb.getPendingProjects();
-  }),
+  pending: adminProcedure
+    .output(apiOutputs["adminShowcase.pending"])
+    .query(async () => {
+      return showcaseDb.getPendingProjects();
+    }),
 
   approve: adminProcedure
+    .output(apiOutputs["adminShowcase.approve"])
     .input(z.object({ id: z.string() }))
     .mutation(async ({ input }) => {
       await showcaseDb.approveProject(input.id);
@@ -166,6 +193,7 @@ export const adminShowcaseRouter = router({
     }),
 
   feature: adminProcedure
+    .output(apiOutputs["adminShowcase.feature"])
     .input(z.object({ id: z.string(), featured: z.boolean() }))
     .mutation(async ({ input }) => {
       await showcaseDb.featureProject(input.id, input.featured);
@@ -173,6 +201,7 @@ export const adminShowcaseRouter = router({
     }),
 
   reject: adminProcedure
+    .output(apiOutputs["adminShowcase.reject"])
     .input(z.object({ id: z.string() }))
     .mutation(async ({ input }) => {
       await showcaseDb.rejectProject(input.id);
@@ -180,6 +209,7 @@ export const adminShowcaseRouter = router({
     }),
 
   delete: adminProcedure
+    .output(apiOutputs["adminShowcase.delete"])
     .input(z.object({ id: z.string() }))
     .mutation(async ({ input }) => {
       await showcaseDb.deleteShowcaseProject(input.id);
@@ -187,6 +217,7 @@ export const adminShowcaseRouter = router({
     }),
 
   update: adminProcedure
+    .output(apiOutputs["adminShowcase.update"])
     .input(
       z.object({
         id: z.string(),

@@ -5,8 +5,8 @@
   "license": "Apache-2.0",
   "scripts": {
     "dev": "NODE_ENV=development tsx watch server/_core/index.ts",
-    "agent:prepare": "tsx scripts/generate-agent-assets.ts prepare",
-    "agent:prerender": "tsx scripts/generate-agent-assets.ts prerender",
+    "agent:prepare": "node --import tsx scripts/generate-agent-assets.ts prepare",
+    "agent:prerender": "node --import tsx scripts/generate-agent-assets.ts prerender",
     "build": "pnpm agent:prepare && vite build && pnpm agent:prerender dist/public && esbuild server/_core/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist",
     "build:vercel": "pnpm agent:prepare && vite build --outDir ../public --emptyOutDir && pnpm agent:prerender public",
     "start": "NODE_ENV=production node dist/index.js",
@@ -16,7 +16,8 @@
     "test": "vitest run",
     "test:agent": "vitest run server/agentReadability.test.ts",
     "test:deployment": "vitest run server/deploymentConfig.test.ts",
-    "db:push": "drizzle-kit generate && drizzle-kit migrate"
+    "db:push": "drizzle-kit generate && drizzle-kit migrate",
+    "agent:freshness": "node --import tsx scripts/check-freshness.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.693.0",

@@ -6,8 +6,8 @@ resource: https://www.aiagents.nexus/api-reference/trpc.md
 tags: [api, trpc, typescript, procedures]
 owner: "human:leonidas-esquire"
 generated: { by: "process:nexus-okf-generator", at: 2026-09-07T09:13:03Z }
-verified: { by: "process:typescript-and-vitest", at: 2026-09-07T09:13:03Z }
-status: stable
+historical_process_check: { by: "process:typescript-and-vitest", at: 2026-09-07T09:13:03Z }
+status: maintained
 stale_after: 2026-12-06T09:13:03Z
 sources:
   - id: trpc-reference
