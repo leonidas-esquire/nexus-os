@@ -1,5 +1,5 @@
 import { useState, type ReactNode, type FormEvent } from "react";
-import { Link, useParams } from "wouter";
+import { Link, useParams, useSearch } from "wouter";
 import { useAuth } from "@clerk/react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Package, ArrowDownToLine, Code2, ShieldCheck } from "lucide-react";
@@ -182,9 +182,8 @@ export function RegistryDetail() {
     skillName: string;
     releaseVersion?: string;
   }>();
-  const version =
-    releaseVersion ||
-    new URLSearchParams(window.location.search).get("version");
+  const search = useSearch();
+  const version = releaseVersion || new URLSearchParams(search).get("version");
   const result = useQuery({
     queryKey: ["registry-detail", skillName, version],
     queryFn: () =>
