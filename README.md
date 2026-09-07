@@ -275,34 +275,9 @@ broker:
 
 ## Architecture
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                         YOUR AGENTS                             │
-└───────────────────────────────┬─────────────────────────────────┘
-                                │
-                                ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                          NEXUS OS                               │
-│  ┌───────────────────────────────────────────────────────────┐  │
-│  │                  ORCHESTRATION LAYER                      │  │
-│  │         Supervisor · Saga · Workflow · Pool               │  │
-│  └───────────────────────────────────────────────────────────┘  │
-│  ┌───────────────────────────────────────────────────────────┐  │
-│  │                   TRUST & COST LAYER                      │  │
-│  │              AXIS Trust · Cost Controller                 │  │
-│  └───────────────────────────────────────────────────────────┘  │
-│  ┌───────────────────────────────────────────────────────────┐  │
-│  │                   EXECUTION LAYER                         │  │
-│  │          WASM Sandbox · Broker · Audit Log                │  │
-│  └───────────────────────────────────────────────────────────┘  │
-└─────────────────────────────────────────────────────────────────┘
-                                │
-                                ▼
-                    ┌───────────────────────┐
-                    │   Cloudflare Edge     │
-                    │   (optional deploy)   │
-                    └───────────────────────┘
-```
+<p align="center">
+  <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310419663030909471/YPtFhebkefwKBukz.png" alt="AI Agents Nexus architecture showing the orchestration, trust and cost, execution, and optional Cloudflare Edge layers" width="760" />
+</p>
 
 ## Roadmap
 
