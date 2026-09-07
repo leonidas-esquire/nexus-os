@@ -52,6 +52,15 @@ naos status
 
 ---
 
+## Run a deterministic agent without an LLM
+
+The local WASM execution path runs compiled WASIp1 agents with bounded input,
+output, memory, fuel, and execution time. The included record-validation agent
+checks structured records and computes totals without model credentials or a
+model connection.
+
+[Run the working example and outage checks →](docs/DETERMINISTIC-WASM.md)
+
 ## Why Nexus OS?
 
 AI agents are powerful but fragile in production:
@@ -164,13 +173,17 @@ naos --version
 
 ### Create Your First Agent
 
+Prepare a compiled WASIp1 module first (see the
+[record-validation example](docs/DETERMINISTIC-WASM.md)) and place it at
+`agents/researcher.wasm` in your new project.
+
 ```bash
 # Initialize a new project
 naos init my-project
 cd my-project
 
-# Create an agent
-naos create researcher
+# Bind the compiled agent module
+naos create researcher --source agents/researcher.wasm
 
 # Run the agent
 naos run researcher
