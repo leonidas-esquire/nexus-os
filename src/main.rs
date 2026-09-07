@@ -30,12 +30,28 @@ enum Commands {
         /// Agent template
         #[arg(short, long, default_value = "echo")]
         template: String,
+
+        /// Path to a compiled WASIp1 agent module
+        #[arg(long)]
+        source: Option<String>,
     },
 
-    /// Run an agent
+    /// Execute one WASIp1 agent task in the foreground
     Run {
         /// Agent name
         name: String,
+        /// Input file, or - to read stdin (empty input when omitted)
+        #[arg(long)]
+        input: Option<String>,
+        /// Execution deadline in seconds, excluding compilation
+        #[arg(long, default_value = "30", value_parser = clap::value_parser!(u64).range(1..=3600))]
+        timeout: u64,
+        /// Maximum guest linear memory in MiB
+        #[arg(long, default_value = "64", value_parser = clap::value_parser!(u64).range(1..=1024))]
+        memory_mb: u64,
+        /// Maximum guest instruction fuel
+        #[arg(long, default_value = "50000000", value_parser = clap::value_parser!(u64).range(1..))]
+        fuel: u64,
     },
 
     /// Stop a running agent
@@ -313,8 +329,26 @@ async fn main() {
 
     let result = match cli_args.command {
         Commands::Init { name } => cli::init::run(&name).await,
-        Commands::Create { name, template } => cli::create::run(&name, &template).await,
-        Commands::Run { name } => cli::agent_run::run(&name).await,
+        Commands::Create {
+            name,
+            template,
+            source,
+        } => cli::create::run(&name, &template, source.as_deref()).await,
+        Commands::Run {
+            name,
+            input,
+            timeout,
+            memory_mb,
+            fuel,
+        } => {
+            let sandbox = naos::wasm::SandboxConfig {
+                timeout_secs: timeout,
+                memory_limit: memory_mb as usize * 1024 * 1024,
+                fuel,
+                ..Default::default()
+            };
+            cli::agent_run::run(&name, input.as_deref(), &sandbox).await
+        }
         Commands::Stop { name } => cli::agent_stop::run(&name).await,
         Commands::Runtime { action } => {
             let exit_code = cli::runtime::dispatch(action).await;
@@ -327,9 +361,11 @@ async fn main() {
         Commands::Delete { name } => cli::delete::run(&name).await,
 
         Commands::Supervisor { action } => match action {
-            SupervisorAction::Create { name, strategy, max_restarts } => {
-                cli::supervisor::create(&name, &strategy, max_restarts).await
-            }
+            SupervisorAction::Create {
+                name,
+                strategy,
+                max_restarts,
+            } => cli::supervisor::create(&name, &strategy, max_restarts).await,
             SupervisorAction::Add { supervisor, agent } => {
                 cli::supervisor::add(&supervisor, &agent).await
             }
@@ -358,9 +394,12 @@ async fn main() {
         },
 
         Commands::Cost { action } => match action {
-            CostAction::Set { agent, budget, alert_at, action: act } => {
-                cli::cost::set(&agent, &budget, alert_at, act.as_deref()).await
-            }
+            CostAction::Set {
+                agent,
+                budget,
+                alert_at,
+                action: act,
+            } => cli::cost::set(&agent, &budget, alert_at, act.as_deref()).await,
             CostAction::Status => cli::cost::status().await,
         },
 

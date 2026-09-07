@@ -1,12 +1,18 @@
+use super::{open_project_db, success};
 use crate::agent::{self, AgentStatus};
 use crate::audit;
 use crate::error::Result;
-use super::{open_project_db, success};
 use colored::Colorize;
 
 pub async fn run(name: &str) -> Result<()> {
     let conn = open_project_db()?;
     let ag = agent::get_agent(&conn, name)?;
+
+    if ag.status == AgentStatus::Running {
+        return Err(crate::NexusError::Agent(
+            "WASM tasks run in the foreground. Use Ctrl-C in the running command to interrupt execution.".into(),
+        ));
+    }
 
     if ag.status == AgentStatus::Stopped {
         return Err(crate::NexusError::Agent(format!(

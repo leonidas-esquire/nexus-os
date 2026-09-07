@@ -40,6 +40,7 @@ reqwest = { version = "0.12", features = ["json"] }
 
 # WASM runtime
 wasmtime = "19"
+wasmtime-wasi = "19"
 
 # Logging & tracing
 tracing = "0.1"
@@ -62,6 +63,7 @@ ctrlc = "3"
 tempfile = "3"
 assert_cmd = "2"
 predicates = "3"
+wat = "1"
 
 [profile.release]
 strip = true
