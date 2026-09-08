@@ -128,12 +128,12 @@ The production Railway backend is live at `https://nexus-os-production-6fd0.up.r
 |---|---|
 | Express backend | Online and healthy |
 | MySQL | Online, linked through `DATABASE_URL`, and migrated |
-| Authentication | Clerk migration implemented locally; Railway deployment pending the Clerk code merge and keys |
-| Owner/admin identity | Configure `CLERK_ADMIN_EMAILS`, `CLERK_ADMIN_USER_IDS`, or Clerk `publicMetadata.role` before testing admin pages |
+| Authentication | Clerk is live on Railway; production sign-in, bearer-token verification, and MySQL user synchronization are verified |
+| Owner/admin identity | The project owner is mapped through `CLERK_ADMIN_USER_IDS`; `auth.me`, `/admin/blog`, and `/admin/showcase` are verified with role `admin` |
 | Public API, Atom feed, installer | Verified over the Railway domain |
 | Image uploads and owner notifications | Require a portable external storage/API credential or replacement integration |
 
-The former temporary PostgreSQL service and its volume were removed after MySQL validation. Do not copy the Manus sandbox's injected Forge credential to Railway; configure an independently portable credential or replace the upload/notification integration before relying on those flows externally.
+The former temporary PostgreSQL service and its volume were removed after MySQL validation. The Clerk migration is merged in PR #10 and GitHub Actions run 33984128365 passed. Do not copy the Manus sandbox's injected Forge credential to Railway; configure an independently portable credential or replace the upload/notification integration before relying on those flows externally. Vercel still needs `VITE_CLERK_PUBLISHABLE_KEY` and `RAILWAY_BACKEND_URL` when its frontend project is created.
 
 ## References
 
