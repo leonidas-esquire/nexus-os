@@ -371,7 +371,7 @@ cargo run -- status
 ## Community
 
 - **Discord:** [discord.gg/nexus-os](https://discord.gg/nexus-os)
-- **Twitter:** [@nexus_os](https://twitter.com/nexus_os)
+- **Twitter:** [@nexus_os](https://twitter.com/agent_nexus_os)
 - **GitHub Discussions:** [Discussions](https://github.com/leonidas-esquire/nexus-os/discussions)
 
 ## License
